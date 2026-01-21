@@ -59,15 +59,3 @@ document.querySelectorAll('section').forEach(section => {
     section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
     observer.observe(section);
 });
-
-// Obfuscated email link - using setTimeout to ensure DOM is ready
-setTimeout(function() {
-    var emailLink = document.getElementById('email-link');
-    if (emailLink) {
-        emailLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            var m = 'mailto:' + 'info' + '@' + 'thadscott' + '.' + 'net';
-            window.location.href = m;
-        });
-    }
-}, 100);
