@@ -1,0 +1,309 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary-color: #1a1a1a;
+    --secondary-color: #4a4a4a;
+    --accent-color: #0066cc;
+    --text-light: #666;
+    --background: #ffffff;
+    --section-bg: #f8f9fa;
+    --border-color: #e1e4e8;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--primary-color);
+    background-color: var(--background);
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Hero Section */
+#hero {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.headshot {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1.5rem;
+    border: 4px solid var(--background);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: var(--secondary-color);
+    margin-bottom: 0.25rem;
+}
+
+.location {
+    font-size: 1rem;
+    color: var(--text-light);
+}
+
+/* Sections */
+section {
+    padding: 3rem 0;
+}
+
+section:nth-child(even) {
+    background-color: var(--section-bg);
+}
+
+section h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+/* About Section */
+.about-content {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+.about-content p {
+    margin-bottom: 1rem;
+    color: var(--secondary-color);
+}
+
+.about-content p:first-child {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* Experience Section */
+.experience-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.experience-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+}
+
+.experience-list li {
+    padding: 0.75rem 0;
+    color: var(--secondary-color);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.experience-list li:last-child {
+    border-bottom: none;
+}
+
+.experience-list li strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.education-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.education-text {
+    color: var(--secondary-color);
+    font-size: 1.0625rem;
+    line-height: 1.7;
+}
+
+/* Contact Section */
+.contact-content {
+    text-align: center;
+}
+
+.contact-content p {
+    font-size: 1.0625rem;
+    margin-bottom: 1.5rem;
+    color: var(--secondary-color);
+}
+
+.contact-form {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--primary-color);
+    background-color: var(--background);
+    transition: border-color 0.3s ease;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.submit-button {
+    padding: 0.875rem 1.75rem;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.submit-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.success-message {
+    color: var(--accent-color);
+    font-size: 1.0625rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+}
+
+.linkedin-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.75rem;
+    background-color: var(--accent-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.0625rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.linkedin-button:hover {
+    background-color: #0052a3;
+    transform: translateY(-2px);
+}
+
+/* Footer */
+footer {
+    padding: 1.5rem 0;
+    background-color: var(--primary-color);
+    color: white;
+    text-align: center;
+}
+
+footer p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9375rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #hero {
+        min-height: 60vh;
+        padding: 2rem 1.5rem;
+    }
+
+    .headshot {
+        width: 140px;
+        height: 140px;
+        margin-bottom: 1.25rem;
+    }
+
+    .hero-content h1 {
+        font-size: 2.25rem;
+    }
+
+    .subtitle {
+        font-size: 1.125rem;
+    }
+
+    section {
+        padding: 2.5rem 0;
+    }
+
+    section h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .about-content {
+        font-size: 1rem;
+    }
+
+    .about-content p:first-child {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #hero {
+        padding: 2rem 1rem;
+    }
+
+    .headshot {
+        width: 120px;
+        height: 120px;
+    }
+
+    .hero-content h1 {
+        font-size: 1.875rem;
+    }
+
+    .container {
+        padding: 0 1rem;
+    }
+
+    section {
+        padding: 2rem 0;
+    }
+}
