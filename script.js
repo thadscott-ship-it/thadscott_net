@@ -60,32 +60,18 @@ document.querySelectorAll('section').forEach(section => {
     observer.observe(section);
 });
 
-// Contact form submission
-document.getElementById('contact-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const email = document.getElementById('email').value;
-    const subject = document.getElementById('subject').value;
-    const message = document.getElementById('message').value;
-
-    // Create mailto link
-    const encodedSubject = encodeURIComponent(subject);
-    const body = encodeURIComponent(`From: ${email}\n\n${message}`);
-    const mailtoLink = `mailto:info@thadscott.net?subject=${encodedSubject}&body=${body}`;
-
-    // Open default email client
-    window.location.href = mailtoLink;
-
-    // Show success message
-    const form = this;
-    const successMessage = document.getElementById('success-message');
-    form.style.display = 'none';
-    successMessage.style.display = 'block';
-
-    // Reset and show form again after 3 seconds
-    setTimeout(() => {
-        form.reset();
-        form.style.display = 'flex';
-        successMessage.style.display = 'none';
-    }, 3000);
+// Obfuscated email link (protects from spam bots)
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const emailLink = document.getElementById('email-link');
+    if (emailLink) {
+        emailLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Email is constructed in JavaScript to avoid being scraped
+            const user = 'info';
+            const domain = 'thadscott';
+            const tld = 'net';
+            window.location.href = 'mailto:' + user + '@' + domain + '.' + tld;
+        });
+    }
 });
