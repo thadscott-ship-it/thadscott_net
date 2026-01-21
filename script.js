@@ -60,18 +60,14 @@ document.querySelectorAll('section').forEach(section => {
     observer.observe(section);
 });
 
-// Obfuscated email link (protects from spam bots)
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    const emailLink = document.getElementById('email-link');
+// Obfuscated email link - using setTimeout to ensure DOM is ready
+setTimeout(function() {
+    var emailLink = document.getElementById('email-link');
     if (emailLink) {
         emailLink.addEventListener('click', function(e) {
             e.preventDefault();
-            // Email is constructed in JavaScript to avoid being scraped
-            const user = 'info';
-            const domain = 'thadscott';
-            const tld = 'net';
-            window.location.href = 'mailto:' + user + '@' + domain + '.' + tld;
+            var m = 'mailto:' + 'info' + '@' + 'thadscott' + '.' + 'net';
+            window.location.href = m;
         });
     }
-});
+}, 100);
