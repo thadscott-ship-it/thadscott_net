@@ -113,8 +113,7 @@
       border: 1px solid #334155;
       border-radius: 12px;
       padding: 1.5rem;
-      width: 90%;
-      max-width: 380px;
+      width: min(90%, 380px);
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
     }
     .city-dialog h3 {
@@ -280,6 +279,7 @@
       padding-bottom: 0.5rem;
       scrollbar-width: thin;
       scrollbar-color: #334155 transparent;
+      -webkit-overflow-scrolling: touch;
     }
     .forecast-row::-webkit-scrollbar { height: 4px; }
     .forecast-row::-webkit-scrollbar-track { background: transparent; }
@@ -414,6 +414,60 @@
       padding: 1.5rem 0 1rem;
       font-size: 0.7rem;
       color: #475569;
+    }
+
+    /* ── Mobile (≤ 480px) ──────────────────────────────────────── */
+    @media (max-width: 480px) {
+      body { padding: 0.65rem; }
+
+      .grid { gap: 0.65rem; }
+
+      .card { padding: 1rem 1.1rem; border-radius: 0.85rem; }
+      .card h2 { font-size: 0.7rem; margin-bottom: 0.6rem; }
+
+      /* Header */
+      .header { padding: 0.75rem 0 0.75rem; }
+      .header h1 { font-size: 1.3rem; }
+      .header .subtitle { font-size: 0.75rem; }
+
+      /* Current conditions */
+      .current-main .temp-icon { font-size: 2.6rem; }
+      .current-main .temp-value { font-size: 2.6rem; }
+      .current-main .temp-unit  { font-size: 1.2rem; }
+      .current-desc { font-size: 0.85rem; margin-bottom: 0.6rem; }
+      .current-details { gap: 0.35rem 1rem; }
+      .detail-item { font-size: 0.8rem; }
+
+      /* Hourly chart */
+      .chart-wrap { height: 180px; }
+
+      /* 7-day forecast */
+      .forecast-day { min-width: 90px; padding: 0.65rem; }
+      .forecast-day .day-name { font-size: 0.68rem; }
+      .forecast-day .day-icon { font-size: 1.4rem; margin: 0.2rem 0; }
+      .forecast-day .day-temps { font-size: 0.82rem; }
+      .forecast-day .day-detail { font-size: 0.65rem; }
+
+      /* Sun & Moon */
+      .sun-moon-item .icon { font-size: 1.5rem; }
+      .sun-moon-item .val  { font-size: 0.95rem; }
+      .sun-moon-item .label { font-size: 0.65rem; }
+
+      /* AQI */
+      .aqi-badge { width: 56px; height: 56px; font-size: 1.5rem; border-radius: 0.75rem; }
+      .aqi-label { font-size: 0.95rem; }
+      .aqi-desc  { font-size: 0.72rem; }
+      .aqi-detail-item .pollutant-label { font-size: 0.65rem; }
+      .aqi-detail-item .pollutant-val   { font-size: 0.85rem; }
+
+      /* Alerts */
+      .alert-banner { padding: 0.7rem 1rem; border-radius: 0.6rem; }
+      .alert-banner .alert-header { font-size: 0.8rem; }
+      .alert-banner .alert-body { font-size: 0.75rem; }
+
+      /* Footer */
+      .footer { font-size: 0.65rem; padding: 1rem 0 0.75rem; }
+      .refresh-info { font-size: 0.65rem; }
     }
   </style>
 </head>
