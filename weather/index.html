@@ -587,6 +587,7 @@ async function applyCity() {
     document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
     document.title = `${CITY_NAME} — Weather Dashboard`;
     closeCityDialog();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     loadDashboard();
   } catch {
     errorEl.textContent = 'Network error. Please try again.';
@@ -936,7 +937,7 @@ function renderAlerts(data) {
     const sev = (p.severity || 'unknown').toLowerCase();
     const cls = ['extreme','severe','moderate','minor'].includes(sev) ? `alert-${sev}` : 'alert-unknown';
     return `
-      <div class="alert-banner ${cls}" onclick="this.classList.toggle('expanded')">
+      <div class="alert-banner ${cls}" onclick="toggleAlert(event, this)">
         <div class="alert-header">
           <span>⚠️ ${p.headline || p.event || 'Weather Alert'}</span>
           <span class="chevron">▼</span>
@@ -1006,6 +1007,15 @@ async function loadDashboard() {
     document.getElementById('alerts-container').classList.remove('active');
   }
 }
+
+// ── Alert toggle (tap outside to dismiss) ─────────────────────────
+function toggleAlert(e, el) {
+  e.stopPropagation();
+  el.classList.toggle('expanded');
+}
+document.addEventListener('click', () => {
+  document.querySelectorAll('.alert-banner.expanded').forEach(el => el.classList.remove('expanded'));
+});
 
 // ── Init ──────────────────────────────────────────────────────────
 loadDashboard();
