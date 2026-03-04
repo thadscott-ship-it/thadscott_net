@@ -768,27 +768,29 @@ async function useCurrentLocation() {
   btn.style.opacity = '0.4';
   btn.disabled = true;
   navigator.geolocation.getCurrentPosition(async pos => {
+    const { latitude, longitude } = pos.coords;
+    LAT = latitude;
+    LON = longitude;
+    // Reverse geocode — fall back to coords if it fails
     try {
-      const { latitude, longitude } = pos.coords;
       const data = await safeFetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-      LAT = latitude;
-      LON = longitude;
       const a = data.address || {};
       const city = a.city || a.town || a.village || a.county || '';
       const state = a.state || '';
       CITY_NAME = city && state ? `${city}, ${state}` : city || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
-      document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
-      document.title = `${CITY_NAME} — Weather Dashboard`;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      loadDashboard();
-    } finally {
-      btn.style.opacity = '';
-      btn.disabled = false;
+    } catch {
+      CITY_NAME = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
     }
+    document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+    document.title = `${CITY_NAME} — Weather Dashboard`;
+    btn.style.opacity = '';
+    btn.disabled = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    loadDashboard();
   }, () => {
     btn.style.opacity = '';
     btn.disabled = false;
-  }, { timeout: 10000 });
+  }, { timeout: 10000, enableHighAccuracy: false });
 }
 
 // ── WMO Weather Code → Emoji + Description ───────────────────────
