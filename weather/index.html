@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirkland, WA — Weather Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    /* ── Reset & Base ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 1rem;
+      line-height: 1.5;
+    }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Animations ────────────────────────────────────────────── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeIn 0.5s ease-out forwards; opacity: 0; }
+    .fade-in:nth-child(2) { animation-delay: 0.05s; }
+    .fade-in:nth-child(3) { animation-delay: 0.10s; }
+    .fade-in:nth-child(4) { animation-delay: 0.15s; }
+    .fade-in:nth-child(5) { animation-delay: 0.20s; }
+    .fade-in:nth-child(6) { animation-delay: 0.25s; }
+    .fade-in:nth-child(7) { animation-delay: 0.30s; }
+
+    /* ── Layout ────────────────────────────────────────────────── */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 700px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .grid .full-width { grid-column: 1 / -1; }
+    }
+    @media (min-width: 1000px) {
+      .grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    /* ── Card ──────────────────────────────────────────────────── */
+    .card {
+      background: #1e293b;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+    .card h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ── Header ────────────────────────────────────────────────── */
+    .header {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+    }
+    .header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .edit-city-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: #64748b;
+      padding: 0.2rem;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+    .edit-city-btn:hover { color: #f1f5f9; }
+
+    /* ── City Dialog ──────────────────────────────────────────── */
+    .city-dialog-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .city-dialog-overlay.open { display: flex; }
+    .city-dialog {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .city-dialog h3 {
+      margin-bottom: 0.75rem;
+      font-size: 1.1rem;
+      color: #f1f5f9;
+    }
+    .city-dialog input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      background: #0f172a;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .city-dialog input:focus { border-color: #60a5fa; }
+    .city-dialog .dialog-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .city-dialog button {
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .city-dialog .btn-cancel {
+      background: #334155;
+      color: #e2e8f0;
+    }
+    .city-dialog .btn-cancel:hover { background: #475569; }
+    .city-dialog .btn-go {
+      background: #3b82f6;
+      color: #fff;
+    }
+    .city-dialog .btn-go:hover { background: #2563eb; }
+    .city-dialog .dialog-error {
+      color: #f87171;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      min-height: 1.2em;
+    }
+    .header .subtitle {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+    .refresh-info {
+      font-size: 0.75rem;
+      color: #475569;
+      margin-top: 0.5rem;
+    }
+    .refresh-info .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: #22c55e;
+      border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── Alerts Banner ─────────────────────────────────────────── */
+    .alerts-container { display: none; }
+    .alerts-container.active { display: block; }
+    .alert-banner {
+      border-radius: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .alert-banner:hover { opacity: 0.9; }
+    .alert-banner .alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .alert-banner .alert-header .chevron {
+      transition: transform 0.2s;
+      font-size: 0.75rem;
+    }
+    .alert-banner.expanded .chevron { transform: rotate(180deg); }
+    .alert-banner .alert-body {
+      display: none;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      opacity: 0.9;
+    }
+    .alert-banner.expanded .alert-body { display: block; }
+    .alert-extreme  { background: #991b1b; color: #fef2f2; }
+    .alert-severe   { background: #dc2626; color: #fef2f2; }
+    .alert-moderate { background: #ea580c; color: #fff7ed; }
+    .alert-minor    { background: #ca8a04; color: #fefce8; }
+    .alert-unknown  { background: #475569; color: #f1f5f9; }
+
+    /* ── Current Conditions ────────────────────────────────────── */
+    .current-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .current-main .temp-icon {
+      font-size: 3.5rem;
+      line-height: 1;
+    }
+    .current-main .temp-value {
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #f8fafc;
+      line-height: 1;
+    }
+    .current-main .temp-unit {
+      font-size: 1.5rem;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .current-desc {
+      font-size: 1rem;
+      color: #cbd5e1;
+      margin-bottom: 0.75rem;
+    }
+    .current-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1.5rem;
+    }
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      padding: 0.15rem 0;
+      border-bottom: 1px solid #334155;
+    }
+    .detail-item .label { color: #94a3b8; }
+    .detail-item .value { color: #e2e8f0; font-weight: 500; }
+
+    /* ── Hourly Chart ──────────────────────────────────────────── */
+    .chart-wrap {
+      position: relative;
+      height: 230px;
+    }
+    .chart-wrap canvas { width: 100% !important; }
+
+    /* ── 7-Day Forecast ────────────────────────────────────────── */
+    .forecast-row {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 transparent;
+    }
+    .forecast-row::-webkit-scrollbar { height: 4px; }
+    .forecast-row::-webkit-scrollbar-track { background: transparent; }
+    .forecast-row::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .forecast-day {
+      flex: 0 0 auto;
+      min-width: 110px;
+      background: #0f172a;
+      border-radius: 0.75rem;
+      padding: 0.85rem;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .forecast-day:hover { background: #1a2640; }
+    .forecast-day .day-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .forecast-day .day-icon { font-size: 1.75rem; margin: 0.35rem 0; }
+    .forecast-day .day-temps {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .forecast-day .day-temps .high { color: #f8fafc; }
+    .forecast-day .day-temps .low  { color: #64748b; margin-left: 0.35rem; }
+    .forecast-day .day-detail {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+
+    /* ── Sun & Moon ────────────────────────────────────────────── */
+    .sun-moon-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .sun-moon-item { text-align: center; }
+    .sun-moon-item .icon { font-size: 2rem; margin-bottom: 0.25rem; }
+    .sun-moon-item .label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .sun-moon-item .val {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .day-length {
+      text-align: center;
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #334155;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    /* ── AQI ───────────────────────────────────────────────────── */
+    .aqi-main {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .aqi-badge {
+      font-size: 2rem;
+      font-weight: 700;
+      width: 72px; height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 1rem;
+      flex-shrink: 0;
+    }
+    .aqi-label {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .aqi-desc {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.15rem;
+    }
+    .aqi-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .aqi-detail-item .pollutant-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+    }
+    .aqi-detail-item .pollutant-val {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    /* ── Loading / Error ───────────────────────────────────────── */
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #64748b;
+    }
+    .loading .spinner {
+      display: inline-block;
+      width: 24px; height: 24px;
+      border: 3px solid #334155;
+      border-top-color: #60a5fa;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 0.5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg {
+      text-align: center;
+      color: #f87171;
+      font-size: 0.85rem;
+      padding: 1rem;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      padding: 1.5rem 0 1rem;
+      font-size: 0.7rem;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header fade-in">
+      <h1><span id="city-name">☁️ Kirkland, WA</span><button class="edit-city-btn" onclick="openCityDialog()" title="Change city">✏️</button></h1>
+      <div class="subtitle" id="current-date"></div>
+    </div>
+
+    <!-- Alerts -->
+    <div id="alerts-container" class="alerts-container fade-in"></div>
+
+    <!-- Dashboard Grid -->
+    <div class="grid">
+      <!-- Current Conditions -->
+      <div class="card fade-in full-width" id="current-card" style="grid-column: 1 / -1;">
+        <h2>Current Conditions</h2>
+        <div id="current-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Hourly Chart -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>48-Hour Forecast</h2>
+        <div id="hourly-content">
+          <div class="chart-wrap"><canvas id="hourly-chart"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 7-Day Forecast -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>7-Day Forecast</h2>
+        <div id="daily-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Sun & Moon -->
+      <div class="card fade-in">
+        <h2>Sun &amp; Moon</h2>
+        <div id="sun-moon-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Air Quality -->
+      <div class="card fade-in">
+        <h2>Air Quality</h2>
+        <div id="aqi-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer fade-in">
+      <div class="refresh-info">
+        <span class="dot"></span>
+        <span>Auto-refreshes every 15 min · Last updated <span id="last-updated">—</span></span>
+      </div>
+      <div style="margin-top: 0.5rem;">
+        Data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0)
+        &amp; <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- City Change Dialog -->
+  <div class="city-dialog-overlay" id="city-dialog-overlay" onclick="if(event.target===this)closeCityDialog()">
+    <div class="city-dialog">
+      <h3>Change City</h3>
+      <input type="text" id="city-input" placeholder="e.g. Seattle, WA" autocomplete="off" />
+      <div class="dialog-error" id="city-error"></div>
+      <div class="dialog-buttons">
+        <button class="btn-cancel" onclick="closeCityDialog()">Cancel</button>
+        <button class="btn-go" id="city-go-btn" onclick="applyCity()">Go</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ── Configuration ─────────────────────────────────────────────────
+let LAT = 47.6769;
+let LON = -122.2060;
+let CITY_NAME = 'Kirkland, WA';
+const TIMEZONE = 'America/Los_Angeles';
+const REFRESH_MS = 15 * 60 * 1000;
+
+// ── City Dialog ───────────────────────────────────────────────────
+function openCityDialog() {
+  document.getElementById('city-input').value = '';
+  document.getElementById('city-error').textContent = '';
+  document.getElementById('city-dialog-overlay').classList.add('open');
+  document.getElementById('city-input').focus();
+}
+function closeCityDialog() {
+  document.getElementById('city-dialog-overlay').classList.remove('open');
+}
+async function applyCity() {
+  const input = document.getElementById('city-input').value.trim();
+  const errorEl = document.getElementById('city-error');
+  const goBtn = document.getElementById('city-go-btn');
+  if (!input) { errorEl.textContent = 'Please enter a city name.'; return; }
+  errorEl.textContent = '';
+  goBtn.textContent = 'Searching…';
+  goBtn.disabled = true;
+  try {
+    const resp = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(input)}&count=1&language=en&format=json`);
+    const data = await resp.json();
+    if (!data.results || data.results.length === 0) {
+      errorEl.textContent = 'City not found. Try a different name.';
+      return;
+    }
+    const r = data.results[0];
+    LAT = r.latitude;
+    LON = r.longitude;
+    CITY_NAME = r.admin1 ? `${r.name}, ${r.admin1}` : r.name;
+    document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+    document.title = `${CITY_NAME} — Weather Dashboard`;
+    closeCityDialog();
+    loadDashboard();
+  } catch {
+    errorEl.textContent = 'Network error. Please try again.';
+  } finally {
+    goBtn.textContent = 'Go';
+    goBtn.disabled = false;
+  }
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeCityDialog();
+});
+document.getElementById('city-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') applyCity();
+});
+
+// ── WMO Weather Code → Emoji + Description ───────────────────────
+function weatherInfo(code, isDay = true) {
+  const map = {
+    0:  { icon: isDay ? '☀️' : '🌙', desc: 'Clear sky' },
+    1:  { icon: isDay ? '🌤️' : '🌙', desc: 'Mainly clear' },
+    2:  { icon: '⛅', desc: 'Partly cloudy' },
+    3:  { icon: '☁️', desc: 'Overcast' },
+    45: { icon: '🌫️', desc: 'Foggy' },
+    48: { icon: '🌫️', desc: 'Depositing rime fog' },
+    51: { icon: '🌦️', desc: 'Light drizzle' },
+    53: { icon: '🌦️', desc: 'Moderate drizzle' },
+    55: { icon: '🌧️', desc: 'Dense drizzle' },
+    56: { icon: '🌧️', desc: 'Freezing drizzle (light)' },
+    57: { icon: '🌧️', desc: 'Freezing drizzle (dense)' },
+    61: { icon: '🌦️', desc: 'Slight rain' },
+    63: { icon: '🌧️', desc: 'Moderate rain' },
+    65: { icon: '🌧️', desc: 'Heavy rain' },
+    66: { icon: '🌧️', desc: 'Freezing rain (light)' },
+    67: { icon: '🌧️', desc: 'Freezing rain (heavy)' },
+    71: { icon: '🌨️', desc: 'Slight snowfall' },
+    73: { icon: '🌨️', desc: 'Moderate snowfall' },
+    75: { icon: '❄️', desc: 'Heavy snowfall' },
+    77: { icon: '❄️', desc: 'Snow grains' },
+    80: { icon: '🌦️', desc: 'Slight rain showers' },
+    81: { icon: '🌧️', desc: 'Moderate rain showers' },
+    82: { icon: '🌧️', desc: 'Violent rain showers' },
+    85: { icon: '🌨️', desc: 'Slight snow showers' },
+    86: { icon: '❄️', desc: 'Heavy snow showers' },
+    95: { icon: '⛈️', desc: 'Thunderstorm' },
+    96: { icon: '⛈️', desc: 'Thunderstorm with slight hail' },
+    99: { icon: '⛈️', desc: 'Thunderstorm with heavy hail' },
+  };
+  return map[code] || { icon: '🌡️', desc: 'Unknown' };
+}
+
+// ── Wind direction helper ─────────────────────────────────────────
+function windDir(deg) {
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+
+// ── Moon phase calculation (simple synodic) ───────────────────────
+function getMoonPhase(date) {
+  const SYNODIC = 29.53058770576;
+  const KNOWN_NEW = new Date('2000-01-06T18:14:00Z');
+  const diff = (date - KNOWN_NEW) / (1000 * 60 * 60 * 24);
+  const phase = ((diff % SYNODIC) + SYNODIC) % SYNODIC;
+  const pct = phase / SYNODIC;
+  let name, icon;
+  if      (pct < 0.0625) { name = 'New Moon';        icon = '🌑'; }
+  else if (pct < 0.1875) { name = 'Waxing Crescent'; icon = '🌒'; }
+  else if (pct < 0.3125) { name = 'First Quarter';   icon = '🌓'; }
+  else if (pct < 0.4375) { name = 'Waxing Gibbous';  icon = '🌔'; }
+  else if (pct < 0.5625) { name = 'Full Moon';        icon = '🌕'; }
+  else if (pct < 0.6875) { name = 'Waning Gibbous';  icon = '🌖'; }
+  else if (pct < 0.8125) { name = 'Last Quarter';    icon = '🌗'; }
+  else if (pct < 0.9375) { name = 'Waning Crescent'; icon = '🌘'; }
+  else                    { name = 'New Moon';        icon = '🌑'; }
+  return { name, icon, pct };
+}
+
+// ── AQI category ──────────────────────────────────────────────────
+function aqiCategory(aqi) {
+  if (aqi <= 50)  return { label: 'Good',                       color: '#22c55e', bg: '#14532d', text: '#f0fdf4' };
+  if (aqi <= 100) return { label: 'Moderate',                   color: '#eab308', bg: '#713f12', text: '#fefce8' };
+  if (aqi <= 150) return { label: 'Unhealthy for Sensitive',    color: '#f97316', bg: '#7c2d12', text: '#fff7ed' };
+  if (aqi <= 200) return { label: 'Unhealthy',                  color: '#ef4444', bg: '#7f1d1d', text: '#fef2f2' };
+  if (aqi <= 300) return { label: 'Very Unhealthy',             color: '#a855f7', bg: '#581c87', text: '#faf5ff' };
+  return              { label: 'Hazardous',                     color: '#881337', bg: '#4c0519', text: '#fff1f2' };
+}
+
+// ── Time formatting helpers ───────────────────────────────────────
+function fmtTime(isoStr) {
+  return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE });
+}
+function fmtHour(isoStr) {
+  return new Date(isoStr).toLocaleTimeString('en-US', { hour: 'numeric', timeZone: TIMEZONE });
+}
+function fmtDay(isoStr) {
+  const d = new Date(isoStr + 'T12:00:00');
+  const today = new Date();
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
+  return d.toLocaleDateString('en-US', { weekday: 'short' });
+}
+
+// ── Fetch with error handling ─────────────────────────────────────
+async function safeFetch(url, opts = {}) {
+  const resp = await fetch(url, opts);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  return resp.json();
+}
+
+// ── Chart instance (reused on refresh) ────────────────────────────
+let hourlyChart = null;
+
+// ── Render: Current Conditions ────────────────────────────────────
+function renderCurrent(current, units, daily) {
+  const w = weatherInfo(current.weather_code);
+  const hi = daily ? Math.round(daily.temperature_2m_max[0]) : '—';
+  const lo = daily ? Math.round(daily.temperature_2m_min[0]) : '—';
+  const el = document.getElementById('current-content');
+  el.innerHTML = `
+    <div class="current-main">
+      <span class="temp-icon">${w.icon}</span>
+      <div>
+        <span class="temp-value">${Math.round(current.temperature_2m)}<span class="temp-unit">°F</span></span>
+      </div>
+    </div>
+    <div class="current-desc">${w.desc} · Feels like ${Math.round(current.apparent_temperature)}°F</div>
+    <div class="current-details">
+      <div class="detail-item"><span class="label">High / Low</span><span class="value">${hi}° / ${lo}°</span></div>
+      <div class="detail-item"><span class="label">Humidity</span><span class="value">${current.relative_humidity_2m}%</span></div>
+      <div class="detail-item"><span class="label">Wind</span><span class="value">${Math.round(current.wind_speed_10m)} mph ${windDir(current.wind_direction_10m)}</span></div>
+      <div class="detail-item"><span class="label">Precip</span><span class="value">${current.precipitation}" </span></div>
+    </div>`;
+}
+
+// ── Render: Hourly Chart ──────────────────────────────────────────
+function renderHourly(hourly) {
+  const labels = hourly.time.map(t => fmtHour(t));
+  const temps = hourly.temperature_2m;
+  const precip = hourly.precipitation_probability;
+  const ctx = document.getElementById('hourly-chart').getContext('2d');
+
+  // Find indices where a new day starts (midnight)
+  const dayBoundaries = [];
+  for (let i = 1; i < hourly.time.length; i++) {
+    const h = new Date(hourly.time[i]);
+    if (h.getHours() === 0) {
+      dayBoundaries.push({ index: i, label: h.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: TIMEZONE }) });
+    }
+  }
+
+  // Custom plugin to draw vertical day-boundary lines
+  const dayLinePlugin = {
+    id: 'dayLines',
+    afterDraw(chart) {
+      const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+      dayBoundaries.forEach(({ index, label }) => {
+        const xPos = x.getPixelForValue(index);
+        c.save();
+        c.beginPath();
+        c.setLineDash([4, 4]);
+        c.strokeStyle = 'rgba(148,163,184,0.4)';
+        c.lineWidth = 1;
+        c.moveTo(xPos, top);
+        c.lineTo(xPos, bottom);
+        c.stroke();
+        c.setLineDash([]);
+        c.fillStyle = '#94a3b8';
+        c.font = '10px -apple-system, sans-serif';
+        c.textAlign = 'center';
+        c.fillText(label, xPos, top - 4);
+        c.restore();
+      });
+    }
+  };
+
+  if (hourlyChart) hourlyChart.destroy();
+
+  hourlyChart = new Chart(ctx, {
+    type: 'line',
+    plugins: [dayLinePlugin],
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperature (°F)',
+          data: temps,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.1)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHitRadius: 8,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Precip Probability (%)',
+          data: precip,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHitRadius: 8,
+          yAxisID: 'y1',
+          borderDash: [4, 4],
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 18 } },
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          titleColor: '#f1f5f9',
+          bodyColor: '#cbd5e1',
+          borderColor: '#334155',
+          borderWidth: 1,
+          cornerRadius: 8,
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b', maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } },
+          grid: { color: 'rgba(51,65,85,0.3)' }
+        },
+        y: {
+          position: 'left',
+          ticks: { color: '#f59e0b', font: { size: 10 }, callback: v => v + '°' },
+          grid: { color: 'rgba(51,65,85,0.3)' }
+        },
+        y1: {
+          position: 'right',
+          min: 0, max: 100,
+          ticks: { color: '#3b82f6', font: { size: 10 }, callback: v => v + '%' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+// ── Render: 7-Day Forecast ────────────────────────────────────────
+function renderDaily(daily) {
+  const el = document.getElementById('daily-content');
+  let html = '<div class="forecast-row">';
+  for (let i = 0; i < daily.time.length; i++) {
+    const w = weatherInfo(daily.weather_code[i]);
+    html += `
+      <div class="forecast-day">
+        <div class="day-name">${fmtDay(daily.time[i])}</div>
+        <div class="day-icon">${w.icon}</div>
+        <div class="day-temps">
+          <span class="high">${Math.round(daily.temperature_2m_max[i])}°</span>
+          <span class="low">${Math.round(daily.temperature_2m_min[i])}°</span>
+        </div>
+        <div class="day-detail">💧 ${daily.precipitation_probability_max[i]}% · 💨 ${Math.round(daily.wind_speed_10m_max[i])} mph</div>
+      </div>`;
+  }
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ── Render: Sun & Moon ────────────────────────────────────────────
+function renderSunMoon(daily) {
+  const sunrise = daily.sunrise[0];
+  const sunset  = daily.sunset[0];
+  const srDate  = new Date(sunrise);
+  const ssDate  = new Date(sunset);
+  const dayLenMs = ssDate - srDate;
+  const dayH = Math.floor(dayLenMs / 3600000);
+  const dayM = Math.round((dayLenMs % 3600000) / 60000);
+  const moon = getMoonPhase(new Date());
+
+  document.getElementById('sun-moon-content').innerHTML = `
+    <div class="sun-moon-grid">
+      <div class="sun-moon-item">
+        <div class="icon">🌅</div>
+        <div class="label">Sunrise</div>
+        <div class="val">${fmtTime(sunrise)}</div>
+      </div>
+      <div class="sun-moon-item">
+        <div class="icon">🌇</div>
+        <div class="label">Sunset</div>
+        <div class="val">${fmtTime(sunset)}</div>
+      </div>
+      <div class="sun-moon-item">
+        <div class="icon">${moon.icon}</div>
+        <div class="label">Moon Phase</div>
+        <div class="val">${moon.name}</div>
+      </div>
+      <div class="sun-moon-item">
+        <div class="icon">☀️</div>
+        <div class="label">Day Length</div>
+        <div class="val">${dayH}h ${dayM}m</div>
+      </div>
+    </div>`;
+}
+
+// ── Render: Air Quality ───────────────────────────────────────────
+function renderAQI(data) {
+  const el = document.getElementById('aqi-content');
+  const aqi = data.current.us_aqi;
+  if (aqi == null) {
+    el.innerHTML = '<div class="error-msg">AQI data unavailable</div>';
+    return;
+  }
+  const cat = aqiCategory(aqi);
+  el.innerHTML = `
+    <div class="aqi-main">
+      <div class="aqi-badge" style="background:${cat.bg}; color:${cat.text}">${aqi}</div>
+      <div>
+        <div class="aqi-label" style="color:${cat.color}">${cat.label}</div>
+        <div class="aqi-desc">US EPA Air Quality Index</div>
+      </div>
+    </div>
+    <div class="aqi-details">
+      <div class="aqi-detail-item">
+        <div class="pollutant-label">PM2.5</div>
+        <div class="pollutant-val">${data.current.pm2_5 != null ? data.current.pm2_5.toFixed(1) : '—'} µg/m³</div>
+      </div>
+      <div class="aqi-detail-item">
+        <div class="pollutant-label">PM10</div>
+        <div class="pollutant-val">${data.current.pm10 != null ? data.current.pm10.toFixed(1) : '—'} µg/m³</div>
+      </div>
+      <div class="aqi-detail-item">
+        <div class="pollutant-label">Ozone</div>
+        <div class="pollutant-val">${data.current.ozone != null ? data.current.ozone.toFixed(1) : '—'} µg/m³</div>
+      </div>
+    </div>`;
+}
+
+// ── Render: NWS Alerts ────────────────────────────────────────────
+function renderAlerts(data) {
+  const container = document.getElementById('alerts-container');
+  const features = data.features || [];
+  if (features.length === 0) {
+    container.classList.remove('active');
+    return;
+  }
+  container.classList.add('active');
+  container.innerHTML = features.map(f => {
+    const p = f.properties;
+    const sev = (p.severity || 'unknown').toLowerCase();
+    const cls = ['extreme','severe','moderate','minor'].includes(sev) ? `alert-${sev}` : 'alert-unknown';
+    return `
+      <div class="alert-banner ${cls}" onclick="this.classList.toggle('expanded')">
+        <div class="alert-header">
+          <span>⚠️ ${p.headline || p.event || 'Weather Alert'}</span>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="alert-body">${(p.description || '').replace(/\n/g, '<br>')}</div>
+      </div>`;
+  }).join('');
+}
+
+// ── Update header date ────────────────────────────────────────────
+function updateDate() {
+  const now = new Date();
+  document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    timeZone: TIMEZONE
+  });
+  document.getElementById('last-updated').textContent = now.toLocaleTimeString('en-US', {
+    hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE
+  });
+}
+
+// ── Main data fetch & render ──────────────────────────────────────
+async function loadDashboard() {
+  updateDate();
+
+  // Fetch all data sources concurrently
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
+    + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,uv_index,visibility`
+    + `&hourly=temperature_2m,precipitation_probability,weather_code`
+    + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max`
+    + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
+    + `&timezone=${TIMEZONE}&forecast_days=7&forecast_hours=48`;
+
+  const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=us_aqi,pm10,pm2_5,ozone`;
+
+  const alertsUrl = `https://api.weather.gov/alerts/active?point=${LAT},${LON}`;
+
+  const [weatherResult, aqiResult, alertsResult] = await Promise.allSettled([
+    safeFetch(weatherUrl),
+    safeFetch(aqiUrl),
+    safeFetch(alertsUrl, { headers: { 'User-Agent': 'kirkland-weather-dashboard' } })
+  ]);
+
+  // Render weather
+  if (weatherResult.status === 'fulfilled') {
+    const d = weatherResult.value;
+    renderCurrent(d.current, d.current_units, d.daily);
+    renderHourly(d.hourly);
+    renderDaily(d.daily);
+    renderSunMoon(d.daily);
+  } else {
+    document.getElementById('current-content').innerHTML = '<div class="error-msg">⚠️ Unable to load weather data. Will retry in 15 minutes.</div>';
+    document.getElementById('daily-content').innerHTML = '<div class="error-msg">⚠️ Forecast unavailable</div>';
+  }
+
+  // Render AQI
+  if (aqiResult.status === 'fulfilled') {
+    renderAQI(aqiResult.value);
+  } else {
+    document.getElementById('aqi-content').innerHTML = '<div class="error-msg">⚠️ Air quality data unavailable</div>';
+  }
+
+  // Render Alerts
+  if (alertsResult.status === 'fulfilled') {
+    renderAlerts(alertsResult.value);
+  } else {
+    document.getElementById('alerts-container').classList.remove('active');
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+loadDashboard();
+setInterval(loadDashboard, REFRESH_MS);
+</script>
+</body>
+</html>
