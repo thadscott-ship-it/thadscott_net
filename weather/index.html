@@ -160,8 +160,8 @@
     .city-dialog .dialog-error {
       color: #f87171;
       font-size: 0.8rem;
-      margin-top: 0.5rem;
-      min-height: 1.2em;
+      margin-top: 0.4rem;
+      min-height: 0;
     }
     .header .subtitle {
       font-size: 0.85rem;
@@ -698,7 +698,7 @@
       <h3>Change City</h3>
       <input type="text" id="city-input" placeholder="e.g. Seattle, WA" autocomplete="off" />
       <div class="dialog-error" id="city-error"></div>
-      <button id="locate-btn" onclick="useCurrentLocation()" style="width:100%;margin-top:0.6rem;padding:0.45rem;background:none;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:0.85rem;cursor:pointer;transition:color 0.2s,border-color 0.2s;">Use location</button>
+      <button id="locate-btn" onclick="useCurrentLocation()" style="width:100%;margin-top:8px;padding:0.45rem;background:none;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:0.85rem;cursor:pointer;transition:color 0.2s,border-color 0.2s;">Use location</button>
       <div class="dialog-buttons">
         <button class="btn-cancel" onclick="closeCityDialog()">Cancel</button>
         <button class="btn-go" id="city-go-btn" onclick="applyCity()">Go</button>
