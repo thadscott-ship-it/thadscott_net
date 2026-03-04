@@ -420,6 +420,20 @@
       color: #475569;
     }
 
+    /* ── Radar Map ─────────────────────────────────────────────── */
+    .radar-map-wrap {
+      width: 100%;
+      height: 230px;
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .radar-map-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
     /* ── Pull to Refresh ───────────────────────────────────────── */
     #ptr-indicator {
       position: fixed;
@@ -624,7 +638,7 @@
 
       <!-- Hourly Chart -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>48-Hour Forecast</h2>
+        <h2>36-Hour Forecast</h2>
         <div id="hourly-content">
           <div class="chart-wrap"><canvas id="hourly-chart"></canvas></div>
         </div>
@@ -634,6 +648,14 @@
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
         <h2>7-Day Forecast</h2>
         <div id="daily-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Radar Map -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Radar</h2>
+        <div class="radar-map-wrap">
+          <iframe id="radar-iframe" allowfullscreen loading="lazy"></iframe>
+        </div>
       </div>
 
       <!-- Sun & Moon -->
@@ -837,6 +859,11 @@ async function safeFetch(url, opts = {}) {
 let hourlyChart = null;
 let modalChart  = null;
 let dailyCache  = null;
+
+// ── Windy embed URL ────────────────────────────────────────────────
+function windyUrl(lat, lon, zoom = 9) {
+  return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&zoom=${zoom}&level=surface&overlay=rain&product=ecmwf&message=true&marker=true&metricWind=mph&metricTemp=%C2%B0F`;
+}
 
 // ── Render: Current Conditions ────────────────────────────────────
 function renderCurrent(current, units, daily) {
@@ -1108,7 +1135,7 @@ async function loadDashboard() {
     + `&hourly=temperature_2m,precipitation_probability,weather_code`
     + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max`
     + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
-    + `&timezone=${TIMEZONE}&forecast_days=7&forecast_hours=48`;
+    + `&timezone=${TIMEZONE}&forecast_days=7&forecast_hours=36`;
 
   const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${LAT}&longitude=${LON}&current=us_aqi,pm10,pm2_5,ozone`;
 
@@ -1145,6 +1172,11 @@ async function loadDashboard() {
   } else {
     document.getElementById('alerts-container').classList.remove('active');
   }
+
+  // Radar map — set once; only update src if city changed
+  const radarIframe = document.getElementById('radar-iframe');
+  const newUrl = windyUrl(LAT, LON);
+  if (radarIframe.src !== newUrl) radarIframe.src = newUrl;
 }
 
 // ── Day Detail Modal ──────────────────────────────────────────────
@@ -1179,6 +1211,10 @@ function openDayModal(i) {
     <div id="day-modal-loading" class="loading"><div class="spinner"></div><div>Loading…</div></div>
     <div class="chart-wrap" id="day-chart-wrap" style="display:none; height:200px;">
       <canvas id="day-hourly-chart"></canvas>
+    </div>
+    <div class="day-modal-chart-title" style="margin-top:1.25rem;">Radar</div>
+    <div class="radar-map-wrap" style="height:180px;">
+      <iframe src="${windyUrl(LAT, LON)}" allowfullscreen loading="lazy"></iframe>
     </div>`;
 
   document.getElementById('day-modal-overlay').classList.add('open');
