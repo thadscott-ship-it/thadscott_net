@@ -1167,17 +1167,48 @@ async function fetchDayHourly(date) {
     const data = await safeFetch(url);
     document.getElementById('day-modal-loading').style.display = 'none';
     document.getElementById('day-chart-wrap').style.display = 'block';
-    renderDayChart(data.hourly);
+    renderDayChart(data.hourly, date);
   } catch {
     document.getElementById('day-modal-loading').innerHTML = '<div class="error-msg">⚠️ Could not load hourly data</div>';
   }
 }
 
-function renderDayChart(hourly) {
+function renderDayChart(hourly, date) {
   const labels = hourly.time.map(t => fmtHour(t));
   const ctx = document.getElementById('day-hourly-chart').getContext('2d');
+
+  // "Now" vertical line plugin — only draws when modal shows today
+  const nowLinePlugin = {
+    id: 'nowLine',
+    afterDraw(chart) {
+      const todayStr = new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE }).format(new Date());
+      if (todayStr !== date) return;
+      const parts = new Intl.DateTimeFormat('en-US', {
+        timeZone: TIMEZONE, hour: 'numeric', minute: 'numeric', hour12: false
+      }).formatToParts(new Date());
+      const h = parseInt(parts.find(p => p.type === 'hour').value);
+      const m = parseInt(parts.find(p => p.type === 'minute').value);
+      const pos = h + m / 60;
+      const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+      const xPos = x.getPixelForValue(pos);
+      c.save();
+      c.beginPath();
+      c.strokeStyle = '#f87171';
+      c.lineWidth = 2;
+      c.moveTo(xPos, top);
+      c.lineTo(xPos, bottom);
+      c.stroke();
+      c.fillStyle = '#f87171';
+      c.font = 'bold 10px -apple-system, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('Now', xPos, top - 5);
+      c.restore();
+    }
+  };
+
   if (modalChart) modalChart.destroy();
   modalChart = new Chart(ctx, {
+    plugins: [nowLinePlugin],
     type: 'line',
     data: {
       labels,
@@ -1202,6 +1233,7 @@ function renderDayChart(hourly) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      layout: { padding: { top: 18 } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
