@@ -621,7 +621,7 @@
   <div class="container">
     <!-- Header -->
     <div class="header fade-in">
-      <h1><span id="city-name">☁️ Kirkland, WA</span><button class="edit-city-btn" onclick="openCityDialog()" title="Change city">✏️</button><button class="edit-city-btn" id="locate-btn" onclick="useCurrentLocation()" title="Use current location"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="7"/><line x1="12" y1="17" x2="12" y2="22"/><line x1="2" y1="12" x2="7" y2="12"/><line x1="17" y1="12" x2="22" y2="12"/></svg></button></h1>
+      <h1><span id="city-name">☁️ Kirkland, WA</span><button class="edit-city-btn" onclick="openCityDialog()" title="Change city">✏️</button></h1>
       <div class="subtitle" id="current-date"></div>
     </div>
 
@@ -698,6 +698,7 @@
       <h3>Change City</h3>
       <input type="text" id="city-input" placeholder="e.g. Seattle, WA" autocomplete="off" />
       <div class="dialog-error" id="city-error"></div>
+      <button id="locate-btn" onclick="useCurrentLocation()" style="width:100%;margin-top:0.6rem;padding:0.45rem;background:none;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:0.85rem;cursor:pointer;transition:color 0.2s,border-color 0.2s;">Use location</button>
       <div class="dialog-buttons">
         <button class="btn-cancel" onclick="closeCityDialog()">Cancel</button>
         <button class="btn-go" id="city-go-btn" onclick="applyCity()">Go</button>
@@ -763,15 +764,17 @@ document.getElementById('city-input').addEventListener('keydown', e => {
 
 // ── Use current location ──────────────────────────────────────────
 async function useCurrentLocation() {
-  if (!navigator.geolocation) return;
+  if (!navigator.geolocation) {
+    document.getElementById('city-error').textContent = 'Geolocation not supported by this browser.';
+    return;
+  }
   const btn = document.getElementById('locate-btn');
-  btn.style.opacity = '0.4';
+  btn.textContent = 'Locating…';
   btn.disabled = true;
   navigator.geolocation.getCurrentPosition(async pos => {
     const { latitude, longitude } = pos.coords;
     LAT = latitude;
     LON = longitude;
-    // Reverse geocode — fall back to coords if it fails
     try {
       const data = await safeFetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
       const a = data.address || {};
@@ -783,13 +786,13 @@ async function useCurrentLocation() {
     }
     document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
     document.title = `${CITY_NAME} — Weather Dashboard`;
-    btn.style.opacity = '';
-    btn.disabled = false;
+    closeCityDialog();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     loadDashboard();
   }, () => {
-    btn.style.opacity = '';
+    btn.textContent = 'Use location';
     btn.disabled = false;
+    document.getElementById('city-error').textContent = 'Could not get location. Check permissions.';
   }, { timeout: 10000, enableHighAccuracy: false });
 }
 
