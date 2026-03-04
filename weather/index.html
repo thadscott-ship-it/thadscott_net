@@ -420,6 +420,105 @@
       color: #475569;
     }
 
+    /* ── Day Detail Modal ──────────────────────────────────────── */
+    .day-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .day-modal-overlay.open { display: flex; }
+    .day-modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 88vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    .day-modal-close {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      background: #334155;
+      border: none;
+      color: #94a3b8;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .day-modal-close:hover { background: #475569; color: #f1f5f9; }
+    .day-modal-inner { padding: 1.5rem; }
+    .day-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .day-modal-icon { font-size: 3rem; line-height: 1; flex-shrink: 0; }
+    .day-modal-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.1;
+    }
+    .day-modal-date {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.15rem;
+    }
+    .day-modal-desc {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-top: 0.2rem;
+    }
+    .day-modal-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .day-stat {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .day-stat-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .day-stat-val {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #f1f5f9;
+    }
+    .day-modal-chart-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      margin-bottom: 0.75rem;
+    }
+    .forecast-day { cursor: pointer; }
+
     /* ── Mobile (≤ 480px) ──────────────────────────────────────── */
     @media (max-width: 480px) {
       body { padding: 0.65rem; }
@@ -534,6 +633,14 @@
     </div>
   </div>
 
+  <!-- Day Detail Modal -->
+  <div class="day-modal-overlay" id="day-modal-overlay" onclick="if(event.target===this)closeDayModal()">
+    <div class="day-modal">
+      <button class="day-modal-close" onclick="closeDayModal()">✕</button>
+      <div class="day-modal-inner" id="day-modal-content"></div>
+    </div>
+  </div>
+
   <!-- City Change Dialog -->
   <div class="city-dialog-overlay" id="city-dialog-overlay" onclick="if(event.target===this)closeCityDialog()">
     <div class="city-dialog">
@@ -597,7 +704,7 @@ async function applyCity() {
   }
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeCityDialog();
+  if (e.key === 'Escape') { closeCityDialog(); closeDayModal(); }
 });
 document.getElementById('city-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') applyCity();
@@ -699,6 +806,8 @@ async function safeFetch(url, opts = {}) {
 
 // ── Chart instance (reused on refresh) ────────────────────────────
 let hourlyChart = null;
+let modalChart  = null;
+let dailyCache  = null;
 
 // ── Render: Current Conditions ────────────────────────────────────
 function renderCurrent(current, units, daily) {
@@ -835,12 +944,13 @@ function renderHourly(hourly) {
 
 // ── Render: 7-Day Forecast ────────────────────────────────────────
 function renderDaily(daily) {
+  dailyCache = daily;
   const el = document.getElementById('daily-content');
   let html = '<div class="forecast-row">';
   for (let i = 0; i < daily.time.length; i++) {
     const w = weatherInfo(daily.weather_code[i]);
     html += `
-      <div class="forecast-day">
+      <div class="forecast-day" onclick="openDayModal(${i})">
         <div class="day-name">${fmtDay(daily.time[i])}</div>
         <div class="day-icon">${w.icon}</div>
         <div class="day-temps">
@@ -1006,6 +1116,124 @@ async function loadDashboard() {
   } else {
     document.getElementById('alerts-container').classList.remove('active');
   }
+}
+
+// ── Day Detail Modal ──────────────────────────────────────────────
+function openDayModal(i) {
+  if (!dailyCache) return;
+  const daily = dailyCache;
+  const date  = daily.time[i];
+  const w     = weatherInfo(daily.weather_code[i]);
+  const hi    = Math.round(daily.temperature_2m_max[i]);
+  const lo    = Math.round(daily.temperature_2m_min[i]);
+  const precipPct = daily.precipitation_probability_max[i];
+  const wind  = Math.round(daily.wind_speed_10m_max[i]);
+  const dayLabel  = fmtDay(date);
+  const fullDate  = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  document.getElementById('day-modal-content').innerHTML = `
+    <div class="day-modal-header">
+      <div class="day-modal-icon">${w.icon}</div>
+      <div>
+        <div class="day-modal-title">${dayLabel}</div>
+        <div class="day-modal-date">${fullDate}</div>
+        <div class="day-modal-desc">${w.desc}</div>
+      </div>
+    </div>
+    <div class="day-modal-stats">
+      <div class="day-stat"><span class="day-stat-label">High</span><span class="day-stat-val">${hi}°F</span></div>
+      <div class="day-stat"><span class="day-stat-label">Low</span><span class="day-stat-val">${lo}°F</span></div>
+      <div class="day-stat"><span class="day-stat-label">Rain chance</span><span class="day-stat-val">${precipPct}%</span></div>
+      <div class="day-stat"><span class="day-stat-label">Max wind</span><span class="day-stat-val">${wind} mph</span></div>
+    </div>
+    <div class="day-modal-chart-title">Hourly Forecast</div>
+    <div id="day-modal-loading" class="loading"><div class="spinner"></div><div>Loading…</div></div>
+    <div class="chart-wrap" id="day-chart-wrap" style="display:none; height:200px;">
+      <canvas id="day-hourly-chart"></canvas>
+    </div>`;
+
+  document.getElementById('day-modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  fetchDayHourly(date);
+}
+
+async function fetchDayHourly(date) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
+    + `&hourly=temperature_2m,precipitation_probability`
+    + `&start_date=${date}&end_date=${date}`
+    + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
+    + `&timezone=${TIMEZONE}`;
+  try {
+    const data = await safeFetch(url);
+    document.getElementById('day-modal-loading').style.display = 'none';
+    document.getElementById('day-chart-wrap').style.display = 'block';
+    renderDayChart(data.hourly);
+  } catch {
+    document.getElementById('day-modal-loading').innerHTML = '<div class="error-msg">⚠️ Could not load hourly data</div>';
+  }
+}
+
+function renderDayChart(hourly) {
+  const labels = hourly.time.map(t => fmtHour(t));
+  const ctx = document.getElementById('day-hourly-chart').getContext('2d');
+  if (modalChart) modalChart.destroy();
+  modalChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperature (°F)',
+          data: hourly.temperature_2m,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.1)',
+          fill: true, tension: 0.4, pointRadius: 0, pointHitRadius: 8,
+          yAxisID: 'y',
+        },
+        {
+          label: 'Precip Probability (%)',
+          data: hourly.precipitation_probability,
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.08)',
+          fill: true, tension: 0.4, pointRadius: 0, pointHitRadius: 8,
+          yAxisID: 'y1', borderDash: [4, 4],
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b', titleColor: '#f1f5f9',
+          bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1, cornerRadius: 8,
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b', maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } },
+          grid: { color: 'rgba(51,65,85,0.3)' }
+        },
+        y: {
+          position: 'left',
+          ticks: { color: '#f59e0b', font: { size: 10 }, callback: v => v + '°' },
+          grid: { color: 'rgba(51,65,85,0.3)' }
+        },
+        y1: {
+          position: 'right', min: 0, max: 100,
+          ticks: { color: '#3b82f6', font: { size: 10 }, callback: v => v + '%' },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function closeDayModal() {
+  document.getElementById('day-modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  if (modalChart) { modalChart.destroy(); modalChart = null; }
 }
 
 // ── Alert toggle (tap outside to dismiss) ─────────────────────────
