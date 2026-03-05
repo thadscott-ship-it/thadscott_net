@@ -1292,14 +1292,14 @@ function renderScooterDay(daily) {
 
   if (reasons.length === 0) {
     el.innerHTML = `
-      <div style="font-size:3.5rem;font-weight:700;line-height:1;color:#22c55e;">Yes</div>
+      <div style="font-size:2.5rem;font-weight:700;line-height:1;color:#22c55e;">Yes</div>
       <div class="current-desc" style="margin-top:0.5rem;">Looks great out there — take it for a spin! 🛴</div>`;
   } else {
     const why = reasons.length === 1
       ? reasons[0]
       : reasons.slice(0, -1).join(', ') + ' and ' + reasons[reasons.length - 1];
     el.innerHTML = `
-      <div style="font-size:3.5rem;font-weight:700;line-height:1;color:#ef4444;">No</div>
+      <div style="font-size:2.5rem;font-weight:700;line-height:1;color:#ef4444;">No</div>
       <div class="current-desc" style="margin-top:0.5rem;">${why.charAt(0).toUpperCase() + why.slice(1)}.</div>`;
   }
 }
