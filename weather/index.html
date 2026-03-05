@@ -1717,6 +1717,8 @@ document.addEventListener('click', () => {
 })();
 
 // ── Init ──────────────────────────────────────────────────────────
+document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+document.title = `${CITY_NAME} — Weather Dashboard`;
 loadDashboard();
 setInterval(loadDashboard, REFRESH_MS);
 </script>
