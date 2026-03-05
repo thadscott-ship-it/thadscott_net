@@ -765,9 +765,14 @@
 
 <script>
 // ── Configuration ─────────────────────────────────────────────────
-let LAT = 47.6769;
-let LON = -122.2060;
-let CITY_NAME = 'Kirkland, WA';
+const _saved = JSON.parse(localStorage.getItem('wx_city') || 'null');
+let LAT = _saved ? _saved.lat : 47.6769;
+let LON = _saved ? _saved.lon : -122.2060;
+let CITY_NAME = _saved ? _saved.name : 'Kirkland, WA';
+
+function saveCity() {
+  localStorage.setItem('wx_city', JSON.stringify({ name: CITY_NAME, lat: LAT, lon: LON }));
+}
 const TIMEZONE = 'America/Los_Angeles';
 const REFRESH_MS = 15 * 60 * 1000;
 
@@ -850,6 +855,7 @@ function selectResult(i) {
   if (!r) return;
   LAT = r.latitude; LON = r.longitude;
   CITY_NAME = r.admin1 ? `${r.name}, ${r.admin1}` : r.name;
+  saveCity();
   document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
   document.title = `${CITY_NAME} — Weather Dashboard`;
   closeCityDialog();
@@ -961,6 +967,7 @@ async function useCurrentLocation() {
     } catch {
       CITY_NAME = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
     }
+    saveCity();
     document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
     document.title = `${CITY_NAME} — Weather Dashboard`;
     closeCityDialog();
