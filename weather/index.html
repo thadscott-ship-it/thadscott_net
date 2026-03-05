@@ -283,10 +283,12 @@
     .detail-item {
       display: flex;
       justify-content: space-between;
+      gap: 0.75rem;
       font-size: 0.85rem;
       padding: 0.15rem 0;
       border-bottom: 1px solid #334155;
     }
+    .detail-item .value { text-align: right; }
     .detail-item .label { color: #94a3b8; }
     .detail-item .value { color: #e2e8f0; font-weight: 500; }
 
@@ -715,6 +717,12 @@
       <div class="card fade-in">
         <h2>Air Quality</h2>
         <div id="aqi-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Scooter / Bike -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Good Day for Scooter or Bike?</h2>
+        <div id="scooter-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
     </div>
 
@@ -1270,6 +1278,32 @@ function renderAQI(data) {
     </div>`;
 }
 
+// ── Render: Scooter / Bike ────────────────────────────────────────
+function renderScooterDay(daily) {
+  const el = document.getElementById('scooter-content');
+  const rain = daily.precipitation_probability_max[0];
+  const hi   = Math.round(daily.temperature_2m_max[0]);
+  const wind = Math.round(daily.wind_speed_10m_max[0]);
+
+  const reasons = [];
+  if (rain > 25) reasons.push(`too wet — ${rain}% chance of rain`);
+  if (hi   < 40) reasons.push(`too cold — high of only ${hi}°`);
+  if (wind > 20) reasons.push(`too windy — gusts up to ${wind} mph`);
+
+  if (reasons.length === 0) {
+    el.innerHTML = `
+      <div style="font-size:3.5rem;font-weight:700;line-height:1;color:#22c55e;">Yes</div>
+      <div class="current-desc" style="margin-top:0.5rem;">Looks great out there — take it for a spin! 🛴</div>`;
+  } else {
+    const why = reasons.length === 1
+      ? reasons[0]
+      : reasons.slice(0, -1).join(', ') + ' and ' + reasons[reasons.length - 1];
+    el.innerHTML = `
+      <div style="font-size:3.5rem;font-weight:700;line-height:1;color:#ef4444;">No</div>
+      <div class="current-desc" style="margin-top:0.5rem;">${why.charAt(0).toUpperCase() + why.slice(1)}.</div>`;
+  }
+}
+
 // ── Render: NWS Alerts ────────────────────────────────────────────
 function renderAlerts(data) {
   const container = document.getElementById('alerts-container');
@@ -1335,6 +1369,7 @@ async function loadDashboard() {
     renderHourly(d.hourly);
     renderDaily(d.daily);
     renderSunMoon(d.daily);
+    renderScooterDay(d.daily);
   } else {
     document.getElementById('current-content').innerHTML = '<div class="error-msg">⚠️ Unable to load weather data. Will retry in 15 minutes.</div>';
     document.getElementById('daily-content').innerHTML = '<div class="error-msg">⚠️ Forecast unavailable</div>';
