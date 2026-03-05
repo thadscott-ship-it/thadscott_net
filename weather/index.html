@@ -752,7 +752,7 @@
     <div class="city-dialog">
       <h3>Change City</h3>
       <div class="city-autocomplete">
-        <input type="text" id="city-input" placeholder="e.g. Seattle, WA" autocomplete="off" />
+        <input type="text" id="city-input" placeholder="e.g. Seattle, WA or 98122" autocomplete="off" />
         <div class="city-dropdown" id="city-dropdown"></div>
       </div>
       <div class="dialog-error" id="city-error"></div>
@@ -785,6 +785,29 @@ function unlockScroll() {
   document.body.style.top = '';
   document.body.style.width = '';
   window.scrollTo(0, y);
+}
+
+// ── US state abbreviation expansion ──────────────────────────────
+const US_STATES = {
+  AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',
+  CO:'Colorado',CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',
+  HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',
+  KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',
+  MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',
+  MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',
+  NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',
+  OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',
+  SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',
+  VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',
+  DC:'Washington DC'
+};
+function expandStateAbbr(val) {
+  const m = val.match(/^(.+),\s*([A-Za-z]{2})$/);
+  if (m) {
+    const full = US_STATES[m[2].toUpperCase()];
+    if (full) return `${m[1].trim()}, ${full}`;
+  }
+  return val;
 }
 
 // ── City autocomplete state ────────────────────────────────────────
@@ -842,9 +865,55 @@ document.getElementById('city-input').addEventListener('input', e => {
   clearTimeout(acTimeout);
   document.getElementById('city-error').textContent = '';
   const val = e.target.value.trim();
+
+  // US zip code — wait for all 5 digits, then use Zippopotam
+  if (/^\d+$/.test(val)) {
+    if (val.length !== 5) { closeDropdown(); return; }
+    acTimeout = setTimeout(async () => {
+      try {
+        const data = await safeFetch(`https://api.zippopotam.us/us/${val}`);
+        const place = data.places?.[0];
+        if (!place) { closeDropdown(); return; }
+        renderDropdown([{
+          name: place['place name'],
+          admin1: place.state,
+          country: 'United States',
+          latitude: parseFloat(place.latitude),
+          longitude: parseFloat(place.longitude),
+        }]);
+      } catch { closeDropdown(); }
+    }, 150);
+    return;
+  }
+
   if (val.length < 2) { closeDropdown(); return; }
   acTimeout = setTimeout(async () => {
     try {
+      // City, ST pattern → Nominatim structured search
+      const stateMatch = val.match(/^(.+),\s*([A-Za-z]{2})$/);
+      if (stateMatch) {
+        const stateName = US_STATES[stateMatch[2].toUpperCase()];
+        if (stateName) {
+          const city = stateMatch[1].trim();
+          const data = await safeFetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&state=${encodeURIComponent(stateName)}&countrycodes=us&format=json&limit=6&addressdetails=1`, { headers: { 'User-Agent': 'weather-dashboard' } });
+          const results = (data || []).map(r => ({
+            name: r.address?.city || r.address?.town || r.address?.village || r.address?.hamlet || city,
+            admin1: r.address?.state || stateName,
+            country: 'United States',
+            latitude: parseFloat(r.lat),
+            longitude: parseFloat(r.lon)
+          }));
+          // Deduplicate by name+state
+          const seen = new Set();
+          renderDropdown(results.filter(r => {
+            const key = `${r.name}|${r.admin1}`;
+            if (seen.has(key)) return false;
+            seen.add(key); return true;
+          }));
+          return;
+        }
+      }
+      // Default: Open-Meteo geocoding
       const data = await safeFetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(val)}&count=6&language=en&format=json`);
       renderDropdown(data.results || []);
     } catch { closeDropdown(); }
