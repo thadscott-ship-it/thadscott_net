@@ -741,6 +741,21 @@ const TIMEZONE = 'America/Los_Angeles';
 const REFRESH_MS = 15 * 60 * 1000;
 
 // ── City Dialog ───────────────────────────────────────────────────
+// ── Scroll lock (iOS Safari safe) ─────────────────────────────────
+function lockScroll() {
+  const y = window.scrollY;
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${y}px`;
+  document.body.style.width = '100%';
+}
+function unlockScroll() {
+  const y = parseInt(document.body.style.top || '0') * -1;
+  document.body.style.position = '';
+  document.body.style.top = '';
+  document.body.style.width = '';
+  window.scrollTo(0, y);
+}
+
 // ── City autocomplete state ────────────────────────────────────────
 let acResults = [];
 let acIndex   = -1;
@@ -750,11 +765,13 @@ function openCityDialog() {
   document.getElementById('city-input').value = '';
   document.getElementById('city-error').textContent = '';
   closeDropdown();
+  lockScroll();
   document.getElementById('city-dialog-overlay').classList.add('open');
   setTimeout(() => document.getElementById('city-input').focus(), 50);
 }
 function closeCityDialog() {
   closeDropdown();
+  unlockScroll();
   document.getElementById('city-dialog-overlay').classList.remove('open');
 }
 function closeDropdown() {
@@ -1313,7 +1330,7 @@ function openDayModal(i) {
     </div>`;
 
   document.getElementById('day-modal-overlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  lockScroll();
   fetchDayHourly(date);
 }
 
@@ -1424,7 +1441,7 @@ function renderDayChart(hourly, date) {
 
 function closeDayModal() {
   document.getElementById('day-modal-overlay').classList.remove('open');
-  document.body.style.overflow = '';
+  unlockScroll();
   if (modalChart) { modalChart.destroy(); modalChart = null; }
 }
 
