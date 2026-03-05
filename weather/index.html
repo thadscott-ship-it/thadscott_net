@@ -413,6 +413,24 @@
       color: #e2e8f0;
     }
 
+    /* ── NWS Written Forecast ──────────────────────────────────── */
+    .nws-period { margin-bottom: 1rem; }
+    .nws-period:last-child { margin-bottom: 0; }
+    .nws-period-name {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #64748b;
+      margin-bottom: 0.3rem;
+    }
+    .nws-period-text {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+    }
+    .nws-unavailable { font-size: 0.85rem; color: #475569; }
+
     /* ── Loading / Error ───────────────────────────────────────── */
     .loading {
       text-align: center;
@@ -666,6 +684,12 @@
         <div id="hourly-content">
           <div class="chart-wrap"><canvas id="hourly-chart"></canvas></div>
         </div>
+      </div>
+
+      <!-- Today's Written Forecast -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Today</h2>
+        <div id="today-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
       <!-- 7-Day Forecast -->
@@ -971,6 +995,52 @@ async function safeFetch(url, opts = {}) {
 let hourlyChart = null;
 let modalChart  = null;
 let dailyCache  = null;
+
+// ── NWS written forecast ──────────────────────────────────────────
+let nwsCache = null;
+
+async function fetchNWSForecast() {
+  try {
+    const points = await safeFetch(
+      `https://api.weather.gov/points/${LAT},${LON}`,
+      { headers: { 'User-Agent': 'weather-dashboard' } }
+    );
+    const forecast = await safeFetch(points.properties.forecast, {
+      headers: { 'User-Agent': 'weather-dashboard' }
+    });
+    nwsCache = forecast.properties.periods;
+  } catch {
+    nwsCache = null;
+  }
+}
+
+function getNWSPeriodsForDate(dateStr) {
+  if (!nwsCache) return [];
+  const date   = new Date(dateStr + 'T12:00:00');
+  const today  = new Date();
+  const isToday = date.toDateString() === today.toDateString();
+  const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+  return nwsCache.filter(p =>
+    isToday
+      ? ['Today','This Afternoon','Tonight',dayName,`${dayName} Night`].includes(p.name)
+      : [dayName, `${dayName} Night`].includes(p.name)
+  );
+}
+
+function nwsPeriodsHtml(periods) {
+  if (!periods.length) return '<div class="nws-unavailable">Detailed forecast not available for this location.</div>';
+  return periods.map(p => `
+    <div class="nws-period">
+      <div class="nws-period-name">${p.name}</div>
+      <div class="nws-period-text">${p.detailedForecast}</div>
+    </div>`).join('');
+}
+
+function renderNWSToday() {
+  const el = document.getElementById('today-content');
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  el.innerHTML = nwsPeriodsHtml(getNWSPeriodsForDate(today));
+}
 
 // ── Windy embed URL ────────────────────────────────────────────────
 function windyUrl(lat, lon, zoom = 9) {
@@ -1285,6 +1355,9 @@ async function loadDashboard() {
     document.getElementById('alerts-container').classList.remove('active');
   }
 
+  // NWS written forecast (US only, fire and forget)
+  fetchNWSForecast().then(renderNWSToday);
+
   // Radar map — set once; only update src if city changed
   const radarIframe = document.getElementById('radar-iframe');
   const newUrl = windyUrl(LAT, LON);
@@ -1304,27 +1377,30 @@ function openDayModal(i) {
   const dayLabel  = fmtDay(date);
   const fullDate  = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
+  const nwsPeriods = getNWSPeriodsForDate(date);
+
   document.getElementById('day-modal-content').innerHTML = `
     <div class="day-modal-header">
       <div class="day-modal-icon">${w.icon}</div>
       <div>
         <div class="day-modal-title">${dayLabel}</div>
         <div class="day-modal-date">${fullDate}</div>
-        <div class="day-modal-desc">${w.desc}</div>
       </div>
     </div>
-    <div class="day-modal-stats">
-      <div class="day-stat"><span class="day-stat-label">High</span><span class="day-stat-val">${hi}°F</span></div>
-      <div class="day-stat"><span class="day-stat-label">Low</span><span class="day-stat-val">${lo}°F</span></div>
-      <div class="day-stat"><span class="day-stat-label">Rain chance</span><span class="day-stat-val">${precipPct}%</span></div>
-      <div class="day-stat"><span class="day-stat-label">Max wind</span><span class="day-stat-val">${wind} mph</span></div>
+    <div class="current-details" style="margin-bottom:1.25rem;">
+      <div class="detail-item"><span class="label">High / Low</span><span class="value">${hi}° / ${lo}°</span></div>
+      <div class="detail-item"><span class="label">Conditions</span><span class="value">${w.desc}</span></div>
+      <div class="detail-item"><span class="label">Rain chance</span><span class="value">${precipPct}%</span></div>
+      <div class="detail-item"><span class="label">Max wind</span><span class="value">${wind} mph</span></div>
     </div>
     <div class="day-modal-chart-title">Hourly Forecast</div>
     <div id="day-modal-loading" class="loading"><div class="spinner"></div><div>Loading…</div></div>
     <div class="chart-wrap" id="day-chart-wrap" style="display:none; height:200px;">
       <canvas id="day-hourly-chart"></canvas>
     </div>
-    <div class="day-modal-chart-title" style="margin-top:1.25rem;">Radar</div>
+    <div class="day-modal-chart-title" style="margin-top:1.25rem;">Detailed Forecast</div>
+    <div style="margin-bottom:1.25rem;">${nwsPeriodsHtml(nwsPeriods)}</div>
+    <div class="day-modal-chart-title">Radar</div>
     <div class="radar-map-wrap" style="height:180px;">
       <iframe src="${windyUrl(LAT, LON)}" allowfullscreen loading="lazy"></iframe>
     </div>`;
