@@ -554,6 +554,34 @@
     .twin-factor-vals  { color: #e2e8f0; font-weight: 500; }
     .twin-sep          { color: #64748b; font-weight: 400; }
 
+    /* ── Daily Weather Game ──────────────────────────────────────── */
+    .game-prompt    { font-size: 0.75rem; font-weight: 600; color: #64748b;
+                      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+    .game-question  { font-size: 1.1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 1rem; }
+    .game-choices   { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .game-choice    { flex: 1; min-width: 120px; padding: 0.75rem 1rem; background: #0f172a;
+                      border: 1px solid #334155; border-radius: 0.625rem; color: #e2e8f0;
+                      font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center;
+                      transition: border-color 0.15s, background 0.15s; line-height: 1.3; }
+    .game-choice:hover                { border-color: #60a5fa; background: #1e293b; }
+    .game-choice.correct              { background: #052e16; border-color: #22c55e; color: #86efac; cursor: default; }
+    .game-choice.wrong                { background: #2d0a0a; border-color: #ef4444; color: #fca5a5; cursor: default; }
+    .game-choice.neutral              { opacity: 0.4; cursor: default; }
+    .game-choice-country              { display: block; font-size: 0.78rem; font-weight: 400; color: #64748b; margin-top: 0.15rem; }
+    .game-choice-val                  { display: block; font-size: 1.05rem; font-weight: 700; margin-top: 0.25rem; }
+    .game-feedback                    { font-size: 0.9rem; margin-bottom: 0.75rem; min-height: 1.2em; }
+    .game-feedback.hit                { color: #22c55e; }
+    .game-feedback.miss               { color: #ef4444; }
+    .game-score-line                  { font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem; }
+    .game-next      { padding: 0.5rem 1.25rem; background: #1e40af; border: none;
+                      border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; font-weight: 600;
+                      cursor: pointer; transition: background 0.15s; }
+    .game-next:hover { background: #2563eb; }
+    .game-final     { text-align: left; padding: 0.5rem 0 0.25rem; }
+    .game-final-num { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1.1; margin-bottom: 0.35rem; }
+    .game-final-msg { font-size: 1rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; }
+    .game-final-sub { font-size: 0.85rem; color: #64748b; }
+
     /* ── Footer ────────────────────────────────────────────────── */
     .footer {
       text-align: center;
@@ -888,6 +916,12 @@
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
         <h2>Should I Wear a Coat?</h2>
         <div id="coat-content"></div>
+      </div>
+
+      <!-- Daily Weather Game -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Daily Weather Game</h2>
+        <div id="game-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
     </div>
 
@@ -2605,6 +2639,9 @@ async function loadDashboard() {
   const radarIframe = document.getElementById('radar-iframe');
   const newUrl = windyUrl(LAT, LON);
   if (radarIframe.src !== newUrl) radarIframe.src = newUrl;
+
+  // Daily Weather Game (location-independent, always render)
+  renderGame();
 }
 
 // ── Day Detail Modal ──────────────────────────────────────────────
@@ -2851,6 +2888,253 @@ document.addEventListener('click', () => {
     }
   }, { passive: true });
 })();
+
+// ── Daily Weather Game ────────────────────────────────────────────
+let gameState = null;
+
+function gameRand(dateStr) {
+  let s = dateStr.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 1);
+  return () => { s ^= s << 13; s ^= s >> 17; s ^= s << 5; return (s >>> 0) / 0xFFFFFFFF; };
+}
+
+function prngShuffle(arr, rand) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+async function buildGameQuestions(dateStr) {
+  const rand = gameRand(dateStr);
+  const categories = [
+    { key: 'hottest',  emoji: '🔥', prompt: 'Which city is hotter right now?',         filter: c => Math.abs(c.lat) < 30, metric: 'temperature_2m', correct: 'higher', unit: '°F', minVal: -999 },
+    { key: 'coldest',  emoji: '❄️', prompt: 'Which city is colder right now?',          filter: c => Math.abs(c.lat) > 45, metric: 'temperature_2m', correct: 'lower',  unit: '°F', minVal: -999 },
+    { key: 'wettest',  emoji: '🌧️', prompt: 'Which city has more precipitation now?',   filter: c => Math.abs(c.lat) < 25, metric: 'precipitation',  correct: 'higher', unit: '"',  minVal: 0.01 },
+    { key: 'snowiest', emoji: '⛄', prompt: 'Which city has more snow on the ground?', filter: c => Math.abs(c.lat) > 35, metric: 'snowfall',       correct: 'higher', unit: '"',  minVal: 0.1  },
+  ];
+
+  const catCandidates = [];
+  const allCandidates = [];
+  for (const cat of categories) {
+    const pool = TWIN_CITIES.filter(cat.filter);
+    const shuffled = prngShuffle(pool, rand).slice(0, 10);
+    catCandidates.push(shuffled);
+    allCandidates.push(...shuffled);
+  }
+
+  const seen = new Set();
+  const unique = allCandidates.filter(c => {
+    const key = `${c.lat},${c.lon}`;
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+
+  const results = await Promise.allSettled(
+    unique.map(city =>
+      safeFetch(`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,precipitation,snowfall,snow_depth&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=UTC`)
+        .then(d => ({ city, current: d.current }))
+    )
+  );
+
+  const weatherMap = new Map();
+  for (const r of results) {
+    if (r.status === 'fulfilled') {
+      const { city, current } = r.value;
+      weatherMap.set(`${city.lat},${city.lon}`, current);
+    }
+  }
+
+  const rand2 = gameRand(dateStr + '_order');
+  const questions = [];
+
+  for (let i = 0; i < categories.length; i++) {
+    const cat = categories[i];
+    const candidates = catCandidates[i]
+      .map(c => ({ city: c, wx: weatherMap.get(`${c.lat},${c.lon}`) }))
+      .filter(x => x.wx);
+    if (candidates.length < 2) continue;
+
+    const getVal = (wx) => {
+      if (cat.metric === 'snowfall') {
+        const sf = wx.snowfall ?? 0;
+        const sd = wx.snow_depth ?? 0;
+        return (sf > 0 || sd > 0) ? Math.max(sf, sd * 3.937) : 0;
+      }
+      return wx[cat.metric] ?? 0;
+    };
+
+    const sorted = [...candidates].sort((a, b) => getVal(b.wx) - getVal(a.wx));
+    let pair = [sorted[0], sorted[sorted.length - 1]];
+    const val0 = getVal(pair[0].wx);
+    const val1 = getVal(pair[1].wx);
+
+    // Skip if the winning city doesn't clear the minimum meaningful value
+    const winnerVal = Math.max(val0, val1);
+    if (winnerVal < cat.minVal) continue;
+
+    let correctIdx = cat.correct === 'higher' ? (val0 >= val1 ? 0 : 1) : (val0 <= val1 ? 0 : 1);
+
+    if (rand2() > 0.5) {
+      pair = [pair[1], pair[0]];
+      correctIdx = 1 - correctIdx;
+    }
+
+    questions.push({
+      category: cat.key,
+      emoji: cat.emoji,
+      prompt: cat.prompt,
+      cities: [
+        { name: pair[0].city.name, country: pair[0].city.country },
+        { name: pair[1].city.name, country: pair[1].city.country },
+      ],
+      values: [getVal(pair[0].wx), getVal(pair[1].wx)],
+      correct: correctIdx,
+      unit: cat.unit,
+      metric: cat.metric,
+    });
+  }
+
+  return questions;
+}
+
+function saveGameState() {
+  if (!gameState) return;
+  const today = new Date().toLocaleDateString('en-CA');
+  localStorage.setItem('wx_game', JSON.stringify({
+    date: today,
+    questions: gameState.questions,
+    round: gameState.round,
+    score: gameState.score,
+    answered: gameState.answered,
+  }));
+}
+
+async function renderGame() {
+  const el = document.getElementById('game-content');
+  const today = new Date().toLocaleDateString('en-CA');
+  try {
+    const cached = JSON.parse(localStorage.getItem('wx_game') || 'null');
+    if (cached && cached.date === today && cached.questions?.length) {
+      gameState = {
+        questions: cached.questions,
+        round: cached.round ?? 0,
+        score: cached.score ?? 0,
+        answered: cached.answered ?? false,
+      };
+      if (gameState.round >= gameState.questions.length) {
+        renderGameFinal();
+      } else {
+        renderGameRound();
+      }
+      return;
+    }
+  } catch {}
+  try {
+    const questions = await buildGameQuestions(today);
+    if (!questions.length) {
+      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Game unavailable today.</div>';
+      return;
+    }
+    gameState = { questions, round: 0, score: 0, answered: false };
+    saveGameState();
+    renderGameRound();
+  } catch (e) {
+    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Game unavailable — could not load weather data.</div>';
+    console.warn('renderGame error', e);
+  }
+}
+
+function renderGameRound() {
+  const el = document.getElementById('game-content');
+  if (!gameState) return;
+  const { questions, round, score, answered } = gameState;
+  const q = questions[round];
+  if (!q) { renderGameFinal(); return; }
+  const total = questions.length;
+
+  const fmtVal = (v, unit) => {
+    if (unit === '°F') return `${v.toFixed(1)}${unit}`;
+    return `${v.toFixed(2)}${unit}`;
+  };
+
+  let choicesHtml;
+  if (!answered) {
+    choicesHtml = q.cities.map((c, i) => `
+      <button class="game-choice" onclick="answerGame(${i})">
+        ${countryFlag(c.country)} ${c.name}
+        <span class="game-choice-country">${c.country}</span>
+      </button>`).join('');
+  } else {
+    choicesHtml = q.cities.map((c, i) => {
+      const cls = i === q.correct ? 'correct' : 'wrong';
+      return `
+        <button class="game-choice ${cls}" disabled>
+          ${countryFlag(c.country)} ${c.name}
+          <span class="game-choice-country">${c.country}</span>
+          <span class="game-choice-val">${fmtVal(q.values[i], q.unit)}</span>
+        </button>`;
+    }).join('');
+  }
+
+  const feedback = answered
+    ? (gameState.lastCorrect
+        ? `<div class="game-feedback hit">Correct! ✓</div>`
+        : `<div class="game-feedback miss">Not quite — ${q.cities[q.correct].name} was ${fmtVal(q.values[q.correct], q.unit)}</div>`)
+    : `<div class="game-feedback"></div>`;
+
+  const nextBtn = answered ? `<button class="game-next" onclick="nextGameRound()">Next →</button>` : '';
+
+  el.innerHTML = `
+    <div class="game-prompt">Round ${round + 1} of ${total} · ${q.emoji} ${q.category.toUpperCase()}</div>
+    <div class="game-question">${q.prompt}</div>
+    <div class="game-choices">${choicesHtml}</div>
+    ${feedback}
+    <div class="game-score-line">Score: ${score} / ${total}</div>
+    ${nextBtn}`;
+}
+
+function answerGame(idx) {
+  if (!gameState || gameState.answered) return;
+  const q = gameState.questions[gameState.round];
+  const correct = idx === q.correct;
+  gameState.answered = true;
+  gameState.lastCorrect = correct;
+  if (correct) gameState.score++;
+  saveGameState();
+  renderGameRound();
+}
+
+function nextGameRound() {
+  if (!gameState) return;
+  gameState.round++;
+  gameState.answered = false;
+  gameState.lastCorrect = false;
+  saveGameState();
+  if (gameState.round >= gameState.questions.length) {
+    renderGameFinal();
+  } else {
+    renderGameRound();
+  }
+}
+
+function renderGameFinal() {
+  const el = document.getElementById('game-content');
+  if (!gameState) return;
+  const { score, questions } = gameState;
+  const total = questions.length;
+  let msg;
+  if (score === total)         msg = '🎉 Perfect Score!';
+  else if (score >= total - 1) msg = '👍 Nice job!';
+  else                         msg = '☁️ Keep at it!';
+  el.innerHTML = `
+    <div class="game-final">
+      <div class="game-final-num">${score} / ${total}</div>
+      <div class="game-final-msg">${msg}</div>
+      <div class="game-final-sub">Play again tomorrow!</div>
+    </div>`;
+}
 
 // ── Init ──────────────────────────────────────────────────────────
 lucide.createIcons();
