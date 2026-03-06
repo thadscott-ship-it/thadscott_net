@@ -1354,6 +1354,7 @@ function renderHourly(hourly) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: window.innerWidth >= 700,
           backgroundColor: '#1e293b',
           titleColor: '#f1f5f9',
           bodyColor: '#cbd5e1',
