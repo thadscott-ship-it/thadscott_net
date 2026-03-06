@@ -447,6 +447,69 @@
     }
     .nws-unavailable { font-size: 0.85rem; color: #475569; }
 
+    /* ── Stargazing ─────────────────────────────────────────────── */
+    .stargazing-score { display: flex; align-items: baseline; gap: 0; margin-bottom: 0.75rem; }
+    .stargazing-score-num { font-size: 2.75rem; font-weight: 700; line-height: 1; color: #f1f5f9; }
+    .stargazing-score-sep { font-size: 2rem; font-weight: 300; color: #334155; margin: 0 0.15rem; line-height: 1; align-self: flex-end; padding-bottom: 0.1rem; }
+    .stargazing-score-denom { font-size: 2rem; font-weight: 400; color: #475569; line-height: 1; align-self: flex-end; padding-bottom: 0.1rem; }
+
+    .stargazing-factors {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    @media (min-width: 700px) { .stargazing-factors { grid-template-columns: repeat(4, 1fr); } }
+    .stargazing-factor { font-size: 0.82rem; }
+    .stargazing-factor-name { color: #64748b; margin-bottom: 0.2rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stargazing-factor-val { font-weight: 600; color: #e2e8f0; }
+    .stargazing-factor-sub { font-weight: 400; color: #64748b; margin-left: 0.25rem; }
+    .stargazing-hourly-label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem; }
+    .stargazing-hourly {
+      display: flex;
+      gap: 0.4rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .stargazing-hourly::-webkit-scrollbar { height: 4px; }
+    .stargazing-hourly::-webkit-scrollbar-track { background: #0f172a; border-radius: 2px; }
+    .stargazing-hourly::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .sg-hour {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      min-width: 2.8rem;
+      flex-shrink: 0;
+    }
+    .sg-hour-time { font-size: 0.72rem; color: #94a3b8; }
+    .sg-hour-pip {
+      width: 2.4rem;
+      height: 0.5rem;
+      border-radius: 0.25rem;
+    }
+    .sg-hour-qual { font-size: 0.7rem; font-weight: 400; color: #64748b; }
+    .sg-hour-pip.sg-exc  { background: #60a5fa; }
+    .sg-hour-pip.sg-vg   { background: #7dd3fc; }
+    .sg-hour-pip.sg-good { background: #94a3b8; }
+    .sg-hour-pip.sg-fair { background: #475569; }
+    .sg-hour-pip.sg-poor { background: #1e3a5f; }
+    .stargazing-moonset { font-size: 0.82rem; color: #94a3b8; margin-top: 0.75rem; }
+
+    /* ── Weekly Extremes ────────────────────────────────────────── */
+    .extremes-week-label { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
+    .extremes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem 1.5rem;
+    }
+    @media (min-width: 700px) { .extremes-grid { grid-template-columns: repeat(4, 1fr); } }
+    .extreme-header { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+    .extreme-value { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1; margin-bottom: 0.2rem; }
+    .extreme-city { font-size: 0.85rem; color: #cbd5e1; font-weight: 500; }
+    .extreme-date { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; }
+
     /* ── Loading / Error ───────────────────────────────────────── */
     .loading {
       text-align: center;
@@ -736,10 +799,25 @@
         <div id="aqi-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
+      <!-- Beta section break -->
+      <div style="grid-column: 1 / -1; text-align: center; color: #475569; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0 0;">Beta Features</div>
+
       <!-- Scooter / Bike -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
         <h2>Good Day for Scooter? <i data-lucide="scooter" class="lucide-sm" style="margin-left:0.25rem;"></i></h2>
         <div id="scooter-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Stargazing Tonight -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Stargazing Tonight</h2>
+        <div id="stargazing-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Weekly Extremes -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Last Week's Extremes</h2>
+        <div id="extremes-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
     </div>
 
@@ -1399,6 +1477,218 @@ function renderAQI(data) {
     </div>`;
 }
 
+// ── Stargazing helpers ────────────────────────────────────────────
+function moonIllumination(date) {
+  const SYNODIC   = 29.53058770576;
+  const KNOWN_NEW = new Date('2000-01-06T18:14:00Z');
+  const diff  = (date - KNOWN_NEW) / (1000 * 60 * 60 * 24);
+  const phase = ((diff % SYNODIC) + SYNODIC) % SYNODIC;
+  const pct   = phase / SYNODIC;
+  return Math.round(50 * (1 - Math.cos(2 * Math.PI * pct)));
+}
+
+function estimateMoonsetHour(date, sunsetHour) {
+  const SYNODIC   = 29.53058770576;
+  const KNOWN_NEW = new Date('2000-01-06T18:14:00Z');
+  const diff      = (date - KNOWN_NEW) / (1000 * 60 * 60 * 24);
+  const phaseDays = ((diff % SYNODIC) + SYNODIC) % SYNODIC;
+  return ((sunsetHour + phaseDays * (48.8 / 60)) % 24 + 24) % 24;
+}
+
+function hourStarScore(cloudCover, windMph) {
+  const cloudScore = Math.max(0, 100 - cloudCover * 1.2);
+  let windScore;
+  if      (windMph < 5)  windScore = 100;
+  else if (windMph < 10) windScore = 80;
+  else if (windMph < 15) windScore = 60;
+  else if (windMph < 25) windScore = 30;
+  else                   windScore = 0;
+  return Math.round(cloudScore * 0.7 + windScore * 0.3);
+}
+
+function sgClass(score) {
+  if (score >= 80) return 'sg-exc';
+  if (score >= 65) return 'sg-vg';
+  if (score >= 50) return 'sg-good';
+  if (score >= 35) return 'sg-fair';
+  return 'sg-poor';
+}
+function sgLabel(score) {
+  if (score >= 80) return 'Exc';
+  if (score >= 65) return 'V.G.';
+  if (score >= 50) return 'Good';
+  if (score >= 35) return 'Fair';
+  return 'Poor';
+}
+function sgRating(score) {
+  if (score >= 80) return { label: 'Excellent',  cls: 'sg-exc' };
+  if (score >= 65) return { label: 'Very Good',   cls: 'sg-vg' };
+  if (score >= 50) return { label: 'Good',        cls: 'sg-good' };
+  if (score >= 35) return { label: 'Fair',        cls: 'sg-fair' };
+  return              { label: 'Poor',        cls: 'sg-poor' };
+}
+
+function renderStargazing(hourly, daily) {
+  const el = document.getElementById('stargazing-content');
+  try {
+    // 1. Determine viewing window
+    const sunsetIso  = daily.sunset[0];
+    const sunriseIso = daily.sunrise[1] || daily.sunrise[0];
+    const sunsetMs   = new Date(sunsetIso).getTime();
+    const sunriseMs  = new Date(sunriseIso).getTime();
+    const windowStart = sunsetMs + 90 * 60 * 1000;
+    // Cap at 3 AM local
+    const cap3am = (() => {
+      const d = new Date(sunsetMs);
+      d.setHours(3, 0, 0, 0);
+      if (d.getTime() < sunsetMs) d.setDate(d.getDate() + 1);
+      return d.getTime();
+    })();
+    const windowEnd = Math.min(sunriseMs - 90 * 60 * 1000, cap3am);
+
+    // 2. Filter hourly times to window
+    const times = hourly.time;
+    const indices = times.reduce((acc, t, i) => {
+      const ms = new Date(t).getTime();
+      if (ms >= windowStart && ms <= windowEnd) acc.push(i);
+      return acc;
+    }, []);
+
+    if (indices.length === 0) {
+      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">No viewing window available tonight.</div>';
+      return;
+    }
+
+    // 3. Score each hour
+    const scored = indices.map(i => ({
+      time:  times[i],
+      score: hourStarScore(hourly.cloud_cover[i] ?? 50, hourly.wind_speed_10m[i] ?? 0),
+      humidity: hourly.relative_humidity_2m[i] ?? 0,
+      cloud: hourly.cloud_cover[i] ?? 50,
+      wind:  hourly.wind_speed_10m[i] ?? 0,
+    }));
+
+    // 4. Overall score = average of top 50% hours
+    const sorted = [...scored].sort((a, b) => b.score - a.score);
+    const topHalf = sorted.slice(0, Math.max(1, Math.ceil(sorted.length / 2)));
+    const overallScore = Math.round(topHalf.reduce((s, h) => s + h.score, 0) / topHalf.length);
+
+    // 5. Best contiguous 2-hr block
+    let bestWindow = null;
+    if (scored.length >= 2) {
+      let bestAvg = -1;
+      for (let i = 0; i < scored.length - 1; i++) {
+        const avg = (scored[i].score + scored[i + 1].score) / 2;
+        if (avg > bestAvg) { bestAvg = avg; bestWindow = i; }
+      }
+    } else {
+      bestWindow = 0;
+    }
+    const windowStartTime = bestWindow !== null
+      ? new Date(scored[bestWindow].time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE })
+      : null;
+    const windowEndIdx = bestWindow !== null ? Math.min(bestWindow + 1, scored.length - 1) : null;
+    const windowEndTime = windowEndIdx !== null
+      ? new Date(scored[windowEndIdx].time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE })
+      : null;
+
+    // 6. Moon
+    const tonight = new Date(sunsetMs);
+    const illum   = moonIllumination(tonight);
+    const sunsetLocalHour = tonight.getHours() + tonight.getMinutes() / 60;
+    const moonsetDecimal  = estimateMoonsetHour(tonight, sunsetLocalHour);
+    // Convert moonset decimal hour to a real Date tonight
+    const moonsetDate = new Date(tonight);
+    moonsetDate.setHours(0, 0, 0, 0);
+    moonsetDate.setTime(moonsetDate.getTime() + moonsetDecimal * 3600 * 1000);
+    // If moonset is earlier than window start, push to next day
+    if (moonsetDate.getTime() < windowStart - 6 * 3600 * 1000) {
+      moonsetDate.setDate(moonsetDate.getDate() + 1);
+    }
+    const moonsetInWindow = moonsetDate.getTime() >= windowStart && moonsetDate.getTime() <= windowEnd;
+    // Only show moonset note if before 2 AM
+    const moonsetHour24 = moonsetDate.getHours() + moonsetDate.getMinutes() / 60;
+    const showMoonset   = moonsetInWindow && moonsetHour24 < 2;
+    const moonsetStr    = moonsetDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE });
+
+    // 7. Factor averages
+    const avgCloud    = Math.round(scored.reduce((s, h) => s + h.cloud, 0) / scored.length);
+    const avgWind     = Math.round(scored.reduce((s, h) => s + h.wind, 0) / scored.length);
+    const avgHumidity = Math.round(scored.reduce((s, h) => s + h.humidity, 0) / scored.length);
+
+    function factorClass(val, low, high) {
+      return val < low ? 'sg-low' : val < high ? 'sg-mod' : 'sg-high';
+    }
+    function factorLabel(val, low, high, labels) {
+      return val < low ? labels[0] : val < high ? labels[1] : labels[2];
+    }
+
+    const cloudCls  = factorClass(avgCloud, 25, 60);
+    const cloudLbl  = factorLabel(avgCloud, 25, 60, ['Low', 'Moderate', 'High']);
+    const moonCls   = factorClass(illum, 25, 75);
+    const moonLbl   = factorLabel(illum, 25, 75, ['Low', 'Moderate', 'High']);
+    const humCls    = factorClass(avgHumidity, 50, 70);
+    const humLbl    = factorLabel(avgHumidity, 50, 70, ['Low', 'Moderate', 'High']);
+    const windCls   = factorClass(avgWind, 10, 20);
+    const windLbl   = factorLabel(avgWind, 10, 20, ['Low', 'Moderate', 'High']);
+
+    const rating = sgRating(overallScore);
+
+    // Build hourly row HTML
+    const hourlyHtml = scored.map(h => {
+      const t   = new Date(h.time).toLocaleTimeString('en-US', { hour: 'numeric', timeZone: TIMEZONE });
+      const cls = sgClass(h.score);
+      return `<div class="sg-hour">
+        <div class="sg-hour-time">${t}</div>
+        <div class="sg-hour-pip ${cls}"></div>
+        <div class="sg-hour-qual ${cls}">${sgLabel(h.score)}</div>
+      </div>`;
+    }).join('');
+
+    const bestWindowHtml = (windowStartTime && windowEndTime)
+      ? `<div class="current-desc" style="margin-top:0.25rem;margin-bottom:1rem;">Best window: ${windowStartTime}–${windowEndTime}</div>`
+      : '';
+
+    const moonsetHtml = showMoonset
+      ? `<div class="stargazing-moonset">Darkest skies after moonset at ${moonsetStr}</div>`
+      : '';
+
+    el.innerHTML = `
+      <div class="stargazing-score">
+        <div class="stargazing-score-num">${overallScore}</div>
+        <div class="stargazing-score-sep">/</div>
+        <div class="stargazing-score-denom">100</div>
+      </div>
+      ${bestWindowHtml}
+      <div class="stargazing-factors">
+        <div class="stargazing-factor">
+          <div class="stargazing-factor-name">Clouds</div>
+          <div class="stargazing-factor-val">${avgCloud}%<span class="stargazing-factor-sub">${cloudLbl}</span></div>
+        </div>
+        <div class="stargazing-factor">
+          <div class="stargazing-factor-name">Moon</div>
+          <div class="stargazing-factor-val">${illum}%<span class="stargazing-factor-sub">${moonLbl}</span></div>
+        </div>
+        <div class="stargazing-factor">
+          <div class="stargazing-factor-name">Humidity</div>
+          <div class="stargazing-factor-val">${avgHumidity}%<span class="stargazing-factor-sub">${humLbl}</span></div>
+        </div>
+        <div class="stargazing-factor">
+          <div class="stargazing-factor-name">Wind</div>
+          <div class="stargazing-factor-val">${avgWind} mph<span class="stargazing-factor-sub">${windLbl}</span></div>
+        </div>
+      </div>
+      <div class="stargazing-hourly-label">Hourly viewing quality</div>
+      <div class="stargazing-hourly">${hourlyHtml}</div>
+      ${moonsetHtml}`;
+
+    // Apply score color via inline style since CSS var would need JS anyway
+  } catch (e) {
+    el.innerHTML = `<div style="color:#64748b;font-size:0.85rem;">Stargazing data unavailable.</div>`;
+    console.warn('renderStargazing error', e);
+  }
+}
+
 // ── Render: Scooter / Bike ────────────────────────────────────────
 function renderScooterDay(daily, aqi = null) {
   const el = document.getElementById('scooter-content');
@@ -1464,6 +1754,224 @@ function updateDate() {
   });
 }
 
+// ── Weekly Extremes ───────────────────────────────────────────────
+const EXTREMES_CITIES = [
+  // Hot candidates
+  { name: 'Furnace Creek, CA',   lat:  36.4629, lon: -116.8679 },
+  { name: 'Phoenix, AZ',         lat:  33.4484, lon: -112.0740 },
+  { name: 'Kuwait City',         lat:  29.3759, lon:   47.9774 },
+  { name: 'Ahvaz, Iran',         lat:  31.3203, lon:   48.6693 },
+  { name: 'Jacobabad, Pakistan', lat:  28.2769, lon:   68.4515 },
+  { name: 'Basra, Iraq',         lat:  30.5082, lon:   47.7832 },
+  { name: 'Riyadh, Saudi Arabia',lat:  24.6877, lon:   46.7219 },
+  { name: 'Dubai, UAE',          lat:  25.2048, lon:   55.2708 },
+  { name: 'Las Vegas, NV',       lat:  36.1699, lon: -115.1398 },
+  { name: 'Yuma, AZ',            lat:  32.6927, lon: -114.6277 },
+  { name: 'Mexicali, Mexico',    lat:  32.6245, lon: -115.4523 },
+  { name: 'Timbuktu, Mali',      lat:  16.7735, lon:   -3.0074 },
+  { name: 'Wadi Halfa, Sudan',   lat:  21.8064, lon:   31.3525 },
+  { name: 'Marble Bar, Australia',lat:-21.1741, lon:  119.7393 },
+  { name: 'Oodnadatta, Australia',lat:-27.5547, lon:  135.4429 },
+  // Cold candidates
+  { name: 'Utqiagvik, AK',       lat:  71.2906, lon: -156.7887 },
+  { name: 'Yakutsk, Russia',      lat:  62.0397, lon:  129.7422 },
+  { name: "Int'l Falls, MN",      lat:  48.6011, lon:  -93.4069 },
+  { name: 'Fairbanks, AK',        lat:  64.8401, lon: -147.7200 },
+  { name: 'Oymyakon, Russia',     lat:  63.4608, lon:  142.7872 },
+  { name: 'Verkhoyansk, Russia',  lat:  67.5500, lon:  133.3833 },
+  { name: 'Yellowknife, Canada',  lat:  62.4540, lon: -114.3718 },
+  { name: 'Resolute, Canada',     lat:  74.6973, lon:  -94.8297 },
+  { name: 'Churchill, Canada',    lat:  58.7684, lon:  -94.1650 },
+  { name: 'Norilsk, Russia',      lat:  69.3558, lon:   88.1893 },
+  { name: 'Ulaanbaatar, Mongolia',lat:  47.9077, lon:  106.8832 },
+  { name: 'Longyearbyen, Norway', lat:  78.2232, lon:   15.6267 },
+  { name: 'Fargo, ND',            lat:  46.8772, lon:  -96.7898 },
+  { name: 'Bismarck, ND',         lat:  46.8083, lon: -100.7837 },
+  { name: 'Nuuk, Greenland',      lat:  64.1835, lon:  -51.7216 },
+  // Wet candidates
+  { name: 'Cherrapunji, India',   lat:  25.2849, lon:   91.7227 },
+  { name: 'Mawsynram, India',     lat:  25.2968, lon:   91.5826 },
+  { name: 'Hilo, HI',             lat:  19.7297, lon: -155.0900 },
+  { name: 'Lihue, HI',            lat:  21.9811, lon: -159.3711 },
+  { name: 'Bergen, Norway',       lat:  60.3913, lon:    5.3221 },
+  { name: 'Miami, FL',            lat:  25.7617, lon:  -80.1918 },
+  { name: 'New Orleans, LA',      lat:  29.9511, lon:  -90.0715 },
+  { name: 'Seattle, WA',          lat:  47.6062, lon: -122.3321 },
+  { name: 'Portland, OR',         lat:  45.5051, lon: -122.6750 },
+  { name: 'Ketchikan, AK',        lat:  55.3422, lon: -131.6461 },
+  { name: 'Juneau, AK',           lat:  58.3005, lon: -134.4197 },
+  { name: 'Quibdó, Colombia',     lat:   5.6947, lon:  -76.6611 },
+  { name: 'Manaus, Brazil',       lat:  -3.1190, lon:  -60.0217 },
+  { name: 'Belem, Brazil',        lat:  -1.4558, lon:  -48.5044 },
+  { name: 'Singapore',            lat:   1.3521, lon:  103.8198 },
+  { name: 'Kuala Lumpur',         lat:   3.1390, lon:  101.6869 },
+  { name: 'Lagos, Nigeria',       lat:   6.5244, lon:    3.3792 },
+  { name: 'Colombo, Sri Lanka',   lat:   6.9271, lon:   79.8612 },
+  // Snow candidates
+  { name: 'Buffalo, NY',          lat:  42.8864, lon:  -78.8784 },
+  { name: 'Syracuse, NY',         lat:  43.0481, lon:  -76.1474 },
+  { name: 'Sapporo, Japan',       lat:  43.0618, lon:  141.3545 },
+  { name: 'Aomori, Japan',        lat:  40.8244, lon:  140.7400 },
+  { name: 'Nagaoka, Japan',       lat:  37.4469, lon:  138.8509 },
+  { name: 'Valdez, AK',           lat:  61.1308, lon: -146.3483 },
+  { name: 'Anchorage, AK',        lat:  61.2181, lon: -149.9003 },
+  { name: 'Minneapolis, MN',      lat:  44.9778, lon:  -93.2650 },
+  { name: 'Denver, CO',           lat:  39.7392, lon: -104.9903 },
+  { name: 'Flagstaff, AZ',        lat:  35.1983, lon: -111.6513 },
+  { name: 'Salt Lake City, UT',   lat:  40.7608, lon: -111.8910 },
+  { name: 'Quebec City, Canada',  lat:  46.8139, lon:  -71.2080 },
+  { name: 'Thunder Bay, Canada',  lat:  48.3809, lon:  -89.2477 },
+  { name: 'Marquette, MI',        lat:  46.5436, lon:  -87.3954 },
+  { name: 'Rochester, NY',        lat:  43.1566, lon:  -77.6088 },
+  { name: 'Erie, PA',             lat:  42.1292, lon:  -80.0851 },
+  { name: 'Binghamton, NY',       lat:  42.0987, lon:  -75.9180 },
+  // Global variety
+  { name: 'Reykjavik, Iceland',   lat:  64.1355, lon:  -21.8954 },
+  { name: 'Tromsø, Norway',       lat:  69.6489, lon:   18.9551 },
+  { name: 'Moscow, Russia',       lat:  55.7558, lon:   37.6173 },
+  { name: 'London, UK',           lat:  51.5074, lon:   -0.1278 },
+  { name: 'Paris, France',        lat:  48.8566, lon:    2.3522 },
+  { name: 'Madrid, Spain',        lat:  40.4168, lon:   -3.7038 },
+  { name: 'Rome, Italy',          lat:  41.9028, lon:   12.4964 },
+  { name: 'Athens, Greece',       lat:  37.9838, lon:   23.7275 },
+  { name: 'Istanbul, Turkey',     lat:  41.0082, lon:   28.9784 },
+  { name: 'Cairo, Egypt',         lat:  30.0444, lon:   31.2357 },
+  { name: 'Tehran, Iran',         lat:  35.6892, lon:   51.3890 },
+  { name: 'Karachi, Pakistan',    lat:  24.8607, lon:   67.0011 },
+  { name: 'Mumbai, India',        lat:  19.0760, lon:   72.8777 },
+  { name: 'Dhaka, Bangladesh',    lat:  23.8103, lon:   90.4125 },
+  { name: 'Bangkok, Thailand',    lat:  13.7563, lon:  100.5018 },
+  { name: 'Tokyo, Japan',         lat:  35.6762, lon:  139.6503 },
+  { name: 'Seoul, South Korea',   lat:  37.5665, lon:  126.9780 },
+  { name: 'Beijing, China',       lat:  39.9042, lon:  116.4074 },
+  { name: 'Taipei, Taiwan',       lat:  25.0330, lon:  121.5654 },
+  { name: 'Chicago, IL',          lat:  41.8781, lon:  -87.6298 },
+  { name: 'New York, NY',         lat:  40.7128, lon:  -74.0060 },
+  { name: 'Toronto, Canada',      lat:  43.6532, lon:  -79.3832 },
+  { name: 'Vancouver, Canada',    lat:  49.2827, lon: -123.1207 },
+  { name: 'Mexico City',          lat:  19.4326, lon:  -99.1332 },
+  { name: 'Bogotá, Colombia',     lat:   4.7110, lon:  -74.0721 },
+  { name: 'Buenos Aires',         lat: -34.6037, lon:  -58.3816 },
+  { name: 'Ushuaia, Argentina',   lat: -54.8019, lon:  -68.3030 },
+  { name: 'Punta Arenas, Chile',  lat: -53.1638, lon:  -70.9171 },
+  { name: 'São Paulo, Brazil',    lat: -23.5505, lon:  -46.6333 },
+  { name: 'Nairobi, Kenya',       lat:  -1.2921, lon:   36.8219 },
+  { name: 'Johannesburg',         lat: -26.2041, lon:   28.0473 },
+  { name: 'Cape Town',            lat: -33.9249, lon:   18.4241 },
+  { name: 'Casablanca, Morocco',  lat:  33.5731, lon:   -7.5898 },
+  { name: 'Sydney, Australia',    lat: -33.8688, lon:  151.2093 },
+  { name: 'Auckland, NZ',         lat: -36.8509, lon:  174.7645 },
+];
+
+function getPrevWeekRange() {
+  const today = new Date();
+  const day = today.getDay(); // 0=Sun
+  const lastSat = new Date(today);
+  lastSat.setDate(today.getDate() - (day === 6 ? 0 : day + 1));
+  const lastSun = new Date(lastSat);
+  lastSun.setDate(lastSat.getDate() - 6);
+  const fmt = d => d.toISOString().slice(0, 10);
+  return { start: fmt(lastSun), end: fmt(lastSat) };
+}
+
+function getNextMondayExpiry() {
+  const now = new Date();
+  const daysUntil = (1 - now.getDay() + 7) % 7 || 7;
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntil);
+  next.setHours(0, 1, 0, 0);
+  return next.getTime();
+}
+
+async function fetchExtremes() {
+  const CACHE_KEY = 'wx_extremes';
+  const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+  if (cached && cached.expires > Date.now() && cached.weekStart === getPrevWeekRange().start) {
+    return cached.data;
+  }
+
+  const { start, end } = getPrevWeekRange();
+  const baseUrl = 'https://archive-api.open-meteo.com/v1/archive';
+  const params = `&start_date=${start}&end_date=${end}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=UTC`;
+
+  const results = await Promise.allSettled(
+    EXTREMES_CITIES.map(city =>
+      safeFetch(`${baseUrl}?latitude=${city.lat}&longitude=${city.lon}${params}`)
+        .then(d => ({ city, daily: d.daily }))
+    )
+  );
+
+  const cities = results
+    .filter(r => r.status === 'fulfilled')
+    .map(r => r.value);
+
+  let hottest = null, coldest = null, wettest = null, snowiest = null;
+  for (const { city, daily } of cities) {
+    const maxTemp = Math.max(...daily.temperature_2m_max.filter(v => v != null));
+    const minTemp = Math.min(...daily.temperature_2m_min.filter(v => v != null));
+    const totalRain = daily.precipitation_sum.filter(v => v != null).reduce((a, b) => a + b, 0);
+    const totalSnow = (daily.snowfall_sum || []).filter(v => v != null).reduce((a, b) => a + b, 0);
+    const totalSnowIn = totalSnow * 0.393701;
+
+    const hotDate = daily.time[daily.temperature_2m_max.indexOf(Math.max(...daily.temperature_2m_max))];
+    const coldDate = daily.time[daily.temperature_2m_min.indexOf(Math.min(...daily.temperature_2m_min))];
+
+    if (!hottest  || maxTemp     > hottest.value)  hottest  = { city: city.name, value: maxTemp,     date: hotDate };
+    if (!coldest  || minTemp     < coldest.value)  coldest  = { city: city.name, value: minTemp,     date: coldDate };
+    if (!wettest  || totalRain   > wettest.value)  wettest  = { city: city.name, value: totalRain };
+    if (!snowiest || totalSnowIn > snowiest.value) snowiest = { city: city.name, value: totalSnowIn };
+  }
+
+  const data = { hottest, coldest, wettest, snowiest, weekStart: start, weekEnd: end };
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, weekStart: start, expires: getNextMondayExpiry() }));
+  return data;
+}
+
+async function renderExtremes() {
+  const el = document.getElementById('extremes-content');
+  try {
+    const d = await fetchExtremes();
+    const { hottest, coldest, wettest, snowiest, weekStart, weekEnd } = d;
+    if (!hottest) { el.innerHTML = '<div style="color:#64748b">No data available.</div>'; return; }
+
+    const fmtDate = iso => new Date(iso + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const weekLabel = `${fmtDate(weekStart)} – ${fmtDate(weekEnd)}`;
+
+    el.innerHTML = `
+      <div class="extremes-week-label">${weekLabel}</div>
+      <div class="extremes-grid">
+        <div class="extreme-item">
+          <div class="extreme-header"><i data-lucide="flame" class="lucide-sm"></i> Hottest</div>
+          <div class="extreme-value">${Math.round(hottest.value)}°F</div>
+          <div class="extreme-city">${hottest.city}</div>
+          <div class="extreme-date">${fmtDate(hottest.date)}</div>
+        </div>
+        <div class="extreme-item">
+          <div class="extreme-header"><i data-lucide="thermometer-snowflake" class="lucide-sm"></i> Coldest</div>
+          <div class="extreme-value">${Math.round(coldest.value)}°F</div>
+          <div class="extreme-city">${coldest.city}</div>
+          <div class="extreme-date">${fmtDate(coldest.date)}</div>
+        </div>
+        <div class="extreme-item">
+          <div class="extreme-header"><i data-lucide="droplets" class="lucide-sm"></i> Wettest</div>
+          <div class="extreme-value">${wettest.value.toFixed(2)}"</div>
+          <div class="extreme-city">${wettest.city}</div>
+          <div class="extreme-date">week total</div>
+        </div>
+        <div class="extreme-item">
+          <div class="extreme-header"><i data-lucide="snowflake" class="lucide-sm"></i> Snowiest</div>
+          <div class="extreme-value">${snowiest.value.toFixed(1)}"</div>
+          <div class="extreme-city">${snowiest.city}</div>
+          <div class="extreme-date">week total</div>
+        </div>
+      </div>`;
+    lucide.createIcons({ nodes: [el] });
+  } catch (e) {
+    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Extremes data unavailable.</div>';
+    console.warn('renderExtremes error', e);
+  }
+}
+
 // ── Main data fetch & render ──────────────────────────────────────
 async function loadDashboard() {
   updateDate();
@@ -1471,7 +1979,7 @@ async function loadDashboard() {
   // Fetch all data sources concurrently
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
     + `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,uv_index,visibility`
-    + `&hourly=temperature_2m,precipitation_probability,weather_code`
+    + `&hourly=temperature_2m,precipitation_probability,weather_code,cloud_cover,wind_speed_10m,relative_humidity_2m`
     + `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max`
     + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
     + `&timezone=${TIMEZONE}&forecast_days=7&forecast_hours=36`;
@@ -1496,6 +2004,7 @@ async function loadDashboard() {
     const currentAqi = aqiResult.status === 'fulfilled' ? aqiResult.value?.current?.us_aqi : null;
     if (currentAqi != null) localStorage.setItem('wx_aqi', currentAqi);
     renderScooterDay(d.daily, currentAqi);
+    renderStargazing(d.hourly, d.daily);
   } else {
     document.getElementById('current-content').innerHTML = '<div class="error-msg">⚠️ Unable to load weather data. Will retry in 15 minutes.</div>';
     document.getElementById('daily-content').innerHTML = '<div class="error-msg">⚠️ Forecast unavailable</div>';
@@ -1517,6 +2026,9 @@ async function loadDashboard() {
 
   // NWS written forecast (US only, fire and forget)
   fetchNWSForecast().then(renderNWSToday);
+
+  // Weekly extremes (global data, cached until Monday, fire and forget)
+  renderExtremes();
 
   // Radar map — set once; only update src if city changed
   const radarIframe = document.getElementById('radar-iframe');
