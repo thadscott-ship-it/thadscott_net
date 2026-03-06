@@ -497,6 +497,12 @@
     .sg-hour-pip.sg-poor { background: #1e3a5f; }
     .stargazing-moonset { font-size: 0.82rem; color: #94a3b8; margin-top: 0.75rem; }
 
+    /* ── Coat Recommendation ─────────────────────────────────────── */
+    .coat-garment { font-size: 1.75rem; font-weight: 700; line-height: 1.1; margin-bottom: 0.35rem; color: #f1f5f9; }
+    .coat-detail  { font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem; }
+    .coat-notes   { display: flex; flex-direction: column; gap: 0.4rem; }
+    .coat-note    { font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.35rem; }
+
     /* ── Weekly Extremes ────────────────────────────────────────── */
     .extremes-week-label { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
     .extremes-grid {
@@ -532,6 +538,21 @@
       font-size: 0.85rem;
       padding: 1rem;
     }
+
+    /* ── Weather Twin ───────────────────────────────────────────── */
+    .twin-match-pct   { font-size: 0.8rem; font-weight: 600; color: #60a5fa; text-transform: uppercase;
+                        letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+    .twin-city-name   { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1.1;
+                        margin-bottom: 0.35rem; }
+    .twin-distance    { font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;
+                        display: flex; align-items: center; gap: 0.25rem; }
+    .twin-factors     { display: flex; flex-direction: column; gap: 0.4rem; }
+    .twin-factor      { display: flex; justify-content: space-between; align-items: baseline;
+                        font-size: 0.85rem; padding: 0.15rem 0; border-bottom: 1px solid #334155; }
+    .twin-factor:last-child { border-bottom: none; }
+    .twin-factor-label { color: #94a3b8; }
+    .twin-factor-vals  { color: #e2e8f0; font-weight: 500; }
+    .twin-sep          { color: #64748b; font-weight: 400; }
 
     /* ── Footer ────────────────────────────────────────────────── */
     .footer {
@@ -837,12 +858,24 @@
       </div>
 
       <!-- Beta section break -->
-      <div style="grid-column: 1 / -1; text-align: center; color: #475569; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0 0;">Beta Features</div>
+      <div style="grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0 0;">Beta Features</div>
 
       <!-- Scooter / Bike -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
         <h2>Good Day for Scooter? <i data-lucide="scooter" class="lucide-sm" style="margin-left:0.25rem;"></i></h2>
         <div id="scooter-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Weather Twin -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Weather Twin</h2>
+        <div id="twin-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Weekly Extremes -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Last Week's Extremes</h2>
+        <div id="extremes-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
       <!-- Stargazing Tonight -->
@@ -851,10 +884,10 @@
         <div id="stargazing-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
-      <!-- Weekly Extremes -->
+      <!-- Should I Wear a Coat? -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>Last Week's Extremes</h2>
-        <div id="extremes-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+        <h2>Should I Wear a Coat?</h2>
+        <div id="coat-content"></div>
       </div>
     </div>
 
@@ -1015,7 +1048,7 @@ document.getElementById('city-input').addEventListener('input', e => {
         renderDropdown([{
           name: place['place name'],
           admin1: place.state,
-          country: 'United States',
+          country: 'USA',
           latitude: parseFloat(place.latitude),
           longitude: parseFloat(place.longitude),
         }]);
@@ -1037,7 +1070,7 @@ document.getElementById('city-input').addEventListener('input', e => {
           const results = (data || []).map(r => ({
             name: r.address?.city || r.address?.town || r.address?.village || r.address?.hamlet || city,
             admin1: r.address?.state || stateName,
-            country: 'United States',
+            country: 'USA',
             latitude: parseFloat(r.lat),
             longitude: parseFloat(r.lon)
           }));
@@ -1769,6 +1802,54 @@ function renderScooterDay(daily, aqi = null) {
   lucide.createIcons({ nodes: [el] });
 }
 
+// ── Render: Coat Recommendation ───────────────────────────────────
+function renderCoat(current, daily) {
+  const el = document.getElementById('coat-content');
+  try {
+    const feels = current.apparent_temperature;
+    const hi    = Math.round(daily.temperature_2m_max[0]);
+    const lo    = Math.round(daily.temperature_2m_min[0]);
+    const wind  = Math.round(daily.wind_speed_10m_max[0]);
+    const rain  = daily.precipitation_probability_max[0];
+    const code  = current.weather_code;
+    const cat   = wmoCategory(code);
+
+    let garment;
+    if      (feels >= 75) { garment = 'No jacket needed';                      }
+    else if (feels >= 65) { garment = 'A light layer is optional';             }
+    else if (feels >= 55) { garment = 'A light sweater or hoodie';             }
+    else if (feels >= 45) { garment = 'A fleece or light jacket';              }
+    else if (feels >= 35) { garment = 'A warm jacket';                         }
+    else if (feels >= 20) { garment = 'A heavy winter coat';                   }
+    else                  { garment = 'Full winter gear — hat and gloves too'; }
+
+    const notes = [];
+    if (cat === 'rain' || cat === 'drizzle' || rain >= 40) {
+      notes.push(`<div class="coat-note"><i data-lucide="umbrella" class="lucide-sm"></i>Bring a rain jacket or umbrella — ${rain}% chance of rain</div>`);
+    }
+    if (cat === 'snow') {
+      notes.push(`<div class="coat-note"><i data-lucide="snowflake" class="lucide-sm"></i>Waterproof layers — snow expected</div>`);
+    }
+    if (wind >= 20) {
+      notes.push(`<div class="coat-note"><i data-lucide="wind" class="lucide-sm"></i>Wind-resistant layer — ${wind} mph gusts</div>`);
+    }
+
+    const notesHtml = notes.length
+      ? `<div class="coat-notes">${notes.join('')}</div>`
+      : '';
+
+    el.innerHTML = `
+      <div class="coat-garment">${garment}</div>
+      <div class="coat-detail">Feels like ${Math.round(feels)}°F · High ${hi}° · Low ${lo}°</div>
+      ${notesHtml}`;
+
+    lucide.createIcons({ nodes: [el] });
+  } catch (e) {
+    el.innerHTML = `<div style="color:#64748b;font-size:0.85rem;">Coat recommendation unavailable.</div>`;
+    console.warn('renderCoat error', e);
+  }
+}
+
 // ── Render: NWS Alerts ────────────────────────────────────────────
 function renderAlerts(data) {
   const container = document.getElementById('alerts-container');
@@ -1915,6 +1996,209 @@ const EXTREMES_CITIES = [
   { name: 'Auckland, NZ',         lat: -36.8509, lon:  174.7645 },
 ];
 
+// ── Weather Twin ──────────────────────────────────────────────────
+const TWIN_CITIES = [
+  // North America — US
+  { name: 'New York',          country: 'USA',   lat:  40.7128, lon:  -74.0060 },
+  { name: 'Los Angeles',       country: 'USA',   lat:  34.0522, lon: -118.2437 },
+  { name: 'Chicago',           country: 'USA',   lat:  41.8781, lon:  -87.6298 },
+  { name: 'Houston',           country: 'USA',   lat:  29.7604, lon:  -95.3698 },
+  { name: 'Philadelphia',      country: 'USA',   lat:  39.9526, lon:  -75.1652 },
+  { name: 'San Antonio',       country: 'USA',   lat:  29.4241, lon:  -98.4936 },
+  { name: 'San Diego',         country: 'USA',   lat:  32.7157, lon: -117.1611 },
+  { name: 'Dallas',            country: 'USA',   lat:  32.7767, lon:  -96.7970 },
+  { name: 'San Jose',          country: 'USA',   lat:  37.3382, lon: -121.8863 },
+  { name: 'Austin',            country: 'USA',   lat:  30.2672, lon:  -97.7431 },
+  { name: 'Jacksonville',      country: 'USA',   lat:  30.3322, lon:  -81.6557 },
+  { name: 'Columbus',          country: 'USA',   lat:  39.9612, lon:  -82.9988 },
+  { name: 'Charlotte',         country: 'USA',   lat:  35.2271, lon:  -80.8431 },
+  { name: 'Indianapolis',      country: 'USA',   lat:  39.7684, lon:  -86.1581 },
+  { name: 'San Francisco',     country: 'USA',   lat:  37.7749, lon: -122.4194 },
+  { name: 'Seattle',           country: 'USA',   lat:  47.6062, lon: -122.3321 },
+  { name: 'Nashville',         country: 'USA',   lat:  36.1627, lon:  -86.7816 },
+  { name: 'Oklahoma City',     country: 'USA',   lat:  35.4676, lon:  -97.5164 },
+  { name: 'El Paso',           country: 'USA',   lat:  31.7619, lon: -106.4850 },
+  { name: 'Boston',            country: 'USA',   lat:  42.3601, lon:  -71.0589 },
+  { name: 'Memphis',           country: 'USA',   lat:  35.1495, lon:  -90.0490 },
+  { name: 'Louisville',        country: 'USA',   lat:  38.2527, lon:  -85.7585 },
+  { name: 'Baltimore',         country: 'USA',   lat:  39.2904, lon:  -76.6122 },
+  { name: 'Milwaukee',         country: 'USA',   lat:  43.0389, lon:  -87.9065 },
+  { name: 'Albuquerque',       country: 'USA',   lat:  35.0844, lon: -106.6504 },
+  { name: 'Tucson',            country: 'USA',   lat:  32.2226, lon: -110.9747 },
+  { name: 'Fresno',            country: 'USA',   lat:  36.7378, lon: -119.7871 },
+  { name: 'Atlanta',           country: 'USA',   lat:  33.7490, lon:  -84.3880 },
+  { name: 'Omaha',             country: 'USA',   lat:  41.2565, lon:  -95.9345 },
+  { name: 'Raleigh',           country: 'USA',   lat:  35.7796, lon:  -78.6382 },
+  { name: 'Miami',             country: 'USA',   lat:  25.7617, lon:  -80.1918 },
+  { name: 'Cleveland',         country: 'USA',   lat:  41.4993, lon:  -81.6944 },
+  { name: 'Tulsa',             country: 'USA',   lat:  36.1540, lon:  -95.9928 },
+  { name: 'Minneapolis',       country: 'USA',   lat:  44.9778, lon:  -93.2650 },
+  { name: 'Honolulu',          country: 'USA',   lat:  21.3069, lon: -157.8583 },
+  { name: 'Anchorage',         country: 'USA',   lat:  61.2181, lon: -149.9003 },
+  // Canada
+  { name: 'Toronto',           country: 'Canada',          lat:  43.6532, lon:  -79.3832 },
+  { name: 'Vancouver',         country: 'Canada',          lat:  49.2827, lon: -123.1207 },
+  { name: 'Montreal',          country: 'Canada',          lat:  45.5017, lon:  -73.5673 },
+  { name: 'Calgary',           country: 'Canada',          lat:  51.0447, lon: -114.0719 },
+  { name: 'Ottawa',            country: 'Canada',          lat:  45.4215, lon:  -75.6972 },
+  { name: 'Edmonton',          country: 'Canada',          lat:  53.5461, lon: -113.4938 },
+  { name: 'Winnipeg',          country: 'Canada',          lat:  49.8951, lon:  -97.1384 },
+  { name: 'Halifax',           country: 'Canada',          lat:  44.6488, lon:  -63.5752 },
+  // Mexico & Central America
+  { name: 'Mexico City',       country: 'Mexico',          lat:  19.4326, lon:  -99.1332 },
+  { name: 'Guadalajara',       country: 'Mexico',          lat:  20.6597, lon: -103.3496 },
+  { name: 'Monterrey',         country: 'Mexico',          lat:  25.6866, lon: -100.3161 },
+  { name: 'Havana',            country: 'Cuba',            lat:  23.1136, lon:  -82.3666 },
+  { name: 'San José',          country: 'Costa Rica',      lat:   9.9281, lon:  -84.0907 },
+  // South America
+  { name: 'Buenos Aires',      country: 'Argentina',       lat: -34.6037, lon:  -58.3816 },
+  { name: 'Santiago',          country: 'Chile',           lat: -33.4489, lon:  -70.6693 },
+  { name: 'Lima',              country: 'Peru',            lat: -12.0464, lon:  -77.0428 },
+  { name: 'Bogotá',            country: 'Colombia',        lat:   4.7110, lon:  -74.0721 },
+  { name: 'São Paulo',         country: 'Brazil',          lat: -23.5505, lon:  -46.6333 },
+  { name: 'Rio de Janeiro',    country: 'Brazil',          lat: -22.9068, lon:  -43.1729 },
+  { name: 'Brasília',          country: 'Brazil',          lat: -15.7801, lon:  -47.9292 },
+  { name: 'Quito',             country: 'Ecuador',         lat:  -0.1807, lon:  -78.4678 },
+  { name: 'Caracas',           country: 'Venezuela',       lat:  10.4806, lon:  -66.9036 },
+  { name: 'Montevideo',        country: 'Uruguay',         lat: -34.9011, lon:  -56.1645 },
+  { name: 'Recife',            country: 'Brazil',          lat:  -8.0476, lon:  -34.8770 },
+  { name: 'Porto Alegre',      country: 'Brazil',          lat: -30.0346, lon:  -51.2177 },
+  { name: 'Medellín',          country: 'Colombia',        lat:   6.2442, lon:  -75.5812 },
+  // Europe
+  { name: 'London',            country: 'UK',  lat:  51.5074, lon:   -0.1278 },
+  { name: 'Paris',             country: 'France',          lat:  48.8566, lon:    2.3522 },
+  { name: 'Berlin',            country: 'Germany',         lat:  52.5200, lon:   13.4050 },
+  { name: 'Madrid',            country: 'Spain',           lat:  40.4168, lon:   -3.7038 },
+  { name: 'Rome',              country: 'Italy',           lat:  41.9028, lon:   12.4964 },
+  { name: 'Amsterdam',         country: 'Netherlands',     lat:  52.3676, lon:    4.9041 },
+  { name: 'Brussels',          country: 'Belgium',         lat:  50.8503, lon:    4.3517 },
+  { name: 'Vienna',            country: 'Austria',         lat:  48.2082, lon:   16.3738 },
+  { name: 'Warsaw',            country: 'Poland',          lat:  52.2297, lon:   21.0122 },
+  { name: 'Budapest',          country: 'Hungary',         lat:  47.4979, lon:   19.0402 },
+  { name: 'Prague',            country: 'Czech Republic',  lat:  50.0755, lon:   14.4378 },
+  { name: 'Stockholm',         country: 'Sweden',          lat:  59.3293, lon:   18.0686 },
+  { name: 'Oslo',              country: 'Norway',          lat:  59.9139, lon:   10.7522 },
+  { name: 'Helsinki',          country: 'Finland',         lat:  60.1699, lon:   24.9384 },
+  { name: 'Copenhagen',        country: 'Denmark',         lat:  55.6761, lon:   12.5683 },
+  { name: 'Lisbon',            country: 'Portugal',        lat:  38.7169, lon:   -9.1399 },
+  { name: 'Porto',             country: 'Portugal',        lat:  41.1579, lon:   -8.6291 },
+  { name: 'Barcelona',         country: 'Spain',           lat:  41.3851, lon:    2.1734 },
+  { name: 'Seville',           country: 'Spain',           lat:  37.3891, lon:   -5.9845 },
+  { name: 'Zurich',            country: 'Switzerland',     lat:  47.3769, lon:    8.5417 },
+  { name: 'Milan',             country: 'Italy',           lat:  45.4654, lon:    9.1866 },
+  { name: 'Athens',            country: 'Greece',          lat:  37.9838, lon:   23.7275 },
+  { name: 'Istanbul',          country: 'Turkey',          lat:  41.0082, lon:   28.9784 },
+  { name: 'Bucharest',         country: 'Romania',         lat:  44.4268, lon:   26.1025 },
+  { name: 'Sofia',             country: 'Bulgaria',        lat:  42.6977, lon:   23.3219 },
+  { name: 'Belgrade',          country: 'Serbia',          lat:  44.7866, lon:   20.4489 },
+  { name: 'Kyiv',              country: 'Ukraine',         lat:  50.4501, lon:   30.5234 },
+  { name: 'Minsk',             country: 'Belarus',         lat:  53.9045, lon:   27.5615 },
+  { name: 'Moscow',            country: 'Russia',          lat:  55.7558, lon:   37.6173 },
+  { name: 'St. Petersburg',    country: 'Russia',          lat:  59.9311, lon:   30.3609 },
+  { name: 'Dublin',            country: 'Ireland',         lat:  53.3498, lon:   -6.2603 },
+  { name: 'Edinburgh',         country: 'UK',  lat:  55.9533, lon:   -3.1883 },
+  { name: 'Manchester',        country: 'UK',  lat:  53.4808, lon:   -2.2426 },
+  { name: 'Reykjavik',         country: 'Iceland',         lat:  64.1355, lon:  -21.8954 },
+  { name: 'Riga',              country: 'Latvia',          lat:  56.9496, lon:   24.1052 },
+  { name: 'Tallinn',           country: 'Estonia',         lat:  59.4370, lon:   24.7536 },
+  { name: 'Vilnius',           country: 'Lithuania',       lat:  54.6872, lon:   25.2797 },
+  { name: 'Sarajevo',          country: 'Bosnia',          lat:  43.8563, lon:   18.4131 },
+  { name: 'Zagreb',            country: 'Croatia',         lat:  45.8150, lon:   15.9819 },
+  { name: 'Tirana',            country: 'Albania',         lat:  41.3275, lon:   19.8187 },
+  { name: 'Valletta',          country: 'Malta',           lat:  35.9042, lon:   14.5189 },
+  { name: 'Nicosia',           country: 'Cyprus',          lat:  35.1856, lon:   33.3823 },
+  // Middle East & Central Asia
+  { name: 'Tel Aviv',          country: 'Israel',          lat:  32.0853, lon:   34.7818 },
+  { name: 'Amman',             country: 'Jordan',          lat:  31.9454, lon:   35.9284 },
+  { name: 'Beirut',            country: 'Lebanon',         lat:  33.8938, lon:   35.5018 },
+  { name: 'Baghdad',           country: 'Iraq',            lat:  33.3152, lon:   44.3661 },
+  { name: 'Muscat',            country: 'Oman',            lat:  23.5880, lon:   58.3829 },
+  { name: 'Doha',              country: 'Qatar',           lat:  25.2854, lon:   51.5310 },
+  { name: 'Baku',              country: 'Azerbaijan',      lat:  40.4093, lon:   49.8671 },
+  { name: 'Tbilisi',           country: 'Georgia',         lat:  41.6941, lon:   44.8337 },
+  { name: 'Yerevan',           country: 'Armenia',         lat:  40.1792, lon:   44.4991 },
+  { name: 'Tashkent',          country: 'Uzbekistan',      lat:  41.2995, lon:   69.2401 },
+  { name: 'Almaty',            country: 'Kazakhstan',      lat:  43.2220, lon:   76.8512 },
+  { name: 'Kabul',             country: 'Afghanistan',     lat:  34.5553, lon:   69.2075 },
+  { name: 'Tehran',            country: 'Iran',            lat:  35.6892, lon:   51.3890 },
+  // South & Southeast Asia
+  { name: 'Delhi',             country: 'India',           lat:  28.6139, lon:   77.2090 },
+  { name: 'Mumbai',            country: 'India',           lat:  19.0760, lon:   72.8777 },
+  { name: 'Kolkata',           country: 'India',           lat:  22.5726, lon:   88.3639 },
+  { name: 'Chennai',           country: 'India',           lat:  13.0827, lon:   80.2707 },
+  { name: 'Hyderabad',         country: 'India',           lat:  17.3850, lon:   78.4867 },
+  { name: 'Pune',              country: 'India',           lat:  18.5204, lon:   73.8567 },
+  { name: 'Ahmedabad',         country: 'India',           lat:  23.0225, lon:   72.5714 },
+  { name: 'Kathmandu',         country: 'Nepal',           lat:  27.7172, lon:   85.3240 },
+  { name: 'Dhaka',             country: 'Bangladesh',      lat:  23.8103, lon:   90.4125 },
+  { name: 'Karachi',           country: 'Pakistan',        lat:  24.8607, lon:   67.0011 },
+  { name: 'Colombo',           country: 'Sri Lanka',       lat:   6.9271, lon:   79.8612 },
+  { name: 'Yangon',            country: 'Myanmar',         lat:  16.8661, lon:   96.1951 },
+  { name: 'Bangkok',           country: 'Thailand',        lat:  13.7563, lon:  100.5018 },
+  { name: 'Hanoi',             country: 'Vietnam',         lat:  21.0278, lon:  105.8342 },
+  { name: 'Ho Chi Minh City',  country: 'Vietnam',         lat:  10.8231, lon:  106.6297 },
+  { name: 'Phnom Penh',        country: 'Cambodia',        lat:  11.5564, lon:  104.9282 },
+  { name: 'Kuala Lumpur',      country: 'Malaysia',        lat:   3.1390, lon:  101.6869 },
+  { name: 'Singapore',         country: 'Singapore',       lat:   1.3521, lon:  103.8198 },
+  { name: 'Jakarta',           country: 'Indonesia',       lat:  -6.2088, lon:  106.8456 },
+  { name: 'Manila',            country: 'Philippines',     lat:  14.5995, lon:  120.9842 },
+  // East Asia
+  { name: 'Tokyo',             country: 'Japan',           lat:  35.6762, lon:  139.6503 },
+  { name: 'Osaka',             country: 'Japan',           lat:  34.6937, lon:  135.5023 },
+  { name: 'Nagoya',            country: 'Japan',           lat:  35.1815, lon:  136.9066 },
+  { name: 'Fukuoka',           country: 'Japan',           lat:  33.5904, lon:  130.4017 },
+  { name: 'Seoul',             country: 'South Korea',     lat:  37.5665, lon:  126.9780 },
+  { name: 'Busan',             country: 'South Korea',     lat:  35.1796, lon:  129.0756 },
+  { name: 'Beijing',           country: 'China',           lat:  39.9042, lon:  116.4074 },
+  { name: 'Shanghai',          country: 'China',           lat:  31.2304, lon:  121.4737 },
+  { name: 'Guangzhou',         country: 'China',           lat:  23.1291, lon:  113.2644 },
+  { name: 'Chengdu',           country: 'China',           lat:  30.5728, lon:  104.0668 },
+  { name: 'Wuhan',             country: 'China',           lat:  30.5928, lon:  114.3052 },
+  { name: 'Hong Kong',         country: 'China',           lat:  22.3193, lon:  114.1694 },
+  { name: 'Taipei',            country: 'Taiwan',          lat:  25.0330, lon:  121.5654 },
+  { name: 'Ulaanbaatar',       country: 'Mongolia',        lat:  47.9077, lon:  106.8832 },
+  // Russia (non-extreme)
+  { name: 'Novosibirsk',       country: 'Russia',          lat:  54.9885, lon:   82.9357 },
+  { name: 'Vladivostok',       country: 'Russia',          lat:  43.1332, lon:  131.9113 },
+  { name: 'Yekaterinburg',     country: 'Russia',          lat:  56.8389, lon:   60.6057 },
+  // Africa
+  { name: 'Cairo',             country: 'Egypt',           lat:  30.0444, lon:   31.2357 },
+  { name: 'Casablanca',        country: 'Morocco',         lat:  33.5731, lon:   -7.5898 },
+  { name: 'Algiers',           country: 'Algeria',         lat:  36.7372, lon:    3.0865 },
+  { name: 'Tunis',             country: 'Tunisia',         lat:  36.8065, lon:   10.1815 },
+  { name: 'Tripoli',           country: 'Libya',           lat:  32.9022, lon:   13.1800 },
+  { name: 'Dakar',             country: 'Senegal',         lat:  14.6928, lon:  -17.4467 },
+  { name: 'Accra',             country: 'Ghana',           lat:   5.6037, lon:   -0.1870 },
+  { name: 'Lagos',             country: 'Nigeria',         lat:   6.5244, lon:    3.3792 },
+  { name: 'Abuja',             country: 'Nigeria',         lat:   9.0765, lon:    7.3986 },
+  { name: 'Douala',            country: 'Cameroon',        lat:   4.0511, lon:    9.7679 },
+  { name: 'Kinshasa',          country: 'DR Congo',        lat:  -4.3217, lon:   15.3222 },
+  { name: 'Luanda',            country: 'Angola',          lat:  -8.8383, lon:   13.2344 },
+  { name: 'Addis Ababa',       country: 'Ethiopia',        lat:   9.0054, lon:   38.7636 },
+  { name: 'Nairobi',           country: 'Kenya',           lat:  -1.2921, lon:   36.8219 },
+  { name: 'Dar es Salaam',     country: 'Tanzania',        lat:  -6.7924, lon:   39.2083 },
+  { name: 'Johannesburg',      country: 'South Africa',    lat: -26.2041, lon:   28.0473 },
+  { name: 'Cape Town',         country: 'South Africa',    lat: -33.9249, lon:   18.4241 },
+  { name: 'Khartoum',          country: 'Sudan',           lat:  15.5007, lon:   32.5599 },
+  { name: 'Bamako',            country: 'Mali',            lat:  12.6392, lon:   -8.0029 },
+  { name: 'Lusaka',            country: 'Zambia',          lat: -15.3875, lon:   28.3228 },
+  { name: 'Harare',            country: 'Zimbabwe',        lat: -17.8252, lon:   31.0335 },
+  { name: 'Antananarivo',      country: 'Madagascar',      lat: -18.8792, lon:   47.5079 },
+  { name: 'Maputo',            country: 'Mozambique',      lat: -25.9692, lon:   32.5732 },
+  { name: 'Windhoek',          country: 'Namibia',         lat: -22.5609, lon:   17.0658 },
+  // Oceania
+  { name: 'Sydney',            country: 'Australia',       lat: -33.8688, lon:  151.2093 },
+  { name: 'Melbourne',         country: 'Australia',       lat: -37.8136, lon:  144.9631 },
+  { name: 'Brisbane',          country: 'Australia',       lat: -27.4698, lon:  153.0251 },
+  { name: 'Perth',             country: 'Australia',       lat: -31.9505, lon:  115.8605 },
+  { name: 'Adelaide',          country: 'Australia',       lat: -34.9285, lon:  138.6007 },
+  { name: 'Darwin',            country: 'Australia',       lat: -12.4634, lon:  130.8456 },
+  { name: 'Auckland',          country: 'New Zealand',     lat: -36.8509, lon:  174.7645 },
+  { name: 'Wellington',        country: 'New Zealand',     lat: -41.2865, lon:  174.7762 },
+  { name: 'Christchurch',      country: 'New Zealand',     lat: -43.5320, lon:  172.6306 },
+  { name: 'Port Moresby',      country: 'Papua New Guinea',lat:  -9.4438, lon:  147.1803 },
+];
+
 function getPrevWeekRange() {
   const today = new Date();
   const day = today.getDay(); // 0=Sun
@@ -2024,6 +2308,234 @@ async function renderExtremes() {
   }
 }
 
+// ── Weather Twin helpers ──────────────────────────────────────────
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 3958.8;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function wmoCategory(code) {
+  if (code === 0 || code === 1)                              return 'clear';
+  if (code === 2)                                            return 'partlyCloudy';
+  if (code === 3)                                            return 'overcast';
+  if (code === 45 || code === 48)                            return 'fog';
+  if (code >= 51 && code <= 57)                              return 'drizzle';
+  if ((code >= 61 && code <= 67) || (code >= 80 && code <= 82)) return 'rain';
+  if ((code >= 71 && code <= 77) || code === 85 || code === 86)  return 'snow';
+  if (code === 95 || code === 96 || code === 99)             return 'thunderstorm';
+  return 'other';
+}
+
+function twinScore(user, city) {
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const tempSim   = clamp(1 - Math.abs(user.temp   - city.temp)   / 25);
+  const feelSim   = clamp(1 - Math.abs(user.feel   - city.feel)   / 25);
+  const humSim    = clamp(1 - Math.abs(user.hum    - city.hum)    / 30);
+  const cloudSim  = clamp(1 - Math.abs(user.cloud  - city.cloud)  / 40);
+  const windSim   = clamp(1 - Math.abs(user.wind   - city.wind)   / 15);
+  const precipSim = clamp(1 - Math.abs(user.precip - city.precip) / 0.2);
+  const codeSim   = wmoCategory(user.code) === wmoCategory(city.code) ? 1 : 0;
+  return 0.25 * tempSim + 0.20 * feelSim + 0.15 * humSim + 0.15 * cloudSim
+       + 0.10 * windSim + 0.10 * precipSim + 0.05 * codeSim;
+}
+
+async function fetchTwin(userCurrent, userCloudCover) {
+  const CACHE_KEY = 'wx_twin';
+  const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+  if (cached && cached.expires > Date.now()
+      && Math.abs(cached.userLat - LAT) <= 0.01
+      && Math.abs(cached.userLon - LON) <= 0.01) {
+    return cached.data;
+  }
+
+  const BATCH = 100;
+  const batch1 = TWIN_CITIES.slice(0, BATCH);
+  const batch2 = TWIN_CITIES.slice(BATCH);
+
+  const buildUrl = cities => {
+    const lats = cities.map(c => c.lat).join(',');
+    const lons = cities.map(c => c.lon).join(',');
+    return `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}`
+      + `&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,cloud_cover,precipitation,weather_code`
+      + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=UTC`;
+  };
+
+  const [r1, r2] = await Promise.allSettled([
+    safeFetch(buildUrl(batch1)),
+    safeFetch(buildUrl(batch2))
+  ]);
+
+  const allResults = [];
+  if (r1.status === 'fulfilled') {
+    const arr = Array.isArray(r1.value) ? r1.value : [r1.value];
+    arr.forEach((d, i) => { if (batch1[i]) allResults.push({ city: batch1[i], current: d.current }); });
+  }
+  if (r2.status === 'fulfilled') {
+    const arr = Array.isArray(r2.value) ? r2.value : [r2.value];
+    arr.forEach((d, i) => { if (batch2[i]) allResults.push({ city: batch2[i], current: d.current }); });
+  }
+
+  if (!allResults.length) throw new Error('No twin data');
+
+  const user = {
+    temp:   userCurrent.temperature_2m,
+    feel:   userCurrent.apparent_temperature,
+    hum:    userCurrent.relative_humidity_2m,
+    cloud:  userCloudCover,
+    wind:   userCurrent.wind_speed_10m,
+    precip: userCurrent.precipitation,
+    code:   userCurrent.weather_code,
+  };
+
+  const candidates = allResults
+    .filter(({ city, current }) =>
+      current && haversine(LAT, LON, city.lat, city.lon) >= 500
+    )
+    .map(({ city, current }) => ({
+      city,
+      score: twinScore(user, {
+        temp:   current.temperature_2m,
+        feel:   current.apparent_temperature,
+        hum:    current.relative_humidity_2m,
+        cloud:  current.cloud_cover ?? 50,
+        wind:   current.wind_speed_10m,
+        precip: current.precipitation,
+        code:   current.weather_code,
+      }),
+      current,
+      distance: Math.round(haversine(LAT, LON, city.lat, city.lon)),
+    }));
+
+  if (!candidates.length) {
+    const data = { noTwin: true };
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, userLat: LAT, userLon: LON, expires: Date.now() + 30 * 60 * 1000 }));
+    return data;
+  }
+
+  candidates.sort((a, b) => b.score - a.score);
+  const best = candidates[0];
+
+  const wmoDesc = code => {
+    const cat = wmoCategory(code);
+    return { clear: 'Clear', partlyCloudy: 'Partly cloudy', overcast: 'Overcast',
+             fog: 'Foggy', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow',
+             thunderstorm: 'Thunderstorm', other: 'Mixed' }[cat] || 'Mixed';
+  };
+
+  const data = {
+    city:     best.city.name,
+    country:  best.city.country,
+    score:    best.score,
+    distance: best.distance,
+    comparison: {
+      userTemp:  Math.round(user.temp),
+      cityTemp:  Math.round(best.current.temperature_2m),
+      userFeel:  Math.round(user.feel),
+      cityFeel:  Math.round(best.current.apparent_temperature),
+      userHum:   Math.round(user.hum),
+      cityHum:   Math.round(best.current.relative_humidity_2m),
+      userWind:  Math.round(user.wind),
+      cityWind:  Math.round(best.current.wind_speed_10m),
+      userDesc:  wmoDesc(user.code),
+      cityDesc:  wmoDesc(best.current.weather_code),
+    },
+  };
+
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ data, userLat: LAT, userLon: LON, expires: Date.now() + 30 * 60 * 1000 }));
+  return data;
+}
+
+function countryFlag(country) {
+  const flags = {
+    'Afghanistan': '🇦🇫', 'Albania': '🇦🇱', 'Algeria': '🇩🇿', 'Angola': '🇦🇴',
+    'Argentina': '🇦🇷', 'Armenia': '🇦🇲', 'Australia': '🇦🇺', 'Austria': '🇦🇹',
+    'Azerbaijan': '🇦🇿', 'Bangladesh': '🇧🇩', 'Belarus': '🇧🇾', 'Belgium': '🇧🇪',
+    'Bosnia': '🇧🇦', 'Brazil': '🇧🇷', 'Bulgaria': '🇧🇬', 'Cambodia': '🇰🇭',
+    'Cameroon': '🇨🇲', 'Canada': '🇨🇦', 'Chile': '🇨🇱', 'China': '🇨🇳',
+    'Colombia': '🇨🇴', 'Costa Rica': '🇨🇷', 'Croatia': '🇭🇷', 'Cuba': '🇨🇺',
+    'Cyprus': '🇨🇾', 'Czech Republic': '🇨🇿', 'Denmark': '🇩🇰', 'DR Congo': '🇨🇩',
+    'Ecuador': '🇪🇨', 'Egypt': '🇪🇬', 'Estonia': '🇪🇪', 'Ethiopia': '🇪🇹',
+    'Finland': '🇫🇮', 'France': '🇫🇷', 'Georgia': '🇬🇪', 'Germany': '🇩🇪',
+    'Ghana': '🇬🇭', 'Greece': '🇬🇷', 'Hungary': '🇭🇺', 'Iceland': '🇮🇸',
+    'India': '🇮🇳', 'Indonesia': '🇮🇩', 'Iran': '🇮🇷', 'Iraq': '🇮🇶',
+    'Ireland': '🇮🇪', 'Israel': '🇮🇱', 'Italy': '🇮🇹', 'Japan': '🇯🇵',
+    'Jordan': '🇯🇴', 'Kazakhstan': '🇰🇿', 'Kenya': '🇰🇪', 'Latvia': '🇱🇻',
+    'Lebanon': '🇱🇧', 'Libya': '🇱🇾', 'Lithuania': '🇱🇹', 'Madagascar': '🇲🇬',
+    'Malaysia': '🇲🇾', 'Mali': '🇲🇱', 'Malta': '🇲🇹', 'Mexico': '🇲🇽',
+    'Mongolia': '🇲🇳', 'Morocco': '🇲🇦', 'Mozambique': '🇲🇿', 'Myanmar': '🇲🇲',
+    'Namibia': '🇳🇦', 'Nepal': '🇳🇵', 'Netherlands': '🇳🇱', 'New Zealand': '🇳🇿',
+    'Nigeria': '🇳🇬', 'Norway': '🇳🇴', 'Oman': '🇴🇲', 'Pakistan': '🇵🇰',
+    'Papua New Guinea': '🇵🇬', 'Peru': '🇵🇪', 'Philippines': '🇵🇭', 'Poland': '🇵🇱',
+    'Portugal': '🇵🇹', 'Qatar': '🇶🇦', 'Romania': '🇷🇴', 'Russia': '🇷🇺',
+    'Senegal': '🇸🇳', 'Serbia': '🇷🇸', 'Singapore': '🇸🇬', 'South Africa': '🇿🇦',
+    'South Korea': '🇰🇷', 'Spain': '🇪🇸', 'Sri Lanka': '🇱🇰', 'Sudan': '🇸🇩',
+    'Sweden': '🇸🇪', 'Switzerland': '🇨🇭', 'Taiwan': '🇹🇼', 'Tanzania': '🇹🇿',
+    'Thailand': '🇹🇭', 'Tunisia': '🇹🇳', 'Turkey': '🇹🇷', 'Ukraine': '🇺🇦',
+    'UK': '🇬🇧', 'United Kingdom': '🇬🇧', 'USA': '🇺🇸', 'United States': '🇺🇸', 'Uruguay': '🇺🇾',
+    'Uzbekistan': '🇺🇿', 'Venezuela': '🇻🇪', 'Vietnam': '🇻🇳',
+    'Zambia': '🇿🇲', 'Zimbabwe': '🇿🇼',
+  };
+  return flags[country] || '';
+}
+
+async function renderTwin(userCurrent, hourly) {
+  const el = document.getElementById('twin-content');
+  try {
+    // Get current hour's cloud cover from hourly data
+    const now = new Date();
+    const currentHourStr = now.toISOString().slice(0, 13);
+    const hourIdx = hourly.time.findIndex(t => t.startsWith(currentHourStr));
+    const userCloudCover = hourIdx >= 0 ? (hourly.cloud_cover[hourIdx] ?? 50) : 50;
+
+    const d = await fetchTwin(userCurrent, userCloudCover);
+
+    if (d.noTwin) {
+      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">No weather twin found beyond 500 miles.</div>';
+      return;
+    }
+
+    const { city, score, distance, comparison: c } = d;
+    const country = d.country === 'United Kingdom' ? 'UK' : d.country === 'United States' ? 'USA' : d.country;
+    const pct = Math.round(score * 100);
+    const distFmt = distance.toLocaleString();
+
+    el.innerHTML = `
+      <div class="twin-match-pct">${pct}% Match</div>
+      <div class="twin-city-name">${city}, ${country} ${countryFlag(country)}</div>
+      <div class="twin-distance"><i data-lucide="map-pin" class="lucide-sm"></i> ${distFmt} miles away</div>
+      <div class="twin-factors">
+        <div class="twin-factor">
+          <span class="twin-factor-label">Temperature</span>
+          <span class="twin-factor-vals">${c.userTemp}°F <span class="twin-sep">vs</span> ${c.cityTemp}°F</span>
+        </div>
+        <div class="twin-factor">
+          <span class="twin-factor-label">Feels like</span>
+          <span class="twin-factor-vals">${c.userFeel}°F <span class="twin-sep">vs</span> ${c.cityFeel}°F</span>
+        </div>
+        <div class="twin-factor">
+          <span class="twin-factor-label">Humidity</span>
+          <span class="twin-factor-vals">${c.userHum}% <span class="twin-sep">vs</span> ${c.cityHum}%</span>
+        </div>
+        <div class="twin-factor">
+          <span class="twin-factor-label">Wind</span>
+          <span class="twin-factor-vals">${c.userWind} mph <span class="twin-sep">vs</span> ${c.cityWind} mph</span>
+        </div>
+        <div class="twin-factor">
+          <span class="twin-factor-label">Conditions</span>
+          <span class="twin-factor-vals">${c.userDesc} <span class="twin-sep">·</span> ${c.cityDesc}</span>
+        </div>
+      </div>`;
+    lucide.createIcons({ nodes: [el] });
+  } catch (e) {
+    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Twin data unavailable.</div>';
+    console.warn('renderTwin error', e);
+  }
+}
+
 // ── Main data fetch & render ──────────────────────────────────────
 async function loadDashboard() {
   updateDate();
@@ -2056,6 +2568,7 @@ async function loadDashboard() {
     const currentAqi = aqiResult.status === 'fulfilled' ? aqiResult.value?.current?.us_aqi : null;
     if (currentAqi != null) localStorage.setItem('wx_aqi', currentAqi);
     renderScooterDay(d.daily, currentAqi);
+    renderCoat(d.current, d.daily);
     renderStargazing(d.hourly, d.daily);
   } else {
     document.getElementById('current-content').innerHTML = '<div class="error-msg">⚠️ Unable to load weather data. Will retry in 15 minutes.</div>';
@@ -2081,6 +2594,12 @@ async function loadDashboard() {
 
   // Weekly extremes (global data, cached until Monday, fire and forget)
   renderExtremes();
+
+  // Weather Twin (fire and forget)
+  if (weatherResult.status === 'fulfilled') {
+    const d = weatherResult.value;
+    renderTwin(d.current, d.hourly);
+  }
 
   // Radar map — set once; only update src if city changed
   const radarIframe = document.getElementById('radar-iframe');
