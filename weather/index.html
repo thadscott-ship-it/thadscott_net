@@ -1400,16 +1400,17 @@ function renderAQI(data) {
 }
 
 // ── Render: Scooter / Bike ────────────────────────────────────────
-function renderScooterDay(daily) {
+function renderScooterDay(daily, aqi = null) {
   const el = document.getElementById('scooter-content');
   const rain = daily.precipitation_probability_max[0];
   const hi   = Math.round(daily.temperature_2m_max[0]);
   const wind = Math.round(daily.wind_speed_10m_max[0]);
 
   const reasons = [];
-  if (rain > 25) reasons.push(`too wet — ${rain}% chance of rain`);
-  if (hi   < 40) reasons.push(`too cold — high of only ${hi}°`);
-  if (wind > 20) reasons.push(`too windy — gusts up to ${wind} mph`);
+  if (rain > 25)              reasons.push(`too wet — ${rain}% chance of rain`);
+  if (hi   < 40)              reasons.push(`too cold — high of only ${hi}°`);
+  if (wind > 20)              reasons.push(`too windy — gusts up to ${wind} mph`);
+  if (aqi != null && aqi > 80) reasons.push(`air quality is too poor — AQI ${aqi}`);
 
   if (reasons.length === 0) {
     el.innerHTML = `
@@ -1492,7 +1493,9 @@ async function loadDashboard() {
     renderHourly(d.hourly);
     renderDaily(d.daily);
     renderSunMoon(d.daily);
-    renderScooterDay(d.daily);
+    const currentAqi = aqiResult.status === 'fulfilled' ? aqiResult.value?.current?.us_aqi : null;
+    if (currentAqi != null) localStorage.setItem('wx_aqi', currentAqi);
+    renderScooterDay(d.daily, currentAqi);
   } else {
     document.getElementById('current-content').innerHTML = '<div class="error-msg">⚠️ Unable to load weather data. Will retry in 15 minutes.</div>';
     document.getElementById('daily-content').innerHTML = '<div class="error-msg">⚠️ Forecast unavailable</div>';
@@ -1537,10 +1540,12 @@ function openDayModal(i) {
   const nwsPeriods = getNWSPeriodsForDate(date);
 
   // Scooter verdict for this day
+  const modalAqi = (() => { try { return JSON.parse(localStorage.getItem('wx_aqi') || 'null'); } catch { return null; } })();
   const scooterReasons = [];
-  if (precipPct > 25) scooterReasons.push(`too wet — ${precipPct}% chance of rain`);
-  if (hi        < 40) scooterReasons.push(`too cold — high of only ${hi}°`);
-  if (wind      > 20) scooterReasons.push(`too windy — gusts up to ${wind} mph`);
+  if (precipPct > 25)                       scooterReasons.push(`too wet — ${precipPct}% chance of rain`);
+  if (hi        < 40)                       scooterReasons.push(`too cold — high of only ${hi}°`);
+  if (wind      > 20)                       scooterReasons.push(`too windy — gusts up to ${wind} mph`);
+  if (modalAqi != null && modalAqi > 80)    scooterReasons.push(`air quality is too poor — AQI ${modalAqi}`);
   const scooterGood = scooterReasons.length === 0;
   const scooterWhy  = scooterGood
     ? 'Looks great — take it for a spin! <i data-lucide="scooter" class="lucide-sm"></i>'
