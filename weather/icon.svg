@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Dark background matching app -->
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <!-- cloud-sun icon (amber + blue) scaled to fill canvas -->
+  <g transform="translate(256,256) scale(14)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M0-10v-2" stroke="#f59e0b"/>
+    <path d="m-7.07-7.07-1.41-1.41" stroke="#f59e0b"/>
+    <path d="M10 0h2" stroke="#f59e0b"/>
+    <path d="m7.07-7.07 1.41-1.41" stroke="#f59e0b"/>
+    <path d="M3.947.65a4 4 0 0 0-5.925-4.128" stroke="#f59e0b"/>
+    <path d="M1 10H-5a5 5 0 1 1 4.9-6H1a3 3 0 0 1 0 6z" stroke="#60a5fa"/>
+  </g>
+</svg>
