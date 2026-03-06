@@ -598,6 +598,29 @@
       color: #475569;
     }
 
+    /* ── Forecast Header & Looking Back ────────────────────────── */
+    .forecast-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .forecast-header h2 { margin-bottom: 0; }
+    .lookback-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      transition: background 0.2s, color 0.2s;
+    }
+    .lookback-btn:hover { background: #1e3a5f; color: #60a5fa; }
+
     /* ── Radar Toggle ──────────────────────────────────────────── */
     .radar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
     .radar-header h2 { margin-bottom: 0; }
@@ -859,7 +882,12 @@
 
       <!-- 7-Day Forecast -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>7-Day Forecast</h2>
+        <div class="forecast-header">
+          <h2>7-Day Forecast</h2>
+          <button class="lookback-btn" onclick="openLookingBack()" title="Looking back">
+            <i data-lucide="calendar-clock" class="lucide-sm"></i>
+          </button>
+        </div>
         <div id="daily-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
@@ -1361,6 +1389,73 @@ let radarOverlay = 'rain';
 
 function windyUrl(lat, lon, zoom = 9, overlay = radarOverlay) {
   return `https://embed.windy.com/embed2.html?lat=${lat}&lon=${lon}&detailLat=${lat}&detailLon=${lon}&zoom=${zoom}&level=surface&overlay=${overlay}&product=ecmwf&message=true&marker=true&metricWind=mph&metricTemp=%C2%B0F`;
+}
+
+async function openLookingBack() {
+  document.getElementById('day-modal-content').innerHTML = `
+    <div class="day-modal-header">
+      <div class="day-modal-icon">
+        <i data-lucide="calendar-clock" style="width:3rem;height:3rem;stroke:#60a5fa;stroke-width:1.5;"></i>
+      </div>
+      <div>
+        <div class="day-modal-title">Looking Back</div>
+        <div class="day-modal-date">Last 2 days</div>
+      </div>
+    </div>
+    <div class="loading"><div class="spinner"></div><div>Loading…</div></div>`;
+  document.getElementById('day-modal-overlay').classList.add('open');
+  lucide.createIcons({ nodes: [document.getElementById('day-modal-content')] });
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
+      + `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max`
+      + `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch`
+      + `&timezone=${TIMEZONE}&past_days=2&forecast_days=0`;
+    const data = await safeFetch(url);
+    const { daily } = data;
+
+    const days = daily.time.map((date, i) => {
+      const w = weatherInfo(daily.weather_code[i]);
+      const hi = Math.round(daily.temperature_2m_max[i]);
+      const lo = Math.round(daily.temperature_2m_min[i]);
+      const precip = daily.precipitation_sum[i]?.toFixed(2) ?? '0.00';
+      const wind = Math.round(daily.wind_speed_10m_max[i]);
+      const label = new Date(date + 'T12:00:00').toLocaleDateString('en-US',
+        { weekday: 'long', month: 'long', day: 'numeric' });
+
+      return `
+        <div style="background:#0f172a;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+            <div style="color:${w.color ?? '#93c5fd'};">${weatherIconHtml(w.icon, 'lucide-modal-weather')}</div>
+            <div>
+              <div style="font-size:1.05rem;font-weight:700;color:#f1f5f9;">${label}</div>
+              <div style="font-size:0.8rem;color:#64748b;">${w.desc}</div>
+            </div>
+          </div>
+          <div class="current-details">
+            <div class="detail-item"><span class="label">High / Low</span><span class="value">${hi}° / ${lo}°</span></div>
+            <div class="detail-item"><span class="label">Precipitation</span><span class="value">${precip}"</span></div>
+            <div class="detail-item"><span class="label">Max wind</span><span class="value">${wind} mph</span></div>
+          </div>
+        </div>`;
+    }).reverse();
+
+    document.getElementById('day-modal-content').innerHTML = `
+      <div class="day-modal-header">
+        <div class="day-modal-icon">
+          <i data-lucide="calendar-clock" style="width:3rem;height:3rem;stroke:#60a5fa;stroke-width:1.5;"></i>
+        </div>
+        <div>
+          <div class="day-modal-title">Looking Back</div>
+          <div class="day-modal-date">Last 2 days</div>
+        </div>
+      </div>
+      ${days.join('')}`;
+    lucide.createIcons({ nodes: [document.getElementById('day-modal-content')] });
+  } catch (e) {
+    document.getElementById('day-modal-content').innerHTML += `
+      <div style="color:#f87171;font-size:0.9rem;">Could not load historical data.</div>`;
+  }
 }
 
 function setRadarOverlay(overlay) {
@@ -2662,7 +2757,8 @@ function openDayModal(i) {
   const lo    = Math.round(daily.temperature_2m_min[i]);
   const precipPct = daily.precipitation_probability_max[i];
   const wind  = Math.round(daily.wind_speed_10m_max[i]);
-  const dayLabel  = fmtDay(date);
+  const _shortDay = fmtDay(date);
+  const dayLabel  = (_shortDay === 'Today' || _shortDay === 'Tomorrow') ? _shortDay : new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' });
   const fullDate  = new Date(date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   const nwsPeriods = getNWSPeriodsForDate(date);
