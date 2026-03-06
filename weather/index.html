@@ -5,7 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kirkland, WA — Weather Dashboard</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
+    /* ── Lucide Icons ──────────────────────────────────────────── */
+    i[data-lucide] { display: inline-flex; align-items: center; justify-content: center; }
+    i[data-lucide] svg { display: block; }
+    .lucide-weather { width: 3.5rem; height: 3.5rem; stroke: currentColor; stroke-width: 1.5; }
+    .lucide-sm { width: 1.1rem; height: 1.1rem; stroke: currentColor; stroke-width: 2; vertical-align: middle; }
+    .lucide-sun-moon { width: 2rem; height: 2rem; stroke: currentColor; stroke-width: 1.5; }
+    .lucide-modal-weather { width: 3rem; height: 3rem; stroke: currentColor; stroke-width: 1.5; }
+    .moon-phase-svg { display: block; color: rgba(255,255,255,0.9); }
+
     /* ── Reset & Base ──────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; overflow-x: hidden; }
@@ -258,7 +268,10 @@
     .current-main .temp-icon {
       font-size: 3.5rem;
       line-height: 1;
+      display: flex;
+      align-items: center;
     }
+    .current-main .temp-icon i svg { width: 3.5rem; height: 3.5rem; stroke: currentColor; stroke-width: 1.5; }
     .current-main .temp-value {
       font-size: 3.5rem;
       font-weight: 700;
@@ -331,7 +344,8 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .forecast-day .day-icon { font-size: 1.75rem; margin: 0.35rem 0; }
+    .forecast-day .day-icon { font-size: 1.75rem; margin: 0.35rem 0; display: flex; justify-content: center; }
+    .forecast-day .day-icon i svg { width: 1.75rem; height: 1.75rem; stroke: currentColor; stroke-width: 1.5; }
     .forecast-day .day-temps {
       font-size: 0.9rem;
       font-weight: 600;
@@ -351,7 +365,7 @@
       gap: 1rem;
     }
     .sun-moon-item { text-align: center; }
-    .sun-moon-item .icon { font-size: 2rem; margin-bottom: 0.25rem; }
+    .sun-moon-item .icon { font-size: 2rem; margin-bottom: 0.25rem; display: flex; justify-content: center; }
     .sun-moon-item .label {
       font-size: 0.7rem;
       color: #64748b;
@@ -554,7 +568,8 @@
       gap: 1rem;
       margin-bottom: 1.25rem;
     }
-    .day-modal-icon { font-size: 3rem; line-height: 1; flex-shrink: 0; }
+    .day-modal-icon { font-size: 3rem; line-height: 1; flex-shrink: 0; display: flex; align-items: center; }
+    .day-modal-icon i svg { width: 3rem; height: 3rem; stroke: currentColor; stroke-width: 1.5; }
     .day-modal-title {
       font-size: 1.4rem;
       font-weight: 700;
@@ -622,6 +637,7 @@
 
       /* Current conditions */
       .current-main .temp-icon { font-size: 2.6rem; }
+      .current-main .temp-icon i svg { width: 2.6rem; height: 2.6rem; }
       .current-main .temp-value { font-size: 2.6rem; }
       .current-main .temp-unit  { font-size: 1.2rem; }
       .current-desc { font-size: 0.85rem; margin-bottom: 0.6rem; }
@@ -634,6 +650,7 @@
       .forecast-day { min-width: 90px; padding: 0.65rem; }
       .forecast-day .day-name { font-size: 0.68rem; }
       .forecast-day .day-icon { font-size: 1.4rem; margin: 0.2rem 0; }
+      .forecast-day .day-icon i svg { width: 1.4rem; height: 1.4rem; }
       .forecast-day .day-temps { font-size: 0.82rem; }
       .forecast-day .day-detail { font-size: 0.65rem; }
 
@@ -664,7 +681,7 @@
   <div class="container">
     <!-- Header -->
     <div class="header fade-in">
-      <h1><span id="city-name">☁️ Kirkland, WA</span><button class="edit-city-btn" onclick="openCityDialog()" title="Change city">✏️</button></h1>
+      <h1><i data-lucide="cloud" class="lucide-sm" style="width:1.5rem;height:1.5rem;margin-right:0.3rem;color:#93c5fd;"></i><span id="city-name">Kirkland, WA</span><button class="edit-city-btn" onclick="openCityDialog()" title="Change city"><i data-lucide="pencil" class="lucide-sm"></i></button></h1>
       <div class="subtitle" id="current-date"></div>
     </div>
 
@@ -721,7 +738,7 @@
 
       <!-- Scooter / Bike -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>Good Day for Scooter or Bike?</h2>
+        <h2>Good Day for Scooter? <i data-lucide="scooter" class="lucide-sm" style="margin-left:0.25rem;"></i></h2>
         <div id="scooter-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
     </div>
@@ -742,7 +759,7 @@
   <!-- Day Detail Modal -->
   <div class="day-modal-overlay" id="day-modal-overlay" onclick="if(event.target===this)closeDayModal()">
     <div class="day-modal">
-      <button class="day-modal-close" onclick="closeDayModal()">✕</button>
+      <button class="day-modal-close" onclick="closeDayModal()"><i data-lucide="x" style="width:1.2rem;height:1.2rem;stroke:currentColor;stroke-width:2.5;"></i></button>
       <div class="day-modal-inner" id="day-modal-content"></div>
     </div>
   </div>
@@ -856,7 +873,7 @@ function selectResult(i) {
   LAT = r.latitude; LON = r.longitude;
   CITY_NAME = r.admin1 ? `${r.name}, ${r.admin1}` : r.name;
   saveCity();
-  document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+  document.getElementById('city-name').textContent = CITY_NAME;
   document.title = `${CITY_NAME} — Weather Dashboard`;
   closeCityDialog();
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -968,7 +985,7 @@ async function useCurrentLocation() {
       CITY_NAME = `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
     }
     saveCity();
-    document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+    document.getElementById('city-name').textContent = CITY_NAME;
     document.title = `${CITY_NAME} — Weather Dashboard`;
     closeCityDialog();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -980,39 +997,42 @@ async function useCurrentLocation() {
   }, { timeout: 10000, enableHighAccuracy: false });
 }
 
-// ── WMO Weather Code → Emoji + Description ───────────────────────
+// ── WMO Weather Code → Lucide icon name + Description ────────────
 function weatherInfo(code, isDay = true) {
   const map = {
-    0:  { icon: isDay ? '☀️' : '🌙', desc: 'Clear sky' },
-    1:  { icon: isDay ? '🌤️' : '🌙', desc: 'Mainly clear' },
-    2:  { icon: '⛅', desc: 'Partly cloudy' },
-    3:  { icon: '☁️', desc: 'Overcast' },
-    45: { icon: '🌫️', desc: 'Foggy' },
-    48: { icon: '🌫️', desc: 'Depositing rime fog' },
-    51: { icon: '🌦️', desc: 'Light drizzle' },
-    53: { icon: '🌦️', desc: 'Moderate drizzle' },
-    55: { icon: '🌧️', desc: 'Dense drizzle' },
-    56: { icon: '🌧️', desc: 'Freezing drizzle (light)' },
-    57: { icon: '🌧️', desc: 'Freezing drizzle (dense)' },
-    61: { icon: '🌦️', desc: 'Slight rain' },
-    63: { icon: '🌧️', desc: 'Moderate rain' },
-    65: { icon: '🌧️', desc: 'Heavy rain' },
-    66: { icon: '🌧️', desc: 'Freezing rain (light)' },
-    67: { icon: '🌧️', desc: 'Freezing rain (heavy)' },
-    71: { icon: '🌨️', desc: 'Slight snowfall' },
-    73: { icon: '🌨️', desc: 'Moderate snowfall' },
-    75: { icon: '❄️', desc: 'Heavy snowfall' },
-    77: { icon: '❄️', desc: 'Snow grains' },
-    80: { icon: '🌦️', desc: 'Slight rain showers' },
-    81: { icon: '🌧️', desc: 'Moderate rain showers' },
-    82: { icon: '🌧️', desc: 'Violent rain showers' },
-    85: { icon: '🌨️', desc: 'Slight snow showers' },
-    86: { icon: '❄️', desc: 'Heavy snow showers' },
-    95: { icon: '⛈️', desc: 'Thunderstorm' },
-    96: { icon: '⛈️', desc: 'Thunderstorm with slight hail' },
-    99: { icon: '⛈️', desc: 'Thunderstorm with heavy hail' },
+    0:  { icon: isDay ? 'sun' : 'moon', desc: 'Clear sky' },
+    1:  { icon: isDay ? 'sun' : 'moon', desc: 'Mainly clear' },
+    2:  { icon: isDay ? 'cloud-sun' : 'cloud-moon', desc: 'Partly cloudy' },
+    3:  { icon: 'cloud', desc: 'Overcast' },
+    45: { icon: 'cloud-fog', desc: 'Foggy' },
+    48: { icon: 'cloud-fog', desc: 'Depositing rime fog' },
+    51: { icon: 'cloud-drizzle', desc: 'Light drizzle' },
+    53: { icon: 'cloud-drizzle', desc: 'Moderate drizzle' },
+    55: { icon: 'cloud-rain', desc: 'Dense drizzle' },
+    56: { icon: 'cloud-rain', desc: 'Freezing drizzle (light)' },
+    57: { icon: 'cloud-rain', desc: 'Freezing drizzle (dense)' },
+    61: { icon: 'cloud-drizzle', desc: 'Slight rain' },
+    63: { icon: 'cloud-rain', desc: 'Moderate rain' },
+    65: { icon: 'cloud-rain', desc: 'Heavy rain' },
+    66: { icon: 'cloud-rain', desc: 'Freezing rain (light)' },
+    67: { icon: 'cloud-rain', desc: 'Freezing rain (heavy)' },
+    71: { icon: 'cloud-snow', desc: 'Slight snowfall' },
+    73: { icon: 'cloud-snow', desc: 'Moderate snowfall' },
+    75: { icon: 'cloud-snow', desc: 'Heavy snowfall' },
+    77: { icon: 'cloud-snow', desc: 'Snow grains' },
+    80: { icon: 'cloud-drizzle', desc: 'Slight rain showers' },
+    81: { icon: 'cloud-rain', desc: 'Moderate rain showers' },
+    82: { icon: 'cloud-rain', desc: 'Violent rain showers' },
+    85: { icon: 'cloud-snow', desc: 'Slight snow showers' },
+    86: { icon: 'cloud-snow', desc: 'Heavy snow showers' },
+    95: { icon: 'cloud-lightning', desc: 'Thunderstorm' },
+    96: { icon: 'cloud-lightning', desc: 'Thunderstorm with slight hail' },
+    99: { icon: 'cloud-lightning', desc: 'Thunderstorm with heavy hail' },
   };
-  return map[code] || { icon: '🌡️', desc: 'Unknown' };
+  return map[code] || { icon: 'thermometer', desc: 'Unknown' };
+}
+function weatherIconHtml(iconName, cls) {
+  return `<i data-lucide="${iconName}" class="${cls}"></i>`;
 }
 
 // ── Wind direction helper ─────────────────────────────────────────
@@ -1021,24 +1041,45 @@ function windDir(deg) {
   return dirs[Math.round(deg / 22.5) % 16];
 }
 
+// ── Moon phase SVG (monoline, Lucide-compatible) ──────────────────
+// All paths: circle r=9 centered at (12,12), top=(12,3), bottom=(12,21)
+// Lit region = filled path; circle outline always drawn on top.
+// Arc sweep=1 → clockwise (right side); sweep=0 → counterclockwise (left side)
+function moonPhaseSvg(phase) {
+  const S = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="2rem" height="2rem" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="moon-phase-svg">`;
+  const E = `</svg>`;
+  const O = `<circle cx="12" cy="12" r="9" fill="none"/>`;
+  const L = (d) => `<path d="${d}" fill="currentColor" fill-opacity="0.4" stroke="none"/>`;
+  switch (phase) {
+    case 'new':             return `${S}${O}${E}`;
+    case 'waxing-crescent': return `${S}${L('M12 3A6 9 0 0 1 12 21A9 9 0 0 1 12 3Z')}${O}${E}`;
+    case 'first-quarter':   return `${S}${L('M12 3L12 21A9 9 0 0 1 12 3Z')}${O}${E}`;
+    case 'waxing-gibbous':  return `${S}${L('M12 3A5 9 0 0 0 12 21A9 9 0 0 1 12 3Z')}${O}${E}`;
+    case 'full':            return `${S}<circle cx="12" cy="12" r="9" fill="currentColor" fill-opacity="0.4" stroke="none"/>${O}${E}`;
+    case 'waning-gibbous':  return `${S}${L('M12 3A5 9 0 0 1 12 21A9 9 0 0 0 12 3Z')}${O}${E}`;
+    case 'last-quarter':    return `${S}${L('M12 3L12 21A9 9 0 0 0 12 3Z')}${O}${E}`;
+    case 'waning-crescent': return `${S}${L('M12 3A6 9 0 0 0 12 21A9 9 0 0 0 12 3Z')}${O}${E}`;
+    default:                return `${S}${O}${E}`;
+  }
+}
+
 // ── Moon phase calculation (simple synodic) ───────────────────────
 function getMoonPhase(date) {
   const SYNODIC = 29.53058770576;
   const KNOWN_NEW = new Date('2000-01-06T18:14:00Z');
   const diff = (date - KNOWN_NEW) / (1000 * 60 * 60 * 24);
   const phase = ((diff % SYNODIC) + SYNODIC) % SYNODIC;
-  const pct = phase / SYNODIC;
-  let name, icon;
-  if      (pct < 0.0625) { name = 'New Moon';        icon = '🌑'; }
-  else if (pct < 0.1875) { name = 'Waxing Crescent'; icon = '🌒'; }
-  else if (pct < 0.3125) { name = 'First Quarter';   icon = '🌓'; }
-  else if (pct < 0.4375) { name = 'Waxing Gibbous';  icon = '🌔'; }
-  else if (pct < 0.5625) { name = 'Full Moon';        icon = '🌕'; }
-  else if (pct < 0.6875) { name = 'Waning Gibbous';  icon = '🌖'; }
-  else if (pct < 0.8125) { name = 'Last Quarter';    icon = '🌗'; }
-  else if (pct < 0.9375) { name = 'Waning Crescent'; icon = '🌘'; }
-  else                    { name = 'New Moon';        icon = '🌑'; }
-  return { name, icon, pct };
+  const day = Math.round(phase) % 29;
+  let name, phaseKey;
+  if      (day === 0 || day >= 28) { name = 'New Moon';        phaseKey = 'new'; }
+  else if (day <= 6)               { name = 'Waxing Crescent'; phaseKey = 'waxing-crescent'; }
+  else if (day === 7)              { name = 'First Quarter';   phaseKey = 'first-quarter'; }
+  else if (day <= 13)              { name = 'Waxing Gibbous';  phaseKey = 'waxing-gibbous'; }
+  else if (day === 14)             { name = 'Full Moon';       phaseKey = 'full'; }
+  else if (day <= 20)              { name = 'Waning Gibbous';  phaseKey = 'waning-gibbous'; }
+  else if (day === 21)             { name = 'Last Quarter';    phaseKey = 'last-quarter'; }
+  else                             { name = 'Waning Crescent'; phaseKey = 'waning-crescent'; }
+  return { name, phaseKey };
 }
 
 // ── AQI category ──────────────────────────────────────────────────
@@ -1138,7 +1179,7 @@ function renderCurrent(current, units, daily) {
   const el = document.getElementById('current-content');
   el.innerHTML = `
     <div class="current-main">
-      <span class="temp-icon">${w.icon}</span>
+      <span class="temp-icon">${weatherIconHtml(w.icon, 'lucide-weather')}</span>
       <div>
         <span class="temp-value">${Math.round(current.temperature_2m)}<span class="temp-unit">°F</span></span>
       </div>
@@ -1150,6 +1191,7 @@ function renderCurrent(current, units, daily) {
       <div class="detail-item"><span class="label">Wind</span><span class="value">${Math.round(current.wind_speed_10m)} mph ${windDir(current.wind_direction_10m)}</span></div>
       <div class="detail-item"><span class="label">Precip</span><span class="value">${current.precipitation}" </span></div>
     </div>`;
+  lucide.createIcons({ nodes: [el] });
 }
 
 // ── Render: Hourly Chart ──────────────────────────────────────────
@@ -1273,16 +1315,17 @@ function renderDaily(daily) {
     html += `
       <div class="forecast-day" onclick="openDayModal(${i})">
         <div class="day-name">${fmtDay(daily.time[i])}</div>
-        <div class="day-icon">${w.icon}</div>
+        <div class="day-icon">${weatherIconHtml(w.icon, 'lucide-sm' )}</div>
         <div class="day-temps">
           <span class="high">${Math.round(daily.temperature_2m_max[i])}°</span>
           <span class="low">${Math.round(daily.temperature_2m_min[i])}°</span>
         </div>
-        <div class="day-detail">💧 ${daily.precipitation_probability_max[i]}% · 💨 ${Math.round(daily.wind_speed_10m_max[i])} mph</div>
+        <div class="day-detail"><i data-lucide="droplets" class="lucide-sm"></i> ${daily.precipitation_probability_max[i]}% · <i data-lucide="wind" class="lucide-sm"></i> ${Math.round(daily.wind_speed_10m_max[i])} mph</div>
       </div>`;
   }
   html += '</div>';
   el.innerHTML = html;
+  lucide.createIcons({ nodes: [el] });
 }
 
 // ── Render: Sun & Moon ────────────────────────────────────────────
@@ -1296,29 +1339,31 @@ function renderSunMoon(daily) {
   const dayM = Math.round((dayLenMs % 3600000) / 60000);
   const moon = getMoonPhase(new Date());
 
-  document.getElementById('sun-moon-content').innerHTML = `
+  const sunMoonEl = document.getElementById('sun-moon-content');
+  sunMoonEl.innerHTML = `
     <div class="sun-moon-grid">
       <div class="sun-moon-item">
-        <div class="icon">🌅</div>
+        <div class="icon"><i data-lucide="sunrise" class="lucide-sun-moon" style="color:#f59e0b;"></i></div>
         <div class="label">Sunrise</div>
         <div class="val">${fmtTime(sunrise)}</div>
       </div>
       <div class="sun-moon-item">
-        <div class="icon">🌇</div>
+        <div class="icon"><i data-lucide="sunset" class="lucide-sun-moon" style="color:#f97316;"></i></div>
         <div class="label">Sunset</div>
         <div class="val">${fmtTime(sunset)}</div>
       </div>
       <div class="sun-moon-item">
-        <div class="icon">${moon.icon}</div>
+        <div class="icon">${moonPhaseSvg(moon.phaseKey)}</div>
         <div class="label">Moon Phase</div>
         <div class="val">${moon.name}</div>
       </div>
       <div class="sun-moon-item">
-        <div class="icon">☀️</div>
+        <div class="icon"><i data-lucide="sun" class="lucide-sun-moon" style="color:#fbbf24;"></i></div>
         <div class="label">Day Length</div>
         <div class="val">${dayH}h ${dayM}m</div>
       </div>
     </div>`;
+  lucide.createIcons({ nodes: [sunMoonEl] });
 }
 
 // ── Render: Air Quality ───────────────────────────────────────────
@@ -1369,7 +1414,7 @@ function renderScooterDay(daily) {
   if (reasons.length === 0) {
     el.innerHTML = `
       <div style="font-size:2.5rem;font-weight:700;line-height:1;color:#22c55e;">Yes</div>
-      <div class="current-desc" style="margin-top:0.5rem;">Looks great out there — take it for a spin! 🛴</div>`;
+      <div class="current-desc" style="margin-top:0.5rem;">Looks great out there — take it for a spin! <i data-lucide="scooter" class="lucide-sm"></i></div>`;
   } else {
     const why = reasons.length === 1
       ? reasons[0]
@@ -1378,6 +1423,7 @@ function renderScooterDay(daily) {
       <div style="font-size:2.5rem;font-weight:700;line-height:1;color:#ef4444;">No</div>
       <div class="current-desc" style="margin-top:0.5rem;">${why.charAt(0).toUpperCase() + why.slice(1)}.</div>`;
   }
+  lucide.createIcons({ nodes: [el] });
 }
 
 // ── Render: NWS Alerts ────────────────────────────────────────────
@@ -1396,12 +1442,13 @@ function renderAlerts(data) {
     return `
       <div class="alert-banner ${cls}" onclick="toggleAlert(event, this)">
         <div class="alert-header">
-          <span>⚠️ ${p.headline || p.event || 'Weather Alert'}</span>
+          <span><i data-lucide="triangle-alert" class="lucide-sm"></i> ${p.headline || p.event || 'Weather Alert'}</span>
           <span class="chevron">▼</span>
         </div>
         <div class="alert-body">${(p.description || '').replace(/\n/g, '<br>')}</div>
       </div>`;
   }).join('');
+  lucide.createIcons({ nodes: [container] });
 }
 
 // ── Update header date ────────────────────────────────────────────
@@ -1496,7 +1543,7 @@ function openDayModal(i) {
   if (wind      > 20) scooterReasons.push(`too windy — gusts up to ${wind} mph`);
   const scooterGood = scooterReasons.length === 0;
   const scooterWhy  = scooterGood
-    ? 'Looks great — take it for a spin! 🛴'
+    ? 'Looks great — take it for a spin! <i data-lucide="scooter" class="lucide-sm"></i>'
     : (s => s.charAt(0).toUpperCase() + s.slice(1) + '.')(
         scooterReasons.length === 1
           ? scooterReasons[0]
@@ -1505,7 +1552,7 @@ function openDayModal(i) {
 
   document.getElementById('day-modal-content').innerHTML = `
     <div class="day-modal-header">
-      <div class="day-modal-icon">${w.icon}</div>
+      <div class="day-modal-icon">${weatherIconHtml(w.icon, 'lucide-modal-weather')}</div>
       <div>
         <div class="day-modal-title">${dayLabel}</div>
         <div class="day-modal-date">${fullDate}</div>
@@ -1524,13 +1571,14 @@ function openDayModal(i) {
     </div>
     <div class="day-modal-chart-title" style="margin-top:1.25rem;">Detailed Forecast</div>
     <div style="margin-bottom:1.25rem;">${nwsPeriodsHtml(nwsPeriods)}</div>
-    <div class="day-modal-chart-title">Good Day for Scooter or Bike?</div>
+    <div class="day-modal-chart-title">Good Day for Scooter?</div>
     <div style="margin-bottom:0.25rem;">
       <div style="font-size:2.5rem;font-weight:700;line-height:1;color:${scooterGood ? '#22c55e' : '#ef4444'};">${scooterGood ? 'Yes' : 'No'}</div>
       <div class="current-desc" style="margin-top:0.4rem;">${scooterWhy}</div>
     </div>
 `;
 
+  lucide.createIcons({ nodes: [document.getElementById('day-modal-content')] });
   document.getElementById('day-modal-overlay').classList.add('open');
   lockScroll();
   fetchDayHourly(date);
@@ -1717,7 +1765,8 @@ document.addEventListener('click', () => {
 })();
 
 // ── Init ──────────────────────────────────────────────────────────
-document.getElementById('city-name').textContent = '☁️ ' + CITY_NAME;
+lucide.createIcons();
+document.getElementById('city-name').textContent = CITY_NAME;
 document.title = `${CITY_NAME} — Weather Dashboard`;
 loadDashboard();
 setInterval(loadDashboard, REFRESH_MS);
