@@ -830,6 +830,10 @@
       margin-bottom: 0.75rem;
     }
     .forecast-day { cursor: pointer; }
+    @keyframes modal-bounce-left  { 0%,100%{transform:translateX(0)} 40%{transform:translateX(-28px)} }
+    @keyframes modal-bounce-right { 0%,100%{transform:translateX(0)} 40%{transform:translateX( 28px)} }
+    .day-modal.bounce-left  { animation: modal-bounce-left  0.35s ease; }
+    .day-modal.bounce-right { animation: modal-bounce-right 0.35s ease; }
 
     /* ── Mobile (≤ 480px) ──────────────────────────────────────── */
     @media (max-width: 480px) {
@@ -1405,7 +1409,8 @@ async function safeFetch(url, opts = {}) {
 
 // ── Chart instance (reused on refresh) ────────────────────────────
 let hourlyChart = null;
-let modalChart  = null;
+let modalChart    = null;
+let modalDayIndex = 0;
 let dailyCache  = null;
 
 // ── NWS written forecast ──────────────────────────────────────────
@@ -2847,6 +2852,7 @@ async function loadDashboard() {
 // ── Day Detail Modal ──────────────────────────────────────────────
 function openDayModal(i) {
   if (!dailyCache) return;
+  modalDayIndex = i;
   const daily = dailyCache;
   const date  = daily.time[i];
   const w     = weatherInfo(daily.weather_code[i]);
@@ -2992,6 +2998,7 @@ function renderDayChart(hourly, date) {
       plugins: {
         legend: { display: false },
         tooltip: {
+          enabled: window.innerWidth >= 700,
           backgroundColor: '#1e293b', titleColor: '#f1f5f9',
           bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1, cornerRadius: 8,
         }
@@ -3021,6 +3028,46 @@ function closeDayModal() {
   unlockScroll();
   if (modalChart) { modalChart.destroy(); modalChart = null; }
 }
+
+// ── Modal swipe navigation ─────────────────────────────────────────
+(function() {
+  const SWIPE_THRESHOLD = 50;
+  let touchStartX = 0;
+
+  const modal = document.querySelector('.day-modal');
+
+  modal.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+  }, { passive: true });
+
+  modal.addEventListener('touchend', e => {
+    const delta = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+
+    const total = dailyCache?.time.length ?? 0;
+    if (delta < 0) {
+      // swiped left → next day
+      if (modalDayIndex < total - 1) {
+        openDayModal(modalDayIndex + 1);
+      } else {
+        modal.classList.remove('bounce-left');
+        void modal.offsetWidth; // force reflow to restart animation
+        modal.classList.add('bounce-left');
+        modal.addEventListener('animationend', () => modal.classList.remove('bounce-left'), { once: true });
+      }
+    } else {
+      // swiped right → previous day
+      if (modalDayIndex > 0) {
+        openDayModal(modalDayIndex - 1);
+      } else {
+        modal.classList.remove('bounce-right');
+        void modal.offsetWidth;
+        modal.classList.add('bounce-right');
+        modal.addEventListener('animationend', () => modal.classList.remove('bounce-right'), { once: true });
+      }
+    }
+  }, { passive: true });
+})();
 
 // ── Alert toggle (tap outside to dismiss) ─────────────────────────
 function toggleAlert(e, el) {
