@@ -1,13 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Dark background matching app -->
-  <rect width="512" height="512" rx="112" fill="#0f172a"/>
-  <!-- cloud-sun icon (amber + blue) scaled to fill canvas -->
+  <defs>
+    <!-- Teal to cobalt diagonal -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0891b2"/>
+      <stop offset="50%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#4338ca"/>
+    </linearGradient>
+    <!-- Top-left brightener -->
+    <radialGradient id="bgLift" cx="15%" cy="15%" r="50%">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sunGlow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="26"/>
+    </filter>
+    <filter id="iconGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#bgLift)"/>
+
+  <!-- Sun bloom -->
+
+  <!-- Icon: glow pass -->
+  <g transform="translate(256,256) scale(14)" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" filter="url(#iconGlow)" opacity="0.6">
+    <path d="M0-10v-2" stroke="#fbbf24"/>
+    <path d="m-7.07-7.07-1.41-1.41" stroke="#fbbf24"/>
+    <path d="M10 0h2" stroke="#fbbf24"/>
+    <path d="m7.07-7.07 1.41-1.41" stroke="#fbbf24"/>
+    <path d="M3.947.65a4 4 0 0 0-5.925-4.128" stroke="#fbbf24"/>
+    <path d="M1 10H-5a5 5 0 1 1 4.9-6H1a3 3 0 0 1 0 6z" stroke="#ffffff"/>
+  </g>
+
+  <!-- Icon: crisp pass — all white, slight warm tint on sun -->
   <g transform="translate(256,256) scale(14)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M0-10v-2" stroke="#f59e0b"/>
-    <path d="m-7.07-7.07-1.41-1.41" stroke="#f59e0b"/>
-    <path d="M10 0h2" stroke="#f59e0b"/>
-    <path d="m7.07-7.07 1.41-1.41" stroke="#f59e0b"/>
-    <path d="M3.947.65a4 4 0 0 0-5.925-4.128" stroke="#f59e0b"/>
-    <path d="M1 10H-5a5 5 0 1 1 4.9-6H1a3 3 0 0 1 0 6z" stroke="#60a5fa"/>
+    <path d="M0-10v-2" stroke="#fbbf24"/>
+    <path d="m-7.07-7.07-1.41-1.41" stroke="#fbbf24"/>
+    <path d="M10 0h2" stroke="#fbbf24"/>
+    <path d="m7.07-7.07 1.41-1.41" stroke="#fbbf24"/>
+    <path d="M3.947.65a4 4 0 0 0-5.925-4.128" stroke="#fbbf24"/>
+    <path d="M1 10H-5a5 5 0 1 1 4.9-6H1a3 3 0 0 1 0 6z" stroke="#ffffff"/>
   </g>
 </svg>
