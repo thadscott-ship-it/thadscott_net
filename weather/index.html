@@ -1740,7 +1740,7 @@ function renderHourly(hourly) {
       },
       scales: {
         x: {
-          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim(), maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } },
+          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim(), maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 }, callback: function(v, i) { return i === 0 ? 'Now' : this.getLabelForValue(v); } },
           grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y: {
