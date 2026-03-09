@@ -665,7 +665,7 @@
     .game-feedback.miss               { color: #ef4444; }
     .game-score-line                  { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
     .game-next      { padding: 0.5rem 1.25rem; background: #1e40af; border: none;
-                      border-radius: 6px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;
+                      border-radius: 6px; color: #ffffff; font-size: 0.9rem; font-weight: 600;
                       cursor: pointer; transition: background 0.15s; }
     .game-next:hover { background: #2563eb; }
     .game-choices--vertical { flex-direction: column; }
@@ -675,6 +675,8 @@
                            padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; line-height: 1.6; }
     .game-scenario-label { display: inline-block; font-weight: 700; color: var(--accent-blue);
                            min-width: 1.4rem; margin-right: 0.25rem; }
+    .game-choice.correct .game-scenario-label,
+    .game-choice.wrong .game-scenario-label { color: rgba(255,255,255,0.75); }
     .game-explanation   { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.75rem;
                           line-height: 1.5; font-style: italic; }
     .game-final     { text-align: left; padding: 0.5rem 0 0.25rem; }
