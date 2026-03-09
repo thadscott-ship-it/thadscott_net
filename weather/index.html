@@ -1439,22 +1439,28 @@ function getMoonPhase(date) {
 }
 
 // ── AQI category ──────────────────────────────────────────────────
+function badgeStyle(cat) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  if (isLight) return `background:transparent; border:3px solid ${cat.color}; color:${cat.lightText};`;
+  return `background:${cat.bg}; color:${cat.text};`;
+}
+
 function aqiCategory(aqi) {
-  if (aqi <= 50)  return { label: 'Good',                       color: '#22c55e', bg: '#14532d', text: '#f0fdf4' };
-  if (aqi <= 100) return { label: 'Moderate',                   color: '#eab308', bg: '#713f12', text: '#fefce8' };
-  if (aqi <= 150) return { label: 'Unhealthy for Sensitive',    color: '#f97316', bg: '#7c2d12', text: '#fff7ed' };
-  if (aqi <= 200) return { label: 'Unhealthy',                  color: '#ef4444', bg: '#7f1d1d', text: '#fef2f2' };
-  if (aqi <= 300) return { label: 'Very Unhealthy',             color: '#a855f7', bg: '#581c87', text: '#faf5ff' };
-  return              { label: 'Hazardous',                     color: '#881337', bg: '#4c0519', text: '#fff1f2' };
+  if (aqi <= 50)  return { label: 'Good',                       color: '#22c55e', bg: '#14532d', text: '#f0fdf4', lightText: '#15803d' };
+  if (aqi <= 100) return { label: 'Moderate',                   color: '#eab308', bg: '#713f12', text: '#fefce8', lightText: '#a16207' };
+  if (aqi <= 150) return { label: 'Unhealthy for Sensitive',    color: '#f97316', bg: '#7c2d12', text: '#fff7ed', lightText: '#c2410c' };
+  if (aqi <= 200) return { label: 'Unhealthy',                  color: '#ef4444', bg: '#7f1d1d', text: '#fef2f2', lightText: '#b91c1c' };
+  if (aqi <= 300) return { label: 'Very Unhealthy',             color: '#a855f7', bg: '#581c87', text: '#faf5ff', lightText: '#7e22ce' };
+  return              { label: 'Hazardous',                     color: '#881337', bg: '#4c0519', text: '#fff1f2', lightText: '#881337' };
 }
 
 // ── UV category ────────────────────────────────────────────────────
 function uvCategory(uv) {
-  if (uv < 3)  return { label: 'Low',      color: '#22c55e', bg: '#14532d', text: '#f0fdf4' };
-  if (uv < 6)  return { label: 'Moderate', color: '#eab308', bg: '#713f12', text: '#fefce8' };
-  if (uv < 8)  return { label: 'High',     color: '#f97316', bg: '#7c2d12', text: '#fff7ed' };
-  if (uv < 11) return { label: 'Very High',color: '#ef4444', bg: '#7f1d1d', text: '#fef2f2' };
-  return              { label: 'Extreme',  color: '#a855f7', bg: '#581c87', text: '#faf5ff' };
+  if (uv < 3)  return { label: 'Low',      color: '#22c55e', bg: '#14532d', text: '#f0fdf4', lightText: '#15803d' };
+  if (uv < 6)  return { label: 'Moderate', color: '#eab308', bg: '#713f12', text: '#fefce8', lightText: '#a16207' };
+  if (uv < 8)  return { label: 'High',     color: '#f97316', bg: '#7c2d12', text: '#fff7ed', lightText: '#c2410c' };
+  if (uv < 11) return { label: 'Very High',color: '#ef4444', bg: '#7f1d1d', text: '#fef2f2', lightText: '#b91c1c' };
+  return              { label: 'Extreme',  color: '#a855f7', bg: '#581c87', text: '#faf5ff', lightText: '#7e22ce' };
 }
 
 // ── Time formatting helpers ───────────────────────────────────────
@@ -1829,7 +1835,7 @@ function renderAQI(data, uvIndex) {
   el.innerHTML = `
     <div class="aqi-uv-row">
       <div class="aqi-block">
-        <div class="aqi-badge" style="background:${cat.bg}; color:${cat.text}">${aqi}</div>
+        <div class="aqi-badge" style="${badgeStyle(cat)}">${aqi}</div>
         <div>
           <div class="aqi-label" style="color:${cat.color}">${cat.label}</div>
           <div class="aqi-desc">US AQI</div>
@@ -1837,7 +1843,7 @@ function renderAQI(data, uvIndex) {
       </div>
       ${uvc ? `
       <div class="uv-block">
-        <div class="uv-badge" style="background:${uvc.bg}; color:${uvc.text}">${uv}</div>
+        <div class="uv-badge" style="${badgeStyle(uvc)}">${uv}</div>
         <div>
           <div class="uv-label" style="color:${uvc.color}">${uvc.label}</div>
           <div class="uv-desc">UV Index</div>
