@@ -12,9 +12,53 @@
   <meta name="apple-mobile-web-app-title" content="ThadCast">
   <meta name="theme-color" content="#0f172a">
   <link rel="apple-touch-icon" href="icon.svg">
+  <script>
+    // Apply saved theme immediately to prevent flash
+    (function(){
+      var t = localStorage.getItem('wx_theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      document.querySelector('meta[name="theme-color"]').content = t === 'light' ? '#f8fafc' : '#0f172a';
+    })();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
+:root {
+  --bg-primary:    #0f172a;
+  --bg-secondary:  #1e293b;
+  --bg-tertiary:   #1a2640;
+  --border:        #334155;
+  --text-primary:  #f1f5f9;
+  --text-secondary: #e2e8f0;
+  --text-body:     #cbd5e1;
+  --text-muted:    #64748b;
+  --text-dim:      #94a3b8;
+  --text-dimmer:   #475569;
+  --accent-blue:   #60a5fa;
+  --accent-blue-mid: #3b82f6;
+  --link:          #60a5fa;
+}
+[data-theme="light"] {
+  --bg-primary:    #f8fafc;
+  --bg-secondary:  #ffffff;
+  --bg-tertiary:   #f1f5f9;
+  --border:        #cbd5e1;
+  --text-primary:  #0f172a;
+  --text-secondary: #1e293b;
+  --text-body:     #475569;
+  --text-muted:    #475569;
+  --text-dim:      #64748b;
+  --text-dimmer:   #334155;
+  --accent-blue:   #2563eb;
+  --accent-blue-mid: #1d4ed8;
+  --link:          #2563eb;
+}
+[data-theme="light"] .card {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+[data-theme="light"] .card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
     /* ── Lucide Icons ──────────────────────────────────────────── */
     i[data-lucide] { display: inline-flex; align-items: center; justify-content: center; }
     i[data-lucide] svg { display: block; }
@@ -23,20 +67,21 @@
     .lucide-sun-moon { width: 2rem; height: 2rem; stroke: currentColor; stroke-width: 1.5; }
     .lucide-modal-weather { width: 3rem; height: 3rem; stroke: currentColor; stroke-width: 1.5; }
     .moon-phase-svg { display: block; color: rgba(255,255,255,0.9); }
+    [data-theme="light"] .moon-phase-svg { color: #334155; }
 
     /* ── Reset & Base ──────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 16px; overflow-x: hidden; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       min-height: 100vh;
       padding: 1rem;
       line-height: 1.5;
       overflow-x: hidden;
     }
-    a { color: #60a5fa; text-decoration: none; }
+    a { color: var(--accent-blue); text-decoration: none; }
     a:hover { text-decoration: underline; }
 
     /* ── Animations ────────────────────────────────────────────── */
@@ -72,7 +117,7 @@
 
     /* ── Card ──────────────────────────────────────────────────── */
     .card {
-      background: #1e293b;
+      background: var(--bg-secondary);
       border-radius: 1rem;
       padding: 1.25rem 1.5rem;
       box-shadow: 0 4px 24px rgba(0,0,0,0.25);
@@ -88,7 +133,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #94a3b8;
+      color: var(--text-dim);
       margin-bottom: 0.75rem;
     }
 
@@ -100,7 +145,7 @@
     .header h1 {
       font-size: 1.75rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: var(--text-primary);
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
@@ -110,12 +155,12 @@
       border: none;
       cursor: pointer;
       font-size: 0.9rem;
-      color: #64748b;
+      color: var(--text-muted);
       padding: 0.2rem;
       border-radius: 4px;
       transition: color 0.2s;
     }
-    .edit-city-btn:hover { color: #f1f5f9; }
+    .edit-city-btn:hover { color: var(--text-primary); }
 
     /* ── City Dialog ──────────────────────────────────────────── */
     .city-dialog-overlay {
@@ -129,8 +174,8 @@
     }
     .city-dialog-overlay.open { display: flex; }
     .city-dialog {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.5rem;
       width: min(90%, 380px);
@@ -139,27 +184,27 @@
     .city-dialog h3 {
       margin-bottom: 0.75rem;
       font-size: 1.1rem;
-      color: #f1f5f9;
+      color: var(--text-primary);
     }
     .city-dialog input {
       width: 100%;
       padding: 0.5rem 0.75rem;
-      border: 1px solid #475569;
+      border: 1px solid var(--text-dimmer);
       border-radius: 6px;
-      background: #0f172a;
-      color: #e2e8f0;
+      background: var(--bg-primary);
+      color: var(--text-secondary);
       font-size: 0.95rem;
       outline: none;
     }
-    .city-dialog input:focus { border-color: #60a5fa; }
+    .city-dialog input:focus { border-color: var(--accent-blue); }
     .city-autocomplete { position: relative; }
     .city-dropdown {
       display: none;
       position: absolute;
       top: calc(100% - 1px);
       left: 0; right: 0;
-      background: #0f172a;
-      border: 1px solid #475569;
+      background: var(--bg-primary);
+      border: 1px solid var(--text-dimmer);
       border-top: none;
       border-radius: 0 0 8px 8px;
       overflow: hidden;
@@ -169,13 +214,13 @@
     .city-dropdown-item {
       padding: 0.55rem 0.75rem;
       cursor: pointer;
-      border-bottom: 1px solid #1e293b;
+      border-bottom: 1px solid var(--bg-secondary);
     }
     .city-dropdown-item:last-child { border-bottom: none; }
     .city-dropdown-item:hover,
-    .city-dropdown-item.active { background: #1e293b; }
-    .city-dropdown-item .item-name { font-size: 0.9rem; color: #f1f5f9; }
-    .city-dropdown-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 1px; }
+    .city-dropdown-item.active { background: var(--bg-secondary); }
+    .city-dropdown-item .item-name { font-size: 0.9rem; color: var(--text-primary); }
+    .city-dropdown-item .item-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
     .city-dialog .dialog-buttons {
       display: flex;
       justify-content: flex-end;
@@ -190,15 +235,15 @@
       cursor: pointer;
     }
     .city-dialog .btn-cancel {
-      background: #334155;
-      color: #e2e8f0;
+      background: var(--border);
+      color: var(--text-secondary);
     }
-    .city-dialog .btn-cancel:hover { background: #475569; }
+    .city-dialog .btn-cancel:hover { background: var(--text-dimmer); }
     .city-dialog .btn-go {
-      background: #3b82f6;
+      background: var(--accent-blue-mid);
       color: #fff;
     }
-    .city-dialog .btn-go:hover { background: #2563eb; }
+    .city-dialog .btn-go:hover { background: var(--accent-blue); }
     .city-dialog .dialog-error {
       color: #f87171;
       font-size: 0.8rem;
@@ -207,12 +252,12 @@
     }
     .header .subtitle {
       font-size: 0.85rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin-top: 0.25rem;
     }
     .refresh-info {
       font-size: 0.75rem;
-      color: #475569;
+      color: var(--text-dimmer);
       margin-top: 0.5rem;
     }
     .refresh-info .dot {
@@ -264,7 +309,7 @@
     .alert-severe   { background: #dc2626; color: #fef2f2; }
     .alert-moderate { background: #ea580c; color: #fff7ed; }
     .alert-minor    { background: #ca8a04; color: #fefce8; }
-    .alert-unknown  { background: #475569; color: #f1f5f9; }
+    .alert-unknown  { background: #475569; color: var(--text-primary); }
 
     /* ── Current Conditions ────────────────────────────────────── */
     .current-main {
@@ -283,17 +328,17 @@
     .current-main .temp-value {
       font-size: 3.5rem;
       font-weight: 700;
-      color: #f8fafc;
+      color: var(--text-primary);
       line-height: 1;
     }
     .current-main .temp-unit {
       font-size: 1.5rem;
-      color: #94a3b8;
+      color: var(--text-dim);
       font-weight: 400;
     }
     .current-desc {
       font-size: 1rem;
-      color: #cbd5e1;
+      color: var(--text-body);
       margin-bottom: 0.75rem;
     }
     .current-details {
@@ -307,11 +352,11 @@
       gap: 0.75rem;
       font-size: 0.85rem;
       padding: 0.15rem 0;
-      border-bottom: 1px solid #334155;
+      border-bottom: 1px solid var(--border);
     }
     .detail-item .value { text-align: right; }
-    .detail-item .label { color: #94a3b8; }
-    .detail-item .value { color: #e2e8f0; font-weight: 500; }
+    .detail-item .label { color: var(--text-dim); }
+    .detail-item .value { color: var(--text-secondary); font-weight: 500; }
 
     /* ── Hourly Chart ──────────────────────────────────────────── */
     .chart-wrap {
@@ -329,26 +374,26 @@
       overflow-x: auto;
       padding-bottom: 0.5rem;
       scrollbar-width: thin;
-      scrollbar-color: #334155 transparent;
+      scrollbar-color: var(--border) transparent;
       -webkit-overflow-scrolling: touch;
     }
     .forecast-row::-webkit-scrollbar { height: 4px; }
     .forecast-row::-webkit-scrollbar-track { background: transparent; }
-    .forecast-row::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .forecast-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .forecast-day {
       flex: 0 0 auto;
       min-width: 110px;
-      background: #0f172a;
+      background: var(--bg-primary);
       border-radius: 0.75rem;
       padding: 0.85rem;
       text-align: center;
       transition: background 0.15s;
     }
-    .forecast-day:hover { background: #1a2640; }
+    .forecast-day:hover { background: var(--bg-tertiary); }
     .forecast-day .day-name {
       font-size: 0.75rem;
       font-weight: 600;
-      color: #94a3b8;
+      color: var(--text-dim);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
@@ -358,11 +403,11 @@
       font-size: 0.9rem;
       font-weight: 600;
     }
-    .forecast-day .day-temps .high { color: #f8fafc; }
-    .forecast-day .day-temps .low  { color: #64748b; margin-left: 0.35rem; }
+    .forecast-day .day-temps .high { color: var(--text-primary); }
+    .forecast-day .day-temps .low  { color: var(--text-muted); margin-left: 0.35rem; }
     .forecast-day .day-detail {
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin-top: 0.25rem;
     }
 
@@ -376,22 +421,22 @@
     .sun-moon-item .icon { font-size: 2rem; margin-bottom: 0.25rem; display: flex; justify-content: center; }
     .sun-moon-item .label {
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
     .sun-moon-item .val {
       font-size: 1.1rem;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-primary);
     }
     .day-length {
       text-align: center;
       margin-top: 0.75rem;
       padding-top: 0.75rem;
-      border-top: 1px solid #334155;
+      border-top: 1px solid var(--border);
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: var(--text-dim);
     }
 
     /* ── AQI & UV ──────────────────────────────────────────────── */
@@ -432,7 +477,7 @@
     }
     .aqi-desc, .uv-desc {
       font-size: 0.75rem;
-      color: #94a3b8;
+      color: var(--text-dim);
       margin-top: 0.15rem;
     }
     .aqi-details {
@@ -443,13 +488,13 @@
     }
     .aqi-detail-item .pollutant-label {
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-muted);
       text-transform: uppercase;
     }
     .aqi-detail-item .pollutant-val {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #e2e8f0;
+      color: var(--text-secondary);
     }
 
     /* ── NWS Written Forecast ──────────────────────────────────── */
@@ -460,21 +505,21 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.07em;
-      color: #64748b;
+      color: var(--text-muted);
       margin-bottom: 0.3rem;
     }
     .nws-period-text {
       font-size: 0.9rem;
-      color: #cbd5e1;
+      color: var(--text-body);
       line-height: 1.65;
     }
-    .nws-unavailable { font-size: 0.85rem; color: #475569; }
+    .nws-unavailable { font-size: 0.85rem; color: var(--text-dimmer); }
 
     /* ── Stargazing ─────────────────────────────────────────────── */
     .stargazing-score { display: flex; align-items: baseline; gap: 0; margin-bottom: 0.75rem; }
-    .stargazing-score-num { font-size: 2.75rem; font-weight: 700; line-height: 1; color: #f1f5f9; }
+    .stargazing-score-num { font-size: 2.75rem; font-weight: 700; line-height: 1; color: var(--text-primary); }
     .stargazing-score-sep { font-size: 2rem; font-weight: 300; color: #334155; margin: 0 0.15rem; line-height: 1; align-self: flex-end; padding-bottom: 0.1rem; }
-    .stargazing-score-denom { font-size: 2rem; font-weight: 400; color: #475569; line-height: 1; align-self: flex-end; padding-bottom: 0.1rem; }
+    .stargazing-score-denom { font-size: 2rem; font-weight: 400; color: var(--text-dimmer); line-height: 1; align-self: flex-end; padding-bottom: 0.1rem; }
 
     .stargazing-factors {
       display: grid;
@@ -484,10 +529,10 @@
     }
     @media (min-width: 700px) { .stargazing-factors { grid-template-columns: repeat(4, 1fr); } }
     .stargazing-factor { font-size: 0.82rem; }
-    .stargazing-factor-name { color: #64748b; margin-bottom: 0.2rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
-    .stargazing-factor-val { font-weight: 600; color: #e2e8f0; }
-    .stargazing-factor-sub { font-weight: 400; color: #64748b; margin-left: 0.25rem; }
-    .stargazing-hourly-label { font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem; }
+    .stargazing-factor-name { color: var(--text-muted); margin-bottom: 0.2rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stargazing-factor-val { font-weight: 600; color: var(--text-secondary); }
+    .stargazing-factor-sub { font-weight: 400; color: var(--text-muted); margin-left: 0.25rem; }
+    .stargazing-hourly-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
     .stargazing-hourly {
       display: flex;
       gap: 0.4rem;
@@ -496,8 +541,8 @@
       -webkit-overflow-scrolling: touch;
     }
     .stargazing-hourly::-webkit-scrollbar { height: 4px; }
-    .stargazing-hourly::-webkit-scrollbar-track { background: #0f172a; border-radius: 2px; }
-    .stargazing-hourly::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .stargazing-hourly::-webkit-scrollbar-track { background: var(--bg-primary); border-radius: 2px; }
+    .stargazing-hourly::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
     .sg-hour {
       display: flex;
       flex-direction: column;
@@ -506,50 +551,50 @@
       min-width: 2.8rem;
       flex-shrink: 0;
     }
-    .sg-hour-time { font-size: 0.72rem; color: #94a3b8; }
+    .sg-hour-time { font-size: 0.72rem; color: var(--text-dim); }
     .sg-hour-pip {
       width: 2.4rem;
       height: 0.5rem;
       border-radius: 0.25rem;
     }
-    .sg-hour-qual { font-size: 0.7rem; font-weight: 400; color: #64748b; }
+    .sg-hour-qual { font-size: 0.7rem; font-weight: 400; color: var(--text-muted); }
     .sg-hour-pip.sg-exc  { background: #60a5fa; }
     .sg-hour-pip.sg-vg   { background: #7dd3fc; }
     .sg-hour-pip.sg-good { background: #94a3b8; }
-    .sg-hour-pip.sg-fair { background: #475569; }
-    .sg-hour-pip.sg-poor { background: #1e3a5f; }
-    .stargazing-moonset { font-size: 0.82rem; color: #94a3b8; margin-top: 0.75rem; }
+    .sg-hour-pip.sg-fair { background: #94a3b8; }
+    .sg-hour-pip.sg-poor { background: #64748b; }
+    .stargazing-moonset { font-size: 0.82rem; color: var(--text-dim); margin-top: 0.75rem; }
 
     /* ── Coat Recommendation ─────────────────────────────────────── */
-    .coat-garment { font-size: 1.75rem; font-weight: 700; line-height: 1.1; margin-bottom: 0.35rem; color: #f1f5f9; }
-    .coat-detail  { font-size: 0.85rem; color: #64748b; margin-bottom: 0.75rem; }
+    .coat-garment { font-size: 1.75rem; font-weight: 700; line-height: 1.1; margin-bottom: 0.35rem; color: var(--text-primary); }
+    .coat-detail  { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
     .coat-notes   { display: flex; flex-direction: column; gap: 0.4rem; }
-    .coat-note    { font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 0.35rem; }
+    .coat-note    { font-size: 0.85rem; color: var(--text-body); display: flex; align-items: center; gap: 0.35rem; }
 
     /* ── Weekly Extremes ────────────────────────────────────────── */
-    .extremes-week-label { font-size: 0.8rem; color: #64748b; margin-bottom: 1rem; }
+    .extremes-week-label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem; }
     .extremes-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem 1.5rem;
     }
     @media (min-width: 700px) { .extremes-grid { grid-template-columns: repeat(4, 1fr); } }
-    .extreme-header { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
-    .extreme-value { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1; margin-bottom: 0.2rem; }
-    .extreme-city { font-size: 0.85rem; color: #cbd5e1; font-weight: 500; }
-    .extreme-date { font-size: 0.75rem; color: #64748b; margin-top: 0.1rem; }
+    .extreme-header { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 0.3rem; margin-bottom: 0.3rem; }
+    .extreme-value { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1; margin-bottom: 0.2rem; }
+    .extreme-city { font-size: 0.85rem; color: var(--text-body); font-weight: 500; }
+    .extreme-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; }
 
     /* ── Loading / Error ───────────────────────────────────────── */
     .loading {
       text-align: center;
       padding: 2rem;
-      color: #64748b;
+      color: var(--text-muted);
     }
     .loading .spinner {
       display: inline-block;
       width: 24px; height: 24px;
-      border: 3px solid #334155;
-      border-top-color: #60a5fa;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-blue);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin-bottom: 0.5rem;
@@ -580,62 +625,69 @@
     }
     .skeleton {
       border-radius: 0.4rem;
-      background: linear-gradient(90deg, #1e293b 25%, #26334d 50%, #1e293b 75%);
+      background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-tertiary) 50%, var(--bg-secondary) 75%);
       background-size: 400% 100%;
       animation: shimmer 1.8s ease-in-out infinite;
     }
 
     /* ── Weather Twin ───────────────────────────────────────────── */
-    .twin-match-pct   { font-size: 0.8rem; font-weight: 600; color: #60a5fa; text-transform: uppercase;
+    .twin-match-pct   { font-size: 0.8rem; font-weight: 600; color: var(--accent-blue); text-transform: uppercase;
                         letter-spacing: 0.08em; margin-bottom: 0.25rem; }
-    .twin-city-name   { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1.1;
+    .twin-city-name   { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1.1;
                         margin-bottom: 0.35rem; }
-    .twin-distance    { font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;
+    .twin-distance    { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;
                         display: flex; align-items: center; gap: 0.25rem; }
     .twin-factors     { display: flex; flex-direction: column; gap: 0.4rem; }
     .twin-factor      { display: flex; justify-content: space-between; align-items: baseline;
-                        font-size: 0.85rem; padding: 0.15rem 0; border-bottom: 1px solid #334155; }
+                        font-size: 0.85rem; padding: 0.15rem 0; border-bottom: 1px solid var(--border); }
     .twin-factor:last-child { border-bottom: none; }
-    .twin-factor-label { color: #94a3b8; }
-    .twin-factor-vals  { color: #e2e8f0; font-weight: 500; }
-    .twin-sep          { color: #64748b; font-weight: 400; }
+    .twin-factor-label { color: var(--text-dim); }
+    .twin-factor-vals  { color: var(--text-secondary); font-weight: 500; }
+    .twin-sep          { color: var(--text-muted); font-weight: 400; }
 
     /* ── Daily Weather Game ──────────────────────────────────────── */
-    .game-prompt    { font-size: 0.75rem; font-weight: 600; color: #64748b;
+    .game-prompt    { font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
                       text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
-    .game-question  { font-size: 1.1rem; font-weight: 600; color: #f1f5f9; margin-bottom: 1rem; }
+    .game-question  { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
     .game-choices   { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
-    .game-choice    { flex: 1; min-width: 120px; padding: 0.75rem 1rem; background: #0f172a;
-                      border: 1px solid #334155; border-radius: 0.625rem; color: #e2e8f0;
+    .game-choice    { flex: 1; min-width: 120px; padding: 0.75rem 1rem; background: var(--bg-primary);
+                      border: 1px solid var(--border); border-radius: 0.625rem; color: var(--text-secondary);
                       font-size: 0.95rem; font-weight: 600; cursor: pointer; text-align: center;
                       transition: border-color 0.15s, background 0.15s; line-height: 1.3; }
-    .game-choice:hover                { border-color: #60a5fa; background: #1e293b; }
+    .game-choice:hover                { border-color: var(--accent-blue); background: var(--bg-secondary); }
     .game-choice.correct              { background: #052e16; border-color: #22c55e; color: #86efac; cursor: default; }
     .game-choice.wrong                { background: #2d0a0a; border-color: #ef4444; color: #fca5a5; cursor: default; }
     .game-choice.neutral              { opacity: 0.4; cursor: default; }
-    .game-choice-country              { display: block; font-size: 0.78rem; font-weight: 400; color: #64748b; margin-top: 0.15rem; }
+    .game-choice-country              { display: block; font-size: 0.78rem; font-weight: 400; color: var(--text-muted); margin-top: 0.15rem; }
     .game-choice-val                  { display: block; font-size: 1.05rem; font-weight: 700; margin-top: 0.25rem; }
     .game-feedback                    { font-size: 0.9rem; margin-bottom: 0.75rem; min-height: 1.2em; }
     .game-feedback.hit                { color: #22c55e; }
     .game-feedback.miss               { color: #ef4444; }
-    .game-score-line                  { font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem; }
+    .game-score-line                  { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.75rem; }
     .game-next      { padding: 0.5rem 1.25rem; background: #1e40af; border: none;
-                      border-radius: 6px; color: #e2e8f0; font-size: 0.9rem; font-weight: 600;
+                      border-radius: 6px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 600;
                       cursor: pointer; transition: background 0.15s; }
     .game-next:hover { background: #2563eb; }
     .game-choices--vertical { flex-direction: column; }
     .game-choice--def { text-align: left; font-size: 0.88rem; min-height: 2.5rem; }
+    .game-scenario-clues { font-size: 0.8rem; color: var(--text-dim); background: var(--bg-primary);
+                           border: 1px solid var(--bg-secondary); border-radius: 0.5rem;
+                           padding: 0.6rem 0.75rem; margin-bottom: 0.75rem; line-height: 1.6; }
+    .game-scenario-label { display: inline-block; font-weight: 700; color: var(--accent-blue);
+                           min-width: 1.4rem; margin-right: 0.25rem; }
+    .game-explanation   { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 0.75rem;
+                          line-height: 1.5; font-style: italic; }
     .game-final     { text-align: left; padding: 0.5rem 0 0.25rem; }
-    .game-final-num { font-size: 1.75rem; font-weight: 700; color: #f1f5f9; line-height: 1.1; margin-bottom: 0.35rem; }
-    .game-final-msg { font-size: 1rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; }
-    .game-final-sub { font-size: 0.85rem; color: #64748b; }
+    .game-final-num { font-size: 1.75rem; font-weight: 700; color: var(--text-primary); line-height: 1.1; margin-bottom: 0.35rem; }
+    .game-final-msg { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; }
+    .game-final-sub { font-size: 0.85rem; color: var(--text-muted); }
 
     /* ── Footer ────────────────────────────────────────────────── */
     .footer {
       text-align: center;
       padding: 1.5rem 0 1rem;
       font-size: 0.7rem;
-      color: #475569;
+      color: var(--text-dimmer);
     }
 
     /* ── Forecast Header & Looking Back ────────────────────────── */
@@ -656,10 +708,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #94a3b8;
+      color: var(--text-dim);
       transition: background 0.2s, color 0.2s;
     }
-    .lookback-btn:hover { background: #1e3a5f; color: #60a5fa; }
+    .lookback-btn:hover { background: #1e3a5f; color: var(--accent-blue); }
+    [data-theme="light"] .lookback-btn:hover { background: #dbeafe; color: var(--accent-blue); }
 
     /* ── Radar Toggle ──────────────────────────────────────────── */
     .radar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
@@ -667,7 +720,7 @@
     .radar-toggle {
       display: flex;
       align-items: center;
-      background: #0f172a;
+      background: var(--bg-primary);
       border-radius: 2rem;
       padding: 0.2rem;
       gap: 0.15rem;
@@ -682,11 +735,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #475569;
+      color: var(--text-dimmer);
       transition: background 0.2s, color 0.2s;
     }
-    .rt-btn:hover { color: #94a3b8; }
-    .rt-btn.active { background: #1e3a5f; color: #60a5fa; }
+    .rt-btn:hover { color: var(--text-dim); }
+    .rt-btn.active { background: #1e3a5f; color: var(--accent-blue); }
+    [data-theme="light"] .rt-btn.active { background: #dbeafe; color: var(--accent-blue); }
 
     /* ── Radar Map ─────────────────────────────────────────────── */
     .radar-map-wrap {
@@ -708,8 +762,8 @@
       top: 0;
       left: 50%;
       transform: translateX(-50%) translateY(-56px);
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 0 14px;
       height: 36px;
@@ -718,7 +772,7 @@
       gap: 6px;
       font-size: 0.78rem;
       font-weight: 500;
-      color: #64748b;
+      color: var(--text-muted);
       z-index: 9999;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
       white-space: nowrap;
@@ -727,7 +781,7 @@
     #ptr-indicator.ptr-snap {
       transition: transform 0.25s ease, opacity 0.25s ease;
     }
-    #ptr-indicator.ptr-ready { color: #60a5fa; border-color: #3b82f6; }
+    #ptr-indicator.ptr-ready { color: var(--accent-blue); border-color: var(--accent-blue-mid); }
     #ptr-indicator .ptr-icon { font-size: 1rem; transition: transform 0.2s; }
     #ptr-indicator.ptr-ready .ptr-icon { transform: rotate(180deg); }
 
@@ -744,8 +798,8 @@
     }
     .day-modal-overlay.open { display: flex; }
     .day-modal {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
       border-radius: 16px;
       width: 100%;
       max-width: 480px;
@@ -758,9 +812,9 @@
       position: absolute;
       top: 0.85rem;
       right: 0.85rem;
-      background: #334155;
+      background: var(--border);
       border: none;
-      color: #94a3b8;
+      color: var(--text-dim);
       width: 28px; height: 28px;
       border-radius: 50%;
       font-size: 0.75rem;
@@ -770,7 +824,8 @@
       justify-content: center;
       z-index: 1;
     }
-    .day-modal-close:hover { background: #475569; color: #f1f5f9; }
+    .day-modal-close:hover { background: #475569; color: var(--text-primary); }
+    [data-theme="light"] .day-modal-close:hover { background: #475569; color: #ffffff; }
     .day-modal-inner { padding: 1.5rem; }
     .day-modal-header {
       display: flex;
@@ -783,17 +838,17 @@
     .day-modal-title {
       font-size: 1.4rem;
       font-weight: 700;
-      color: #f1f5f9;
+      color: var(--text-primary);
       line-height: 1.1;
     }
     .day-modal-date {
       font-size: 0.8rem;
-      color: #64748b;
+      color: var(--text-muted);
       margin-top: 0.15rem;
     }
     .day-modal-desc {
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: var(--text-dim);
       margin-top: 0.2rem;
     }
     .day-modal-stats {
@@ -803,7 +858,7 @@
       margin-bottom: 1.25rem;
     }
     .day-stat {
-      background: #0f172a;
+      background: var(--bg-primary);
       border-radius: 10px;
       padding: 0.75rem 1rem;
       display: flex;
@@ -812,21 +867,21 @@
     }
     .day-stat-label {
       font-size: 0.7rem;
-      color: #64748b;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.06em;
     }
     .day-stat-val {
       font-size: 1.15rem;
       font-weight: 600;
-      color: #f1f5f9;
+      color: var(--text-primary);
     }
     .day-modal-chart-title {
       font-size: 0.75rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      color: #64748b;
+      color: var(--text-muted);
       margin-bottom: 0.75rem;
     }
     .forecast-day { cursor: pointer; }
@@ -889,6 +944,14 @@
       .footer { font-size: 0.65rem; padding: 1rem 0 0.75rem; }
       .refresh-info { font-size: 0.65rem; }
     }
+
+    /* ── Theme Toggle ───────────────────────────────────────────── */
+    .footer-theme { color: var(--text-muted); }
+    .theme-sep    { margin: 0 0.3rem; color: var(--text-muted); }
+    .theme-btn    { background: none; border: none; cursor: pointer; font-size: 0.7rem;
+                    color: var(--text-muted); padding: 0 0.1rem; }
+    .theme-btn--active { color: var(--accent-blue); font-weight: 700; }
+    .theme-btn:hover   { color: var(--text-dim); }
   </style>
 </head>
 <body>
@@ -966,7 +1029,7 @@
       </div>
 
       <!-- Beta section break -->
-      <div style="grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0 0; margin-top: 8px;">Beta Features</div>
+      <div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 0 0; margin-top: 8px;">Beta Features</div>
 
       <!-- Scooter / Bike -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
@@ -1015,6 +1078,16 @@
         Data from <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> (CC BY 4.0)
         &amp; <a href="https://www.weather.gov/" target="_blank" rel="noopener">National Weather Service</a>
       </div>
+      <div class="footer-theme" style="margin-top: 0.75rem;">
+        Choose your mode:
+        <button class="theme-btn" data-theme="light" onclick="applyTheme('light')">Light</button>
+        <span class="theme-sep">|</span>
+        <button class="theme-btn" data-theme="dark" onclick="applyTheme('dark')">Dark</button>
+      </div>
+      <div style="margin-top: 0.5rem;">
+        ThadCast is a vibe-coded creation by
+        <a href="https://thadscott.net" target="_blank" rel="noopener">Thad Scott</a>
+      </div>
     </div>
   </div>
 
@@ -1035,7 +1108,7 @@
         <div class="city-dropdown" id="city-dropdown"></div>
       </div>
       <div class="dialog-error" id="city-error"></div>
-      <button id="locate-btn" onclick="useCurrentLocation()" style="width:100%;margin-top:8px;padding:0.45rem;background:none;border:1px solid #334155;border-radius:6px;color:#94a3b8;font-size:0.85rem;cursor:pointer;transition:color 0.2s,border-color 0.2s;">Use location</button>
+      <button id="locate-btn" onclick="useCurrentLocation()" style="width:100%;margin-top:8px;padding:0.45rem;background:none;border:1px solid #334155;border-radius:6px;color:var(--text-dim);font-size:0.85rem;cursor:pointer;transition:color 0.2s,border-color 0.2s;">Use location</button>
       <div class="dialog-buttons">
         <button class="btn-cancel" onclick="closeCityDialog()">Cancel</button>
       </div>
@@ -1499,12 +1572,12 @@ async function openLookingBack() {
         { weekday: 'long', month: 'long', day: 'numeric' });
 
       return `
-        <div style="background:#0f172a;border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+        <div style="background:var(--bg-primary);border-radius:12px;padding:1rem 1.25rem;margin-bottom:0.75rem;">
           <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
             <div style="color:${w.color ?? '#93c5fd'};">${weatherIconHtml(w.icon, 'lucide-modal-weather')}</div>
             <div>
-              <div style="font-size:1.05rem;font-weight:700;color:#f1f5f9;">${label}</div>
-              <div style="font-size:0.8rem;color:#64748b;">${w.desc}</div>
+              <div style="font-size:1.05rem;font-weight:700;color:var(--text-primary);">${label}</div>
+              <div style="font-size:0.8rem;color:var(--text-muted);">${w.desc}</div>
             </div>
           </div>
           <div class="current-details">
@@ -1651,23 +1724,23 @@ function renderHourly(hourly) {
         legend: { display: false },
         tooltip: {
           enabled: window.innerWidth >= 700,
-          backgroundColor: '#1e293b',
-          titleColor: '#f1f5f9',
-          bodyColor: '#cbd5e1',
-          borderColor: '#334155',
+          backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary').trim(),
+          titleColor: getComputedStyle(document.body).getPropertyValue('--text-primary').trim(),
+          bodyColor: getComputedStyle(document.body).getPropertyValue('--text-body').trim(),
+          borderColor: getComputedStyle(document.body).getPropertyValue('--border').trim(),
           borderWidth: 1,
           cornerRadius: 8,
         }
       },
       scales: {
         x: {
-          ticks: { color: '#64748b', maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } },
-          grid: { color: 'rgba(51,65,85,0.3)' }
+          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim(), maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } },
+          grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y: {
           position: 'left',
           ticks: { color: '#f59e0b', font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
-          grid: { color: 'rgba(51,65,85,0.3)' }
+          grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y1: {
           position: 'right',
@@ -1865,7 +1938,7 @@ function renderStargazing(hourly, daily) {
     }, []);
 
     if (indices.length === 0) {
-      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">No viewing window available tonight.</div>';
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">No viewing window available tonight.</div>';
       return;
     }
 
@@ -1994,7 +2067,7 @@ function renderStargazing(hourly, daily) {
 
     // Apply score color via inline style since CSS var would need JS anyway
   } catch (e) {
-    el.innerHTML = `<div style="color:#64748b;font-size:0.85rem;">Stargazing data unavailable.</div>`;
+    el.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">Stargazing data unavailable.</div>`;
     console.warn('renderStargazing error', e);
   }
 }
@@ -2070,7 +2143,7 @@ function renderCoat(current, daily) {
 
     lucide.createIcons({ nodes: [el] });
   } catch (e) {
-    el.innerHTML = `<div style="color:#64748b;font-size:0.85rem;">Coat recommendation unavailable.</div>`;
+    el.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;">Coat recommendation unavailable.</div>`;
     console.warn('renderCoat error', e);
   }
 }
@@ -2528,7 +2601,7 @@ async function renderExtremes() {
       </div>`;
     lucide.createIcons({ nodes: [el] });
   } catch (e) {
-    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Extremes data unavailable.</div>';
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">Extremes data unavailable.</div>';
     console.warn('renderExtremes error', e);
   }
 }
@@ -2719,7 +2792,7 @@ async function renderTwin(userCurrent, hourly) {
     const d = await fetchTwin(userCurrent, userCloudCover);
 
     if (d.noTwin) {
-      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">No weather twin found beyond 500 miles.</div>';
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">No weather twin found beyond 500 miles.</div>';
       return;
     }
 
@@ -2756,7 +2829,7 @@ async function renderTwin(userCurrent, hourly) {
       </div>`;
     lucide.createIcons({ nodes: [el] });
   } catch (e) {
-    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Twin data unavailable.</div>';
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">Twin data unavailable.</div>';
     console.warn('renderTwin error', e);
   }
 }
@@ -2999,19 +3072,19 @@ function renderDayChart(hourly, date) {
         legend: { display: false },
         tooltip: {
           enabled: window.innerWidth >= 700,
-          backgroundColor: '#1e293b', titleColor: '#f1f5f9',
-          bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1, cornerRadius: 8,
+          backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-secondary').trim(), titleColor: getComputedStyle(document.body).getPropertyValue('--text-primary').trim(),
+          bodyColor: getComputedStyle(document.body).getPropertyValue('--text-body').trim(), borderColor: getComputedStyle(document.body).getPropertyValue('--border').trim(), borderWidth: 1, cornerRadius: 8,
         }
       },
       scales: {
         x: {
-          ticks: { color: '#64748b', maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } },
-          grid: { color: 'rgba(51,65,85,0.3)' }
+          ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-muted').trim(), maxRotation: 0, autoSkip: true, maxTicksLimit: 8, font: { size: 10 } },
+          grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y: {
           position: 'left',
           ticks: { color: '#f59e0b', font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
-          grid: { color: 'rgba(51,65,85,0.3)' }
+          grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y1: {
           position: 'right', min: 0, max: 100,
@@ -3141,7 +3214,7 @@ document.addEventListener('click', () => {
 // ── Daily Weather Game ────────────────────────────────────────────
 let gameState = null;
 
-const GAME_FORMATS = ['cityCompare', 'wordGuess'];
+const GAME_FORMATS = ['cityCompare', 'wordGuess', 'scenarioGame'];
 
 function formatForDay(dateStr) {
   const rand = gameRand(dateStr + '_fmt');
@@ -3304,6 +3377,98 @@ function buildWordGuessQuestions(dateStr) {
 }
 
 
+const SCENARIO_LIBRARY = [
+  {
+    clues: 'Temperature: 68°F · Humidity: 85% · Pressure: Falling rapidly · Wind: Increasing · Dark clouds building',
+    question: 'What happens next?',
+    choices: ['Skies clear up', 'Thunderstorm develops', 'Temperature drops but stays dry'],
+    answer_index: 1,
+    explanation: 'Rapid pressure drops combined with high humidity and building clouds strongly signal an approaching storm.',
+  },
+  {
+    clues: 'Temperature: 36°F · Wind: Calm · Sky: Clear · Night approaching',
+    question: 'What happens by morning?',
+    choices: ['Frost forms', 'Thunderstorms develop', 'Temperature rises overnight'],
+    answer_index: 0,
+    explanation: 'Clear skies and calm winds allow rapid nighttime cooling, leading to radiational frost by morning.',
+  },
+  {
+    clues: 'Temperature: 28°F · Wind: Off a large lake · Sky: Overcast · Wind speed: 30 mph',
+    question: 'What type of precipitation is most likely?',
+    choices: ['Freezing rain', 'Heavy lake-effect snow', 'Hail'],
+    answer_index: 1,
+    explanation: 'Cold air passing over a warm lake picks up moisture, producing intense lake-effect snowbands on the downwind shore.',
+  },
+  {
+    clues: 'Temperature: 45°F → 72°F in 3 hours · Wind: From the mountains · Humidity: Dropping fast',
+    question: 'What is causing this rapid warming?',
+    choices: ['A cold front passed through', 'Chinook downslope winds', 'Afternoon solar heating'],
+    answer_index: 1,
+    explanation: 'Chinook winds descend the leeward side of mountains, compressing and warming dramatically — sometimes 40°F in an hour.',
+  },
+  {
+    clues: 'Pressure: High and steady · Sky: Clear · Winds: Light · Temperatures: Seasonal',
+    question: 'What is most likely over the next 24 hours?',
+    choices: ['Severe thunderstorms', 'Stable, fair weather', 'Heavy snowfall'],
+    answer_index: 1,
+    explanation: 'High pressure suppresses rising air, keeping the atmosphere stable and skies clear.',
+  },
+  {
+    clues: 'Clouds progressing: cirrus → cirrostratus → altostratus · Pressure: Falling slowly · Wind shifting south',
+    question: 'What is approaching?',
+    choices: ['A warm front bringing steady rain', 'A cold front bringing gusty storms', 'High pressure clearing skies'],
+    answer_index: 0,
+    explanation: 'The classic warm front cloud sequence — high thin cirrus giving way to lower, thicker layers — signals steady rain within hours.',
+  },
+  {
+    clues: 'Temperature: 52°F · Sky: Hazy · Wind: Calm · Near industrial valley · Light winds aloft',
+    question: 'What is causing the poor air quality?',
+    choices: ['A dust storm approaching', 'Temperature inversion trapping pollutants', 'High ozone from thunderstorm activity'],
+    answer_index: 1,
+    explanation: 'Temperature inversions trap cool, polluted air near the surface while a warm layer above acts like a lid, concentrating smog.',
+  },
+  {
+    clues: 'Atmospheric river detected · Moisture plume: From Pacific · Pressure: Falling · Mountains ahead',
+    question: 'What will the mountains likely receive?',
+    choices: ['Drought conditions', 'Extreme precipitation and flooding', 'Mild, dry winds'],
+    answer_index: 1,
+    explanation: 'Atmospheric rivers carry enormous moisture. When forced up a mountain range, the air cools rapidly, releasing heavy rain or snow.',
+  },
+  {
+    clues: 'Temperature: 85°F · Dewpoint: 75°F · Pressure: Slightly falling · Cumulus building rapidly · Afternoon hours',
+    question: 'What is developing?',
+    choices: ['Radiation fog by evening', 'Convective thunderstorms', 'Strong offshore winds'],
+    answer_index: 1,
+    explanation: 'High heat and dewpoints fuel explosive convective development in the afternoon, the classic recipe for pop-up thunderstorms.',
+  },
+  {
+    clues: 'Temperature: 20°F · Wind: NW at 25 mph · Pressure: Rising rapidly · Sky: Clearing behind cold front',
+    question: 'What is happening?',
+    choices: ['A cold front is passing — cold and clearing behind it', 'A warm front is arriving', 'A tropical system is approaching'],
+    answer_index: 0,
+    explanation: 'Rapid pressure rises, falling temperatures, and northwesterly winds clearing after a front are the textbook cold front passage signature.',
+  },
+];
+
+function buildScenarioQuestions(dateStr) {
+  const rand = gameRand(dateStr + '_scenario');
+  const rand2 = gameRand(dateStr + '_scorder');
+  const shuffled = prngShuffle([...SCENARIO_LIBRARY], rand).slice(0, 2);
+  return shuffled.map(entry => {
+    const correctAnswer = entry.choices[entry.answer_index];
+    const choices = prngShuffle([...entry.choices], rand2);
+    return {
+      type: 'scenario',
+      clues: entry.clues,
+      question: entry.question,
+      choices,
+      correct: choices.indexOf(correctAnswer),
+      explanation: entry.explanation,
+    };
+  });
+}
+
+
 function saveGameState() {
   if (!gameState) return;
   const today = new Date().toLocaleDateString('en-CA');
@@ -3348,16 +3513,18 @@ async function renderGame() {
   try {
     const questions = fmt === 'wordGuess'
       ? buildWordGuessQuestions(today)
-      : await buildGameQuestions(today);
+      : fmt === 'scenarioGame'
+        ? buildScenarioQuestions(today)
+        : await buildGameQuestions(today);
     if (!questions.length) {
-      el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Game unavailable today.</div>';
+      el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">Game unavailable today.</div>';
       return;
     }
     gameState = { format: fmt, questions, round: 0, score: 0, answered: false, lastChoice: null, lastCorrect: false };
     saveGameState();
     renderGameRound();
   } catch (e) {
-    el.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Game unavailable — could not load data.</div>';
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">Game unavailable — could not load data.</div>';
     console.warn('renderGame error', e);
   }
 }
@@ -3365,6 +3532,7 @@ async function renderGame() {
 function renderGameRound() {
   if (!gameState) return;
   if (gameState.format === 'wordGuess') return renderWordGuessRound();
+  if (gameState.format === 'scenarioGame') return renderScenarioRound();
   renderCityCompareRound();
 }
 
@@ -3453,6 +3621,49 @@ function renderWordGuessRound() {
     ${nextBtn}`;
 }
 
+function renderScenarioRound() {
+  const el = document.getElementById('game-content');
+  if (!gameState) return;
+  const { questions, round, score, answered } = gameState;
+  const q = questions[round];
+  if (!q) { renderGameFinal(); return; }
+
+  const labels = ['A', 'B', 'C'];
+  let choicesHtml;
+  if (!answered) {
+    choicesHtml = q.choices.map((text, i) =>
+      `<button class="game-choice game-choice--def" onclick="answerGame(${i})"><span class="game-scenario-label">${labels[i]}</span>${text}</button>`
+    ).join('');
+  } else {
+    choicesHtml = q.choices.map((text, i) => {
+      const cls = i === q.correct ? 'correct' : (i === gameState.lastChoice ? 'wrong' : 'neutral');
+      return `<button class="game-choice game-choice--def ${cls}" disabled><span class="game-scenario-label">${labels[i]}</span>${text}</button>`;
+    }).join('');
+  }
+
+  const feedback = answered
+    ? (gameState.lastCorrect
+        ? `<div class="game-feedback hit">Correct! ✓</div>`
+        : `<div class="game-feedback miss">Not quite — ${labels[q.correct]}: ${q.choices[q.correct]}</div>`)
+    : `<div class="game-feedback"></div>`;
+
+  const explanation = answered
+    ? `<div class="game-explanation">${q.explanation}</div>`
+    : '';
+
+  const nextBtn = answered ? `<button class="game-next" onclick="nextGameRound()">Next →</button>` : '';
+
+  el.innerHTML = `
+    <div class="game-prompt">Question ${round + 1} of ${questions.length} · 🌩️ WHAT HAPPENS NEXT?</div>
+    <div class="game-scenario-clues">${q.clues}</div>
+    <div class="game-question">${q.question}</div>
+    <div class="game-choices game-choices--vertical">${choicesHtml}</div>
+    ${feedback}
+    ${explanation}
+    <div class="game-score-line">Score: ${score} / ${questions.length}</div>
+    ${nextBtn}`;
+}
+
 function answerGame(idx) {
   if (!gameState || gameState.answered) return;
   const q = gameState.questions[gameState.round];
@@ -3485,7 +3696,11 @@ function renderGameFinal() {
   const { score, questions } = gameState;
   const total = questions.length;
   let msg;
-  if (score === total)         msg = '🎉 Perfect Score!';
+  if (gameState.format === 'scenarioGame') {
+    if (score === 2)      msg = '🎉 Great job!';
+    else if (score === 1) msg = '👍 Nice try!';
+    else                  msg = '☁️ Better luck tomorrow!';
+  } else if (score === total)         msg = '🎉 Perfect Score!';
   else if (score >= total - 1) msg = '👍 Nice job!';
   else                         msg = '☁️ Keep at it!';
   el.innerHTML = `
@@ -3496,9 +3711,21 @@ function renderGameFinal() {
     </div>`;
 }
 
+// ── Theme ──────────────────────────────────────────────────────────
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelector('meta[name="theme-color"]').content =
+    theme === 'light' ? '#f8fafc' : '#0f172a';
+  localStorage.setItem('wx_theme', theme);
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('theme-btn--active', btn.dataset.theme === theme);
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────
 lucide.createIcons();
 lucide.createIcons({ nodes: [document.querySelector('.radar-toggle')] });
+applyTheme(localStorage.getItem('wx_theme') || 'dark');
 document.getElementById('city-name').textContent = CITY_NAME;
 document.title = `ThadCast — ${CITY_NAME}`;
 loadDashboard();
