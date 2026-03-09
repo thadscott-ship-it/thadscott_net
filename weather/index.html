@@ -1441,8 +1441,12 @@ function getMoonPhase(date) {
 // ── AQI category ──────────────────────────────────────────────────
 function badgeStyle(cat) {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  if (isLight) return `background:transparent; border:3px solid ${cat.color}; color:${cat.lightText};`;
+  if (isLight) return `background:transparent; border:3px solid ${cat.lightText}; color:${cat.lightText};`;
   return `background:${cat.bg}; color:${cat.text};`;
+}
+function catColor(cat) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  return isLight ? cat.lightText : cat.color;
 }
 
 function aqiCategory(aqi) {
@@ -1837,7 +1841,7 @@ function renderAQI(data, uvIndex) {
       <div class="aqi-block">
         <div class="aqi-badge" style="${badgeStyle(cat)}">${aqi}</div>
         <div>
-          <div class="aqi-label" style="color:${cat.color}">${cat.label}</div>
+          <div class="aqi-label" style="color:${catColor(cat)}">${cat.label}</div>
           <div class="aqi-desc">US AQI</div>
         </div>
       </div>
@@ -1845,7 +1849,7 @@ function renderAQI(data, uvIndex) {
       <div class="uv-block">
         <div class="uv-badge" style="${badgeStyle(uvc)}">${uv}</div>
         <div>
-          <div class="uv-label" style="color:${uvc.color}">${uvc.label}</div>
+          <div class="uv-label" style="color:${catColor(uvc)}">${uvc.label}</div>
           <div class="uv-desc">UV Index</div>
         </div>
       </div>` : ''}
