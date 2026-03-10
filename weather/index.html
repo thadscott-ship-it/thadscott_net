@@ -686,6 +686,14 @@
     .game-final-msg { font-size: 1rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.25rem; }
     .game-final-sub { font-size: 0.85rem; color: var(--text-muted); }
 
+    /* ── Today's Story ──────────────────────────────────────────── */
+    .story-arc  { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                  letter-spacing: 0.12em; color: var(--accent-blue); margin-bottom: 0.6rem; }
+    .story-text { font-size: 1rem; color: var(--text-secondary);
+                  line-height: 1.8; font-style: italic; }
+    .story-ai-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem;
+                     letter-spacing: 0.06em; }
+
     /* ── Footer ────────────────────────────────────────────────── */
     .footer {
       text-align: center;
@@ -1069,6 +1077,12 @@
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
         <h2>Daily Weather Game</h2>
         <div id="game-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
+      </div>
+
+      <!-- Today's Story -->
+      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
+        <h2>Today's Story</h2>
+        <div id="story-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
     </div>
@@ -2854,7 +2868,7 @@ async function renderTwin(userCurrent, hourly) {
 function resetCardsToLoading() {
   ['current-content','today-content','daily-content','sun-moon-content',
    'aqi-content','scooter-content','twin-content','extremes-content',
-   'stargazing-content','game-content'].forEach(id => {
+   'stargazing-content','game-content','story-content'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML =
       '<div class="skeleton" style="height:2rem;margin-bottom:0.6rem;"></div>' +
@@ -2936,6 +2950,14 @@ async function loadDashboard() {
 
   // Daily Weather Game (location-independent, always render)
   renderGame();
+
+  // Today's Story
+  if (weatherResult.status === 'fulfilled') {
+    renderStory(weatherResult.value.hourly);
+  } else {
+    const el = document.getElementById('story-content');
+    if (el) el.innerHTML = '';
+  }
 
 }
 
@@ -3227,6 +3249,256 @@ document.addEventListener('click', () => {
     }
   }, { passive: true });
 })();
+
+// ── Today's Story ────────────────────────────────────────────────
+
+function getTodayHourlyBeats(hourly) {
+  if (!hourly?.time) return null;
+  const now = new Date();
+  const todayStr = now.toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  const indices = hourly.time.reduce((acc, t, i) => {
+    if (t.startsWith(todayStr)) acc.push(i);
+    return acc;
+  }, []);
+  if (!indices.length) return null;
+  const hour = h => indices.find(i => {
+    const d = new Date(hourly.time[i]);
+    return d.toLocaleString('en-US', { timeZone: TIMEZONE, hour: 'numeric', hour12: false }) === String(h).padStart(2, '0');
+  });
+  return {
+    morning:   hour(8)  ?? indices[0],
+    midday:    hour(12) ?? indices[Math.floor(indices.length * 0.4)],
+    afternoon: hour(15) ?? indices[Math.floor(indices.length * 0.6)],
+    evening:   hour(19) ?? indices[indices.length - 1],
+    all: indices
+  };
+}
+
+function classifyNarrativeArc(hourly, beats) {
+  const cc = hourly.cloud_cover;
+  const pp = hourly.precipitation_probability;
+  if (!cc || !pp) return 'Steady Companion';
+
+  const val = i => (cc[i] ?? 50);
+  const rainVal = i => (pp[i] ?? 0);
+
+  const morn = val(beats.morning);
+  const eve  = val(beats.evening);
+  const all  = beats.all.map(i => val(i));
+  const maxCC = Math.max(...all);
+  const minCC = Math.min(...all);
+  const swing = maxCC - minCC;
+
+  const rainMorn = rainVal(beats.morning);
+  const rainEve  = rainVal(beats.evening);
+
+  // Plot Twist: big volatile swings mid-day
+  if (swing > 45 && all.length > 4) {
+    const midSwings = all.slice(1, -1);
+    const midMax = Math.max(...midSwings);
+    const midMin = Math.min(...midSwings);
+    if (midMax - midMin > 40) return 'Plot Twist';
+  }
+
+  // Redemption Arc: bad morning → clear evening
+  if ((morn > 60 || rainMorn > 50) && eve < 35 && rainEve < 25) return 'Redemption Arc';
+
+  // Fall From Grace: clear morning → bad evening
+  if (morn < 35 && rainMorn < 25 && (eve > 60 || rainEve > 50)) return 'Fall From Grace';
+
+  // Slow Burn: steady warming, no meaningful rain
+  const temps = beats.all.map(i => hourly.temperature_2m?.[i] ?? 0);
+  const isWarming = temps.length > 3 && temps[temps.length - 1] - temps[0] > 8;
+  const lowRain = beats.all.every(i => (pp[i] ?? 0) < 20);
+  if (isWarming && lowRain) return 'Slow Burn';
+
+  // Chaotic Neutral: high variance, unpredictable
+  if (swing > 45) return 'Chaotic Neutral';
+
+  return 'Steady Companion';
+}
+
+function getTempBand(hourly, beats) {
+  const idx = beats.midday ?? beats.afternoon ?? beats.morning;
+  const temp = idx != null ? (hourly.temperature_2m?.[idx] ?? 60) : 60;
+  if (temp < 35) return 'cold';
+  if (temp < 60) return 'cool';
+  if (temp < 85) return 'warm';
+  return 'hot';
+}
+
+const STORY_LIBRARY = {
+  'Redemption Arc': {
+    cold: [
+      "The morning arrived wrapped in pewter cloud, the air sharp enough to catch in the throat. By afternoon, thin light broke through the grey — not warmth exactly, but the memory of it. Evening came clear and still, the cold made honest by an open sky.",
+      "A heavy ceiling pressed down through the early hours, the world muffled under low cloud and the threat of ice. Then, slowly, the curtain drew back. Stars appeared before dark, and the cold felt different for it — cleaner, almost earned.",
+      "Dawn brought a grey that seemed permanent, the kind that settles into the bones. But patience was rewarded: the clouds thinned and parted through the afternoon, leaving the evening sky a pale and luminous blue above frozen ground.",
+      "The day began in shadow, frost on every surface, clouds too close and too thick. Then the afternoon shifted something — a gap, then another. The evening opened like a sentence finally completed, cold and clear and right."
+    ],
+    cool: [
+      "The morning was muted, the sky close and pale, the air carrying the particular chill of unresolved weather. Slowly the clouds gave way, and by late afternoon the light had that clean, slanted quality unique to a cool clear day. The evening felt earned.",
+      "Rain threatened at dawn but never fully committed, leaving the morning in uncertain grey. As the hours passed, the overcast thinned and lifted, and the afternoon arrived in unexpected brightness. A cool, clear ending to a hesitant beginning.",
+      "Low clouds and scattered drizzle made the morning feel provisional, like the day hadn't yet decided what it wanted to be. It decided clearly: by evening the sky was open, the air crisp and still, each breath a small clarification.",
+      "The first light came diffuse and colorless, the world soft and wet from overnight rain. Through midday the sky worked through its indecision, and by evening had settled into something clean. Cool air, open sky — the day kept its promise after all."
+    ],
+    warm: [
+      "The morning clouds had the look of things that mean to stay, but they were only passing through. By midday the light was warm and direct, and the afternoon unfolded with the ease of a day that never needed to prove anything. A quiet, generous ending.",
+      "Thick air and low grey made the morning feel heavier than it was. Then the sun found its angle, burning through and lifting everything with it. The afternoon opened wide, warm and unhurried, and the evening held that light until it couldn't anymore.",
+      "Rain moved through in the small hours, leaving the morning damp and overcast. But warmth followed close behind — by afternoon, everything had dried and brightened. The day resolved itself gently, a good story with a better ending than its opening suggested.",
+      "The early hours were soft with cloud and mist, the warmth present but hidden. Slowly the haze burned away, and by afternoon the day was fully itself — easy light, familiar heat, the kind of afternoon that makes the morning feel like a distant rumor."
+    ],
+    hot: [
+      "A heavy haze sat over the morning, pressing down like a lid, the heat already gathering beneath it. Then the clouds broke and moved off, and the full weight of summer arrived unobstructed. The evening came no cooler, but it came honest — clear and bright above the warmth.",
+      "The morning was thick with cloud and held humidity, the air close and restless. By midday the sky had opened, and the heat became direct, purposeful, without apology. A hot evening under a clear sky: the day delivered exactly what it promised, once it decided to promise anything.",
+      "Dense clouds through the early hours kept the heat in rather than out, making the morning feel trapped. They lifted by afternoon, and what followed was the full expression of a summer day — bright and relentless, the evening too warm to call comfortable, but beautifully clear.",
+      "The day began reluctant, cloud-covered and close, but the sun was patient. By afternoon it had won through completely, and the heat settled in for the duration. Evening came warm and open-skied, the day's redemption arc written in light and sweat."
+    ]
+  },
+  'Fall From Grace': {
+    cold: [
+      "The morning was bright and frozen, every surface gleaming, the sky a deep winter blue. By afternoon the clouds had crept in from the edges, and by evening the world had narrowed to grey — the cold now shapeless and close, the clarity of dawn a distant memory.",
+      "A crystalline start: sharp air, hard light, everything defined. The clouds arrived quietly, without drama, and by midday had taken possession of the sky. Evening brought the particular heaviness of a winter storm that hasn't committed yet, the bright beginning sealed away.",
+      "Frost and clear sky at dawn made the cold feel purposeful, almost beautiful. The clouds came in with the afternoon, and the beauty curdled slowly into something grey and indefinite. By evening, only the cold remained — the clarity was gone.",
+      "The day opened like a winter gift: cold, clear, all angles and light. Then the gift was taken back. Cloud moved in through the afternoon, heavy and low, and the evening arrived muffled and dark. Cold is less interesting when you can't see through it."
+    ],
+    cool: [
+      "Morning light came through clean and unimpeded, cool air sharpening every edge. The clouds gathered gradually, and by afternoon were fully in charge — that particular overcast that flattens everything and makes noon feel like evening. The day declined with a certain melancholy grace.",
+      "A bright, cool beginning: the kind of morning that feels like a minor gift. The gift didn't last. Clouds moved in by midday, and the afternoon took on the muted palette of a day that's given up on sunshine. Whatever the morning promised, the evening quietly withdrew.",
+      "The early light was honest and clean, the cool air making the world feel recently clarified. By midday, clouds had diffused that clarity into something uniform and grey. Evening came with a drizzle that felt inevitable — the day finishing what the afternoon had started.",
+      "Cool clarity at dawn: long shadows, bright edges, the day feeling spacious. Then the overcast arrived and took the edges away one by one. By evening the world was soft and grey, the morning's light something you had to take on faith it had existed."
+    ],
+    warm: [
+      "The morning was warm and open, the kind that makes you forget weather can do anything other than glow. The clouds came in the afternoon without warning, and by evening the air was heavy with rain not yet fallen. The day's promising beginning became a conditional thing.",
+      "Golden and easy at first light, the warmth already present and generous. By midday the sky was filling in, and the afternoon arrived overcast, the air growing restless. Rain came in the evening like a sentence that had been building all day, finally spoken.",
+      "The morning asked nothing of you — warm, clear, unhurried. The afternoon slowly changed its mind. Clouds thickened, the light went flat, and by evening the rain was steady. A day that started like a gift and ended like a lesson.",
+      "Warm and bright through the early hours, the light that makes you feel the world is in a reasonable mood. Then the clouds came and the mood changed. By evening the warmth remained but hid beneath grey and damp, a warmth with conditions attached."
+    ],
+    hot: [
+      "The morning was blazing and open, summer in full voice, the sky too blue to doubt. The clouds that moved in by afternoon seemed almost an insult — heavy and grey against all that heat. By evening, warm rain was falling through thick air: the day's excess reclaimed.",
+      "Full sun at dawn, the heat announcing itself without delay. By midday the clouds were gathering, and the afternoon turned strange — hot and overcast, the light gone but the heat remaining, pressed down from above. Evening brought rain that offered no relief, only moisture.",
+      "The sky was empty and burning at first light, the heat a given. By afternoon it had clouded completely, and the warmth became oppressive without the distraction of direct sun. Evening arrived humid and dark, rain threatening, the open morning sealed away beneath heavy cloud.",
+      "Hot and cloudless early: a summer day declaring itself without qualification. Then the qualification arrived by afternoon in the form of building cloud, the kind that traps heat rather than offering shade. By evening it was dark and close, the blazing morning like something recalled from another day."
+    ]
+  },
+  'Plot Twist': {
+    cold: [
+      "The day couldn't settle. Sun one moment, cloud the next, then a brief snow flurry that stopped as suddenly as it started. The cold made each shift feel dramatic — stillness and light trading off against grey and cold wind, neither winning for long.",
+      "Unpredictability defined the hours: the morning clear, then closed; the afternoon torn between two weathers and choosing neither. The cold air moved in fast-shifting columns of light and shadow, each looking briefly like a decision before reversing.",
+      "A restless winter day — the sky cycling through its whole range several times before noon. Sun and cloud and the occasional hard gust, cold throughout, the temperature constant even as everything else refused to be. You couldn't read it, only experience it.",
+      "Every time the day seemed to commit to something, it changed its mind. Clear spells interrupted by sudden grey, thin sun replaced without warning by flat overcast. The cold was the only constant — everything else just kept moving."
+    ],
+    cool: [
+      "The day performed several different weathers in quick succession: bright, then grey, then bright again, the clouds moving fast and low. The cool air carried the changes in: each shift announced by a drop in temperature and a restlessness in the light.",
+      "A shifting day — sun that came and went without pattern, clouds that built and cleared only to return. The cool air felt appropriate: brisk weather for a day that couldn't make up its mind. You dressed for all possibilities and still got caught in two.",
+      "The light kept changing — long shafts through broken cloud, then flat grey, then unexpected brightness again. The cool temperature was constant, but everything else was in motion. A day to watch from a window, and to keep an eye on anyway.",
+      "Cloud and sun traded the sky all day in a negotiation that never resolved. The afternoon's brief clarity gave way to a grey spell, then cleared again — the cool air carrying each change in with particular efficiency. The day ended without conclusion."
+    ],
+    warm: [
+      "The sky was in an argumentative mood: sun, then cloud, then a brief rain shower, then sun again. The warmth underneath was consistent but the weather above it kept revising its position. A day that felt like several days layered loosely on top of each other.",
+      "Warm air, but nothing to count on above it: the clouds moved through all day in different formations, the light changing every hour in ways that didn't follow a pattern. Brief showers came and went. The warmth made it bearable; the unpredictability made it interesting.",
+      "The afternoon reversed the morning entirely, the sun that was present and generous suddenly replaced by cloud, then rain, then sun again — the day cycling through its possibilities without settling. All of it warm enough, which was the one constant promise it kept.",
+      "A warm, complicated day — the kind where you look up every hour and find something different. Cloud and sun sharing the sky without clear boundaries, a shower that lasted twenty minutes and then stopped as if embarrassed. Warm throughout; readable, never."
+    ],
+    hot: [
+      "Even the heat wasn't steady — storm clouds built and scattered, the sun blinding one moment and then gone behind towering grey the next. A brief, violent afternoon shower cooled nothing and left everything steaming. The day was restless and hot and resolved into nothing.",
+      "Hot and unsettled: the sky cycled through cloud and sun and cloud again, each shift changing the character of the heat. Storm cells built dramatically on the horizon and mostly passed by. The heat was the one reliable fact; everything else was negotiable.",
+      "The day was thermal and argumentative — thick clouds building in the afternoon heat, breaking apart, re-forming. Brief downpours gave way to brilliant sun and back again. The temperature never moved; the weather never stopped moving. A hot day with the attention span of a summer storm.",
+      "Heat and cloud in constant renegotiation: the sun that blazed at dawn was interrupted by the afternoon's building cumulus, which brought a brief heavy rain and then retreated. The evening was clear and still just as hot. The day never found its tone, but the warmth was consistent."
+    ]
+  },
+  'Slow Burn': {
+    cold: [
+      "The morning began bitter and still, the kind of cold that presses in from all sides. But the sun was doing its work. By afternoon the air had softened by degrees — barely noticeable until you compared it to the frozen hour after dawn. A slow thaw that didn't finish, but tried.",
+      "Cold at first light, the world hard and quiet. The temperature climbed with the sun through a clear day — each degree deliberate and unhurried, the warmth arriving like a slow argument being won. By late afternoon, 'cold' had become merely 'cool'. Progress, small and steady.",
+      "Frost-covered and still at dawn, the day opened with the seriousness of deep winter. The sun moved across a clear sky and brought the temperature with it, reluctantly at first, then more generously. Evening was still cold, but not the same cold as morning.",
+      "A winter day in full resolve: hard air, pale sky, stillness. The sun rose and began its patient negotiation with the cold. By midday there was a hint of something warmer in it, by afternoon more so. Not warm — just less cold than it had been."
+    ],
+    cool: [
+      "The morning had that cool, provisional feel — the temperature low enough to keep your jacket on, the light new and undecided. Through the day the warmth built steadily, each hour a degree or two ahead of the last. By afternoon it felt like a different day than the one that started.",
+      "Cool and unhurried at first light, the kind of morning where you can see your breath and feel no urgency about it. The day warmed steadily, without drama — by midday comfortable, by late afternoon almost warm. A day with only one direction and the patience to take it.",
+      "A slow, clean warming through a cool day: the early chill giving way degree by degree, the light changing as the temperature did, the afternoon arriving noticeably kinder than the morning had been. No particular event — just the day quietly becoming warmer than it started.",
+      "The cool of early morning was genuine but not harsh, a starting point more than a statement. The day built from there — steady, clear, purposeful. Each hour warmer than the last, not dramatically but reliably. By evening the cool was gone and something easier had replaced it."
+    ],
+    warm: [
+      "The morning was easy and warm, and it intended to keep going. Through the day the temperature rose without urgency — a degree here, a degree there, the warmth accumulating like a long and pleasant sentence. By afternoon the day was as warm as it knew how to be, and satisfied with that.",
+      "Warm from the start, and committed to getting warmer. The day built through itself at an unhurried pace, each hour a little more generous than the last. By late afternoon the light had that thick, golden quality that follows a long day of steady warming. No drama. Just warmth, applied patiently.",
+      "A day that knows what it wants and moves toward it without rushing. The warmth present at dawn was just the beginning — by midday it was full and generous, by afternoon entirely itself. A Slow Burn day: no reversals, no complications, just the temperature doing exactly what it said it would.",
+      "Morning warmth that built through the day with the confidence of something that knows it's going the right direction. The afternoon arrived at the kind of comfortable, full-day warmth that makes everything feel slightly more possible. No clouds to interrupt the logic. Just a day becoming what it intended."
+    ],
+    hot: [
+      "Hot at dawn — which meant hotter later. The day built with the inevitability of high summer, the temperature climbing through each hour with a patience that made it feel even more certain. By afternoon the heat was total, and the long steady rise from morning felt like it had been leading here all along.",
+      "The morning was already warm enough to be honest about where the day was going. It went there steadily, without pause — the temperature rising through midday and into the afternoon with the slow, inexorable quality of a summer that's committed to itself. Evening brought no relief, only the heat's full arrival.",
+      "A slow-building day in high summer: the dawn heat a promise, the midday heat a statement, the afternoon heat an insistence. Each hour confirmed the direction of the last. By late afternoon the original morning temperature felt almost temperate in memory. The day held its course.",
+      "Hot from the first hour and methodical about getting hotter. The Slow Burn in summer is less a warming than an accumulation — heat piling onto heat through the long clear day. By afternoon the air was thick with it, the earlier hours a foundation for what the day eventually became."
+    ]
+  },
+  'Chaotic Neutral': {
+    cold: [
+      "The day refused to be categorized. Cloud and clearing traded the sky without negotiation, and the cold moved through in waves — sometimes piercing, sometimes merely present. Nothing resolved. Nothing sustained. The weather seemed indifferent to its own choices.",
+      "Unpredictable from the start: sun through morning frost, then cloud, then a clearing that didn't hold. The cold was consistent where nothing else was — a fixed point in a day that couldn't settle. By evening it was unclear what kind of day it had been, only that it had been cold.",
+      "A cold day without coherence: the sky cycling through grey and blue and grey again on its own schedule. Wind arrived and left. The cold held. Everything else was variable — a day that seemed to be improvising, with the temperature as its only theme.",
+      "Whatever the morning suggested, the afternoon contradicted. The cold stayed constant while the light changed, the clouds shifted, brief sun gave way to flat grey and back again. A day in motion, without direction, arriving nowhere in particular by evening."
+    ],
+    cool: [
+      "The day seemed to be making decisions and then immediately reversing them. Cloud moved in, then parted; a light drizzle arrived and stopped; the cool air carried each change in with a kind of editorial disregard for continuity. Nothing was coherent, but it was all the same temperature.",
+      "Cool and inconsistent: the morning and afternoon bore little relationship to each other, and neither prepared you for the evening. The weather moved through its options without committing — an overcast that became sun that became overcast that became something else. The cool air was the only constant thread.",
+      "A day that kept changing what it was about. Bright spells interrupted by grey spells, a brief shower, then clarity, then cloud again — all of it cool, none of it the same. The kind of day you describe as 'changeable' and then shrug.",
+      "The sky had its own agenda today, and didn't share it. Conditions shifted through the hours without clear cause, the cool air arriving with each change like punctuation in a sentence that had no point. Still, nothing severe. Just endlessly, mildly unpredictable."
+    ],
+    warm: [
+      "Warm and shapeless: the clouds moved through without pattern, the sun came and went on its own schedule, and the day accumulated hours without a clear shape. The warmth was consistent but the weather wasn't. A day to stop trying to predict and just experience.",
+      "The warm air was real, but what happened in it wasn't stable. Cloud and sun alternated without logic, and a brief shower in the afternoon was followed immediately by bright light, as if neither had been planned. A warm day that couldn't settle on a personality.",
+      "Something warm but unresolved in the air today — the weather cycling through its moods at irregular intervals, the sun present and absent in no particular order. Each hour felt like a different afternoon from a different day. Warm throughout, which was something. Coherent, never.",
+      "A warm, confused day: the kind where you look up and find something different each time but the temperature stays the same. Cloud and clearing traded places, a brief rain came through, the wind shifted. The warmth held. The day around it made no promises and kept fewer."
+    ],
+    hot: [
+      "Hot and incoherent: storm clouds building in the afternoon heat and then dispersing, brief showers that did nothing to cool the air, the sun returning between cloud banks like it had forgotten something. The temperature never wavered while the weather forgot what it was supposed to be doing.",
+      "The heat was constant; the weather was not. Cloud and sun, a short sharp shower, then sun again — all of it warm, none of it predictable. The day had no arc, only weather and more weather, the heat the only narrative thread running through an otherwise improvised afternoon.",
+      "Volatile and hot: the kind of day where you can't make plans around the weather because the weather doesn't have plans. Building cumulus that arrived and retreated, brief downpours, long gaps of hard sun. The heat stayed. Everything else moved around it without purpose.",
+      "A hot day behaving badly: no clear pattern, no reliable conditions, just warmth and whatever else the atmosphere felt like trying. By evening it was unclear what had happened other than that it had been hot and, at various points, many other things too."
+    ]
+  },
+  'Steady Companion': {
+    cold: [
+      "The cold settled in before dawn and had no intention of leaving. Bare branches stood still in air that barely moved, each breath making itself visible. It was the kind of day that asked nothing of you, offered nothing dramatic — only the steady, honest presence of winter.",
+      "Grey and cold through the whole of the day: not the dramatic cold of a storm, just the ordinary cold of a winter that knows itself. The world went about its business in the familiar palette of the season. Nothing asked for attention. Everything was exactly as expected.",
+      "Bare trees, frozen ground, a low white sky that didn't change all day. The cold was matter-of-fact — present and consistent and uninterested in being interesting. A winter day keeping its promise of nothing but winter.",
+      "The day maintained its cold composure from first light to last, neither softening nor sharpening. Stillness and pale grey. The kind of day you recognize more by what it doesn't do than by what it does. The cold, at least, was reliable company."
+    ],
+    cool: [
+      "The day arrived quiet and cool, with that particular clarity of early autumn — the light a little muted, the air carrying a faint melancholy that felt earned. Nothing dramatic. A day in the middle of a transition, neither here nor there, but honest about it.",
+      "A cool, unremarkable day: the sky muted, the temperature steady, the world neither inviting nor inhospitable. The kind of afternoon that passes without leaving an impression — which is its own kind of grace. Not every day needs a story.",
+      "Overcast and cool from morning to evening, the light the same at three as it was at ten. The air carried a certain grey clarity — the kind that's good for thinking, not for anything that requires sun. A day content to be merely itself.",
+      "The cool held steady through the hours, unhurried and uncommitted to drama. The sky stayed the same shade of white-grey all day, and the light never quite arrived in any direction. A muted day, with a muted palette — the year's slow exhale."
+    ],
+    warm: [
+      "An easy day — warm light through morning to evening, no urgency anywhere. The kind of day where time moves at the pace it claims to. The world felt neither demanding nor distant, just present and pleasantly warm. There was nothing to resist and no need to.",
+      "The day asked nothing of you and gave everything it had: warm, steady light; an unhurried temperature; the particular ease of weather that has decided to be kind. Whatever needed doing could wait. The afternoon was that good.",
+      "Warm and still, the light even and unhurried. Nothing in the day made demands. The temperature didn't shift enough to be noticed, the sky stayed open and easy, and the afternoon was the kind you reference months later when you're trying to remember what good days feel like.",
+      "A generous, uncomplicated day — the warmth even and consistent from morning into evening. The light had that amber quality of a day fully in itself, unhurried and without agenda. Steady company from first to last."
+    ],
+    hot: [
+      "The heat arrived with the light and didn't leave. By midday the air had gone heavy with it — insects at the edges of everything, shadows avoided, movement slowed to the minimum necessary. The day made no pretense of being anything other than hot.",
+      "Thick, still heat: the kind that makes the air visible, that makes August feel very much like August. Time moved differently — slowly, through the middle of the day, each hour longer than the last. By evening, nothing had changed except that it had gotten later.",
+      "A full summer day, in full summer form: the heat that presses down from above and rises from below, the stillness that comes when everything sensible has stopped moving. Long and slow and unambiguously hot. The day kept its one promise without variation.",
+      "The heat was continuous and total — not dramatic, just present in the complete way that deep summer achieves. The afternoon was the morning, only more so. The air barely moved. The day held its temperature like something it intended to keep."
+    ]
+  }
+};
+
+function renderStory(hourly) {
+  const el = document.getElementById('story-content');
+  if (!el) return;
+  const beats = getTodayHourlyBeats(hourly);
+  if (!beats) { el.innerHTML = ''; return; }
+  const arcName  = classifyNarrativeArc(hourly, beats);
+  const band     = getTempBand(hourly, beats);
+  const variants = (STORY_LIBRARY[arcName] ?? STORY_LIBRARY['Steady Companion'])[band];
+  const today    = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
+  const seed     = today.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
+  const idx      = seed % variants.length;
+  el.innerHTML   = `<div class="story-arc">${arcName}</div><div class="story-text">${variants[idx]}</div><div class="story-ai-note">✦ AI generated</div>`;
+}
 
 // ── Daily Weather Game ────────────────────────────────────────────
 let gameState = null;
