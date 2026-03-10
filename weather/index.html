@@ -3997,20 +3997,17 @@ function buildStoryPrompt(arcName, hourly, beats) {
 }
 
 async function callHuggingFace(token, prompt) {
-  const resp = await fetch(`https://api-inference.huggingface.co/models/${STORY_MODEL}/v1/chat/completions`, {
+  const resp = await fetch(`https://api-inference.huggingface.co/models/${STORY_MODEL}`, {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: STORY_MODEL,
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 180,
-      temperature: 0.75,
-      top_p: 0.9,
+      inputs: `<s>[INST] ${prompt} [/INST]`,
+      parameters: { max_new_tokens: 180, temperature: 0.75, top_p: 0.9, return_full_text: false },
     }),
   });
-  if (!resp.ok) throw new Error(`HF ${resp.status}`);
+  if (!resp.ok) throw new Error(`HF ${resp.status}: ${await resp.text()}`);
   const data = await resp.json();
-  const text = data.choices?.[0]?.message?.content?.trim() ?? '';
+  const text = data[0]?.generated_text?.trim() ?? '';
   if (!text) throw new Error('Empty response');
   return text;
 }
@@ -4060,11 +4057,12 @@ async function renderStory(hourly) {
       <div class="story-arc">${escHtml(arcName)}</div>
       <div class="story-text">${escHtml(text)}</div>
       <div class="story-powered">AI Generated</div>`;
-  } catch {
+  } catch (err) {
+    console.error('Today\'s Story error:', err);
     el.innerHTML = `
       <div class="story-arc">${escHtml(arcName)}</div>
       <div class="story-text" style="color:var(--text-muted);">Today's weather tells a simple story — steady, familiar, and calm.</div>
-      <div class="story-powered">AI Generated</div>`;
+      <div class="story-powered" style="color:#f87171;">${escHtml(err?.message ?? String(err))}</div>`;
   }
 }
 
