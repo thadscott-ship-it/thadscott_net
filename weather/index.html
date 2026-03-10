@@ -687,12 +687,18 @@
     .game-final-sub { font-size: 0.85rem; color: var(--text-muted); }
 
     /* ── Today's Story ──────────────────────────────────────────── */
-    .story-arc  { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-                  letter-spacing: 0.12em; color: var(--accent-blue); margin-bottom: 0.6rem; }
-    .story-text { font-size: 1rem; color: var(--text-secondary);
-                  line-height: 1.8; font-style: italic; }
-    .story-ai-note { font-size: 0.7rem; color: var(--text-muted); margin-top: 1rem;
-                     letter-spacing: 0.06em; }
+    .story-arc    { font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+                    letter-spacing: 0.12em; color: var(--accent-blue); margin-bottom: 0.6rem; }
+    .story-text   { font-size: 1rem; color: var(--text-secondary);
+                    line-height: 1.8; font-style: italic; }
+    .card-header-row { display: flex; align-items: center; justify-content: space-between;
+                       margin-bottom: 0.75rem; }
+    .card-header-row h2 { margin-bottom: 0; }
+    .card-icon-btn  { background: none; border: none; cursor: pointer; padding: 0;
+                      color: var(--text-dim); line-height: 1;
+                      transition: color 0.15s; }
+    .card-icon-btn:hover { color: var(--accent-blue); }
+    .story-ai-note  { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.75rem; display: block; }
 
     /* ── Footer ────────────────────────────────────────────────── */
     .footer {
@@ -1081,7 +1087,12 @@
 
       <!-- Today's Story -->
       <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>Today's Story</h2>
+        <div class="card-header-row">
+          <h2>Today's Story</h2>
+          <button class="card-icon-btn" onclick="cycleStory()" title="New story">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+        </div>
         <div id="story-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
@@ -3330,165 +3341,168 @@ function getTempBand(hourly, beats) {
 const STORY_LIBRARY = {
   'Redemption Arc': {
     cold: [
-      "The morning arrived wrapped in pewter cloud, the air sharp enough to catch in the throat. By afternoon, thin light broke through the grey — not warmth exactly, but the memory of it. Evening came clear and still, the cold made honest by an open sky.",
-      "A heavy ceiling pressed down through the early hours, the world muffled under low cloud and the threat of ice. Then, slowly, the curtain drew back. Stars appeared before dark, and the cold felt different for it — cleaner, almost earned.",
-      "Dawn brought a grey that seemed permanent, the kind that settles into the bones. But patience was rewarded: the clouds thinned and parted through the afternoon, leaving the evening sky a pale and luminous blue above frozen ground.",
-      "The day began in shadow, frost on every surface, clouds too close and too thick. Then the afternoon shifted something — a gap, then another. The evening opened like a sentence finally completed, cold and clear and right."
+      "The grey came first, insistent, pressing its cold argument against the glass. But something broke in the afternoon — a seam of light, then more light, the sky finally relenting. The stars arrived before we deserved them, cold and abundant, a forgiveness written in open air.",
+      "Morning sealed itself in cloud and ice, the world a held breath, a closed fist. Then slowly the fist opened. Stars came out before the dark arrived, and the cold became the kind you choose to walk into — not the kind you flee.",
+      "A pewter dawn, the sky drawn down like a lid over the frozen earth. The afternoon undid it — slowly, the way grief loosens its grip on a thing. By evening there was only sky, and cold, and the particular silence that means the worst has passed.",
+      "The cold came in the dark and brought the clouds with it, and all morning they stayed. Then the afternoon began its quiet mutiny, and by evening the sky was swept clean — cold and limitless, a mercy with nothing left to prove."
     ],
     cool: [
-      "The morning was muted, the sky close and pale, the air carrying the particular chill of unresolved weather. Slowly the clouds gave way, and by late afternoon the light had that clean, slanted quality unique to a cool clear day. The evening felt earned.",
-      "Rain threatened at dawn but never fully committed, leaving the morning in uncertain grey. As the hours passed, the overcast thinned and lifted, and the afternoon arrived in unexpected brightness. A cool, clear ending to a hesitant beginning.",
-      "Low clouds and scattered drizzle made the morning feel provisional, like the day hadn't yet decided what it wanted to be. It decided clearly: by evening the sky was open, the air crisp and still, each breath a small clarification.",
-      "The first light came diffuse and colorless, the world soft and wet from overnight rain. Through midday the sky worked through its indecision, and by evening had settled into something clean. Cool air, open sky — the day kept its promise after all."
+      "First light arrived muffled, the sky the color of intention not yet formed. Through the day it clarified — slowly, the way a thought becomes a sentence, a sentence becomes a conviction. The evening was cool and lucid, the air sharpened to a particular transparency.",
+      "Rain at the margins of the morning, never fully arriving, never quite leaving. Then the light found its angle and held it. The afternoon opened from under all that grey like a hand extended — cool, clean, unhesitating, with nothing more to apologize for.",
+      "The morning couldn't decide what it wanted to be, and spent its hours in grey deliberation. The afternoon decided for it. By evening the air was the color of intention kept — cool, still, the sky freshly emptied of everything it had been carrying.",
+      "Something withheld itself through the early hours, the light diffuse as a kept secret. Then the clouds relented, as clouds do when they have made their point. Evening came cool and exact, each outline sharpened, the world made newly legible after a morning of uncertain text."
     ],
     warm: [
-      "The morning clouds had the look of things that mean to stay, but they were only passing through. By midday the light was warm and direct, and the afternoon unfolded with the ease of a day that never needed to prove anything. A quiet, generous ending.",
-      "Thick air and low grey made the morning feel heavier than it was. Then the sun found its angle, burning through and lifting everything with it. The afternoon opened wide, warm and unhurried, and the evening held that light until it couldn't anymore.",
-      "Rain moved through in the small hours, leaving the morning damp and overcast. But warmth followed close behind — by afternoon, everything had dried and brightened. The day resolved itself gently, a good story with a better ending than its opening suggested.",
-      "The early hours were soft with cloud and mist, the warmth present but hidden. Slowly the haze burned away, and by afternoon the day was fully itself — easy light, familiar heat, the kind of afternoon that makes the morning feel like a distant rumor."
+      "The morning came in heavy, the sky low, the warmth a rumor beneath the grey. But warmth was patient — it moved through the middle hours like a truth that knows it doesn't need to hurry. By afternoon the clouds had released what they'd been keeping, and the light poured through, warm and unapologetic.",
+      "Grey and reluctant at first, the day an unlit room. Then the warmth found its source and the clouds gave way — suddenly, like a conviction overturned by evidence. The afternoon was warm and open, a full reversal that arrived without apology and stayed without condition.",
+      "Rain before dawn, the night wrung out into morning, everything damp and dim. Then warmth moved in behind it, gradual and certain as a tide. The afternoon came warm and bright — a good ending to a beginning that had promised nothing this good.",
+      "The morning was mist and delay, the warmth somewhere beneath the cloud like a word not yet spoken. The afternoon spoke it. The day opened into something easy and luminous, the early grey already forgiven in the warmth of what remained."
     ],
     hot: [
-      "A heavy haze sat over the morning, pressing down like a lid, the heat already gathering beneath it. Then the clouds broke and moved off, and the full weight of summer arrived unobstructed. The evening came no cooler, but it came honest — clear and bright above the warmth.",
-      "The morning was thick with cloud and held humidity, the air close and restless. By midday the sky had opened, and the heat became direct, purposeful, without apology. A hot evening under a clear sky: the day delivered exactly what it promised, once it decided to promise anything.",
-      "Dense clouds through the early hours kept the heat in rather than out, making the morning feel trapped. They lifted by afternoon, and what followed was the full expression of a summer day — bright and relentless, the evening too warm to call comfortable, but beautifully clear.",
-      "The day began reluctant, cloud-covered and close, but the sun was patient. By afternoon it had won through completely, and the heat settled in for the duration. Evening came warm and open-skied, the day's redemption arc written in light and sweat."
+      "Heavy morning: the heat trapped beneath cloud, the air close as a held secret, the sky the color of everything unresolved. Then the lid came off. The sun blazed through and claimed the day entirely — hot and honest, summer in full declaration, without remainder.",
+      "The clouds held the heat down through the morning like a judgment deferred. Then they lifted, and the full summer came in — blazing, purposeful, the afternoon made of light and its consequences. By evening the early trouble was already legend.",
+      "Morning under glass, the heat and cloud conspiring — sealed, breathless, the air thick with what the sky refused to say. Something broke open in the afternoon. The sun arrived as if late and making up for it, the rest of the day hot and relentless and beautifully direct.",
+      "The humidity kept its counsel through the morning, wrapping the heat in grey and holding it close as a wound. By afternoon the wrapping fell. What remained was summer in full declaration — hot sky, open air, the day finally willing to be what it was."
     ]
   },
   'Fall From Grace': {
     cold: [
-      "The morning was bright and frozen, every surface gleaming, the sky a deep winter blue. By afternoon the clouds had crept in from the edges, and by evening the world had narrowed to grey — the cold now shapeless and close, the clarity of dawn a distant memory.",
-      "A crystalline start: sharp air, hard light, everything defined. The clouds arrived quietly, without drama, and by midday had taken possession of the sky. Evening brought the particular heaviness of a winter storm that hasn't committed yet, the bright beginning sealed away.",
-      "Frost and clear sky at dawn made the cold feel purposeful, almost beautiful. The clouds came in with the afternoon, and the beauty curdled slowly into something grey and indefinite. By evening, only the cold remained — the clarity was gone.",
-      "The day opened like a winter gift: cold, clear, all angles and light. Then the gift was taken back. Cloud moved in through the afternoon, heavy and low, and the evening arrived muffled and dark. Cold is less interesting when you can't see through it."
+      "The morning was crystalline, the cold so clean it felt like clarity itself — every branch defined, every shadow exact. The clouds came quietly, as betrayal does. By evening the world had narrowed to grey, the cold now shapeless and close, the bright beginning sealed away like a wound dressed too late.",
+      "Sharp light at dawn, the frost making the world precise and briefly glittering. Then the sky began to lose its nerve. By afternoon it had given up entirely, cloud settling low and final — the morning's beauty curdled into something grey and indefinite, keeping only the cold.",
+      "We began in cold clarity, every angle struck in blue and silver, the world at its most architectural. The clouds arrived through the middle hours and took the silver first, then the angles. By evening only the cold remained, stripped of everything that had made it bearable.",
+      "The winter morning offered itself like a gift: cold, clear, the sky as deep as anything good and brief. Then the gift was recalled. Cloud moved in through the afternoon, heavy and unhurried. By evening the cold had lost its face — the clarity was gone, and it was just cold."
     ],
     cool: [
-      "Morning light came through clean and unimpeded, cool air sharpening every edge. The clouds gathered gradually, and by afternoon were fully in charge — that particular overcast that flattens everything and makes noon feel like evening. The day declined with a certain melancholy grace.",
-      "A bright, cool beginning: the kind of morning that feels like a minor gift. The gift didn't last. Clouds moved in by midday, and the afternoon took on the muted palette of a day that's given up on sunshine. Whatever the morning promised, the evening quietly withdrew.",
-      "The early light was honest and clean, the cool air making the world feel recently clarified. By midday, clouds had diffused that clarity into something uniform and grey. Evening came with a drizzle that felt inevitable — the day finishing what the afternoon had started.",
-      "Cool clarity at dawn: long shadows, bright edges, the day feeling spacious. Then the overcast arrived and took the edges away one by one. By evening the world was soft and grey, the morning's light something you had to take on faith it had existed."
+      "The early light came cool and unimpeded, sharpening the world to its best and most honest edges. The clouds gathered without urgency and then were simply there, the afternoon rearranged into something flatter. By evening whatever morning had clarified had been slowly, thoroughly obscured.",
+      "A clean cool start — the sky making its case for transparency, the light sharpening every line. By midday the argument was lost. The clouds moved in and took the edges away, the day descending into something muted, the morning's small gift withdrawn without explanation.",
+      "Cool air and open sky at dawn, the light still honest and exact, the world briefly worth examining. The overcast arrived like second thoughts — first one, then many, then the whole sky committed to grey. By evening the morning's clarity was something you'd have to describe to be believed.",
+      "Something true in the early light — the cool air and the open sky in a kind of brief agreement. The clouds came and withdrew the terms. Through the afternoon the world softened and then went grey, and by evening the morning felt like something that had happened to someone else."
     ],
     warm: [
-      "The morning was warm and open, the kind that makes you forget weather can do anything other than glow. The clouds came in the afternoon without warning, and by evening the air was heavy with rain not yet fallen. The day's promising beginning became a conditional thing.",
-      "Golden and easy at first light, the warmth already present and generous. By midday the sky was filling in, and the afternoon arrived overcast, the air growing restless. Rain came in the evening like a sentence that had been building all day, finally spoken.",
-      "The morning asked nothing of you — warm, clear, unhurried. The afternoon slowly changed its mind. Clouds thickened, the light went flat, and by evening the rain was steady. A day that started like a gift and ended like a lesson.",
-      "Warm and bright through the early hours, the light that makes you feel the world is in a reasonable mood. Then the clouds came and the mood changed. By evening the warmth remained but hid beneath grey and damp, a warmth with conditions attached."
+      "The morning was warm and offered everything — gold light, open sky, the particular ease of weather that has decided to be kind and means it. It changed its mind. The afternoon came wrapped in cloud, the warmth still present but reduced, and by evening the rain had the final word.",
+      "All that warmth and light in the early hours, the day declaring itself generous and meaning it. But the clouds moved in from the west like a revision, and the afternoon's warmth became something pressed and grey. The rain came in the evening like a fact that had always been coming.",
+      "The morning was warm and unguarded — the kind of opening that makes you trust what follows. You should not have trusted. The clouds arrived without ceremony and the afternoon went dark and close, and the warmth the day had offered became a warmth with terms — humid, heavy, conditional.",
+      "Warm light at dawn, the day making its promises aloud and without hesitation. By noon the sky had begun its qualification. By evening the rain was steady and the warmth was trapped beneath it — the morning's generosity surviving only as humidity, as longing, as memory."
     ],
     hot: [
-      "The morning was blazing and open, summer in full voice, the sky too blue to doubt. The clouds that moved in by afternoon seemed almost an insult — heavy and grey against all that heat. By evening, warm rain was falling through thick air: the day's excess reclaimed.",
-      "Full sun at dawn, the heat announcing itself without delay. By midday the clouds were gathering, and the afternoon turned strange — hot and overcast, the light gone but the heat remaining, pressed down from above. Evening brought rain that offered no relief, only moisture.",
-      "The sky was empty and burning at first light, the heat a given. By afternoon it had clouded completely, and the warmth became oppressive without the distraction of direct sun. Evening arrived humid and dark, rain threatening, the open morning sealed away beneath heavy cloud.",
-      "Hot and cloudless early: a summer day declaring itself without qualification. Then the qualification arrived by afternoon in the form of building cloud, the kind that traps heat rather than offering shade. By evening it was dark and close, the blazing morning like something recalled from another day."
+      "The morning blazed, the heat already a declaration, the sky emptied of everything but sun and pure intention. Then the clouds rose up from the south like second thoughts made physical. By evening the heat was still there but imprisoned — dark and close and stripped of its earlier grandeur.",
+      "Everything lit and open at dawn, summer announcing itself at full volume, the light too abundant to doubt. The clouds that arrived by afternoon seemed impossible against that light — and yet they came, and the heat became strange beneath them, sealed and purposeless by dark.",
+      "The morning was fire and open sky, the heat wearing its best light like something it had earned. By afternoon the sky had changed its mind and the heat changed character with it — no longer blazing, just heavy, just pressing. By evening, humid dark. The morning might as well have been a different season.",
+      "High and blue and burning at first light — summer in full confidence, the sky too sure of itself to doubt. Then the afternoon came with its clouds and its drama, and the heat became something that pressed rather than shone, something that suffocated rather than lit. The earlier beauty was legend by dark."
     ]
   },
   'Plot Twist': {
     cold: [
-      "The day couldn't settle. Sun one moment, cloud the next, then a brief snow flurry that stopped as suddenly as it started. The cold made each shift feel dramatic — stillness and light trading off against grey and cold wind, neither winning for long.",
-      "Unpredictability defined the hours: the morning clear, then closed; the afternoon torn between two weathers and choosing neither. The cold air moved in fast-shifting columns of light and shadow, each looking briefly like a decision before reversing.",
-      "A restless winter day — the sky cycling through its whole range several times before noon. Sun and cloud and the occasional hard gust, cold throughout, the temperature constant even as everything else refused to be. You couldn't read it, only experience it.",
-      "Every time the day seemed to commit to something, it changed its mind. Clear spells interrupted by sudden grey, thin sun replaced without warning by flat overcast. The cold was the only constant — everything else just kept moving."
+      "The cold kept its composure while the sky had none. Cloud and clearance traded places all morning without resolution, and a brief snow squall arrived in the afternoon like a stage direction no one had agreed to. The cold watched all of it, kept count, stayed — the one reliable witness to a day that couldn't stop revising itself.",
+      "Nothing about the day would hold still. The light came and was revoked; the cloud lifted and returned without apology. Cold throughout — the one fixed point in a day that seemed to be arguing with itself, trying positions, refusing every conclusion it had briefly entertained.",
+      "The sky rehearsed several different weathers before noon and committed to none. Cold and light and then dark and then cold again, the wind arriving and departing like a guest who cannot decide whether to leave. The day ended where it started: weather unsettled, the cold unchanged, the sky still unresolved.",
+      "Every hour revised the one before it. Clear gave way to grey, grey to an unexpected brightness, brightness to a swirl of snow that stopped as suddenly as it started, as if embarrassed. The cold stayed out of it — indifferent, singular, unchanged through all the sky's urgent revisions."
     ],
     cool: [
-      "The day performed several different weathers in quick succession: bright, then grey, then bright again, the clouds moving fast and low. The cool air carried the changes in: each shift announced by a drop in temperature and a restlessness in the light.",
-      "A shifting day — sun that came and went without pattern, clouds that built and cleared only to return. The cool air felt appropriate: brisk weather for a day that couldn't make up its mind. You dressed for all possibilities and still got caught in two.",
-      "The light kept changing — long shafts through broken cloud, then flat grey, then unexpected brightness again. The cool temperature was constant, but everything else was in motion. A day to watch from a window, and to keep an eye on anyway.",
-      "Cloud and sun traded the sky all day in a negotiation that never resolved. The afternoon's brief clarity gave way to a grey spell, then cleared again — the cool air carrying each change in with particular efficiency. The day ended without conclusion."
+      "A cool day in conversation with itself, the sky changing its position every hour, clouds moving through without introduction or farewell. The light was never settled; the cool air was the only one keeping its word, the one steady thing in a day that couldn't stop moving.",
+      "Sun and cloud in perpetual argument, neither winning, neither leaving. The cool air arrived with each change like a moderator no one was listening to. By evening the debate was still open, the day having tried several conclusions and accepted none of them, the sky still making its case.",
+      "The morning made a claim. The afternoon disputed it. The evening refused to adjudicate. Cool throughout, and changeable throughout — the day writing and erasing itself with the persistence of a mind that can't stop revising, can't stop wondering if it got it wrong.",
+      "Clouds pushed through in formations that meant nothing, the light shifting between them without plan or apology. The cool air gave each change its own brief weight. By evening you couldn't have said what kind of day it had been — only that it had kept moving, and the cool air had stayed."
     ],
     warm: [
-      "The sky was in an argumentative mood: sun, then cloud, then a brief rain shower, then sun again. The warmth underneath was consistent but the weather above it kept revising its position. A day that felt like several days layered loosely on top of each other.",
-      "Warm air, but nothing to count on above it: the clouds moved through all day in different formations, the light changing every hour in ways that didn't follow a pattern. Brief showers came and went. The warmth made it bearable; the unpredictability made it interesting.",
-      "The afternoon reversed the morning entirely, the sun that was present and generous suddenly replaced by cloud, then rain, then sun again — the day cycling through its possibilities without settling. All of it warm enough, which was the one constant promise it kept.",
-      "A warm, complicated day — the kind where you look up every hour and find something different. Cloud and sun sharing the sky without clear boundaries, a shower that lasted twenty minutes and then stopped as if embarrassed. Warm throughout; readable, never."
+      "The warmth was constant; everything else was not. Cloud and clearing, a brief rain that apologized by stopping, bright light that couldn't stay — the day warm and shapeshifting, a warm argument that kept forgetting what it was arguing about and starting again.",
+      "A warm day that couldn't stay still. The sky cycled through its moods in quick succession — sun to cloud to shower to sun again — while the warmth underneath held steady, indifferent to the drama above it. The day felt like several different days wearing the same temperature.",
+      "The afternoon contradicted the morning, and the evening contradicted them both, and the warmth was the only reliable witness to any of it — present through each contradiction, patient as a fact that doesn't require your agreement to remain true.",
+      "Rain arrived and left without explanation. The sun came back as if nothing had happened, bright and unapologetic. The warmth was the only constant in a day of revisions — the ground note beneath the weather's restless improvisation, holding everything loosely together."
     ],
     hot: [
-      "Even the heat wasn't steady — storm clouds built and scattered, the sun blinding one moment and then gone behind towering grey the next. A brief, violent afternoon shower cooled nothing and left everything steaming. The day was restless and hot and resolved into nothing.",
-      "Hot and unsettled: the sky cycled through cloud and sun and cloud again, each shift changing the character of the heat. Storm cells built dramatically on the horizon and mostly passed by. The heat was the one reliable fact; everything else was negotiable.",
-      "The day was thermal and argumentative — thick clouds building in the afternoon heat, breaking apart, re-forming. Brief downpours gave way to brilliant sun and back again. The temperature never moved; the weather never stopped moving. A hot day with the attention span of a summer storm.",
-      "Heat and cloud in constant renegotiation: the sun that blazed at dawn was interrupted by the afternoon's building cumulus, which brought a brief heavy rain and then retreated. The evening was clear and still just as hot. The day never found its tone, but the warmth was consistent."
+      "Even the heat couldn't hold the story together. Storm clouds built and collapsed through the afternoon, and a hard brief rain left everything steaming without cooling anything. The day was thermal and unresolved, restless as a dream just before waking — hot, insistent, refusing to end cleanly.",
+      "The heat was the one certainty in a day of weather that couldn't commit. Clouds built to the height of drama and then dispersed. A shower arrived and was gone in minutes, leaving the air thicker than before. The heat watched all of it and changed nothing — the day's one unmovable fact.",
+      "Hot and volatile — the sky building its towers through the afternoon, tearing them down, building again with the persistence of something that believes in its own importance. Short fierce showers, long gaps of hard sun. The heat made everything more intense without making anything more clear.",
+      "The temperature held while everything else moved. Cloud and sun in constant exchange, a brief downpour that released nothing, the evening still as hot as noon. The day was a hot argument about the weather, resolved by exhaustion rather than conclusion, ending only because days must end."
     ]
   },
   'Slow Burn': {
     cold: [
-      "The morning began bitter and still, the kind of cold that presses in from all sides. But the sun was doing its work. By afternoon the air had softened by degrees — barely noticeable until you compared it to the frozen hour after dawn. A slow thaw that didn't finish, but tried.",
-      "Cold at first light, the world hard and quiet. The temperature climbed with the sun through a clear day — each degree deliberate and unhurried, the warmth arriving like a slow argument being won. By late afternoon, 'cold' had become merely 'cool'. Progress, small and steady.",
-      "Frost-covered and still at dawn, the day opened with the seriousness of deep winter. The sun moved across a clear sky and brought the temperature with it, reluctantly at first, then more generously. Evening was still cold, but not the same cold as morning.",
-      "A winter day in full resolve: hard air, pale sky, stillness. The sun rose and began its patient negotiation with the cold. By midday there was a hint of something warmer in it, by afternoon more so. Not warm — just less cold than it had been."
+      "The cold was absolute at dawn — a fact, a given, the world organized around it with a winter logic that seemed permanent. But the sun had its own argument. Through the long clear hours it made its case, degree by patient degree, and by afternoon had proven something. The cold refused to wholly concede. But it had heard.",
+      "Morning: the cold undeniable, the world hard and still, every surface held in frost's particular grammar. Then the sun rose and began its patient work, and the temperature followed where it led — slowly, the way a mind changes, not all at once but through accumulation, until by afternoon something had shifted.",
+      "Cold at first light, the kind that seems permanent, the kind that makes permanence seem like the only honest position. The sun made no promises but kept working. Each hour was a small negotiation. By late afternoon, 'cold' had become merely 'cool.' Progress, small and steady, and enough.",
+      "The deep cold of before-dawn gave way to the cold of actual morning, and from there — slowly, with no drama whatsoever — to something merely cool. The sun moved through a clear sky doing its quiet arithmetic. By evening the cold remained, but a different cold: somewhat answered, somewhat less sure of itself."
     ],
     cool: [
-      "The morning had that cool, provisional feel — the temperature low enough to keep your jacket on, the light new and undecided. Through the day the warmth built steadily, each hour a degree or two ahead of the last. By afternoon it felt like a different day than the one that started.",
-      "Cool and unhurried at first light, the kind of morning where you can see your breath and feel no urgency about it. The day warmed steadily, without drama — by midday comfortable, by late afternoon almost warm. A day with only one direction and the patience to take it.",
-      "A slow, clean warming through a cool day: the early chill giving way degree by degree, the light changing as the temperature did, the afternoon arriving noticeably kinder than the morning had been. No particular event — just the day quietly becoming warmer than it started.",
-      "The cool of early morning was genuine but not harsh, a starting point more than a statement. The day built from there — steady, clear, purposeful. Each hour warmer than the last, not dramatically but reliably. By evening the cool was gone and something easier had replaced it."
+      "Cool and undecided at dawn, the temperature a beginning rather than a statement. Through the day the warmth accumulated quietly, each hour a degree ahead of the last, the afternoon arriving warmer than the morning had any right to promise. The day built itself without hurry and arrived at something real.",
+      "The morning was cool and provisional, the air still carrying the night's reserve like something not yet decided. Then the day began its slow persuasion — warmth building through the hours without announcement, each degree a quiet argument for what the afternoon could be. By late afternoon the morning felt like a different country.",
+      "A cool start, the air still carrying the night's reserve. But the sun was patient and the day was willing, and through the long unhurried hours the temperature rose like a thought developing into a conviction — slowly, with gathering certainty, by afternoon irresistible.",
+      "What the morning held carefully, the afternoon gave away — degree by degree, the cool releasing into something warmer, the air losing its edge with the quiet inevitability of something that was always going to happen. Nothing dramatic. Just a day becoming, slowly and certainly, better than it started."
     ],
     warm: [
-      "The morning was easy and warm, and it intended to keep going. Through the day the temperature rose without urgency — a degree here, a degree there, the warmth accumulating like a long and pleasant sentence. By afternoon the day was as warm as it knew how to be, and satisfied with that.",
-      "Warm from the start, and committed to getting warmer. The day built through itself at an unhurried pace, each hour a little more generous than the last. By late afternoon the light had that thick, golden quality that follows a long day of steady warming. No drama. Just warmth, applied patiently.",
-      "A day that knows what it wants and moves toward it without rushing. The warmth present at dawn was just the beginning — by midday it was full and generous, by afternoon entirely itself. A Slow Burn day: no reversals, no complications, just the temperature doing exactly what it said it would.",
-      "Morning warmth that built through the day with the confidence of something that knows it's going the right direction. The afternoon arrived at the kind of comfortable, full-day warmth that makes everything feel slightly more possible. No clouds to interrupt the logic. Just a day becoming what it intended."
+      "Warm from the beginning, and with further intentions. The day moved through itself with the confidence of something that knows its direction — the temperature rising through the long hours without haste, the afternoon arriving at a warmth the morning had only implied, the light thickening like a sentence finding its final word.",
+      "A warm morning that made a promise and kept it, hour by hour, degree by degree, with the patient fidelity of something that believes in what it's doing. The light thickened as the temperature rose. The afternoon arrived golden and unhurried — the warmth by then so settled it felt less like weather than like something the earth had decided to offer.",
+      "The warmth was there at dawn, quiet and accumulating with the patience of something that doesn't need to announce itself. Through the day it built — each hour slightly warmer, the light slightly richer, the afternoon a long and generous delivery on the morning's early hint. No interruption. Only arrival.",
+      "Day like a sustained note held through the full length of the afternoon: warm at the start, warmer through the middle, warmest in the long golden hours before evening. No interruption, no revision. The day simply became more of what it was, with a certainty that made even the ordinary feel inevitable."
     ],
     hot: [
-      "Hot at dawn — which meant hotter later. The day built with the inevitability of high summer, the temperature climbing through each hour with a patience that made it feel even more certain. By afternoon the heat was total, and the long steady rise from morning felt like it had been leading here all along.",
-      "The morning was already warm enough to be honest about where the day was going. It went there steadily, without pause — the temperature rising through midday and into the afternoon with the slow, inexorable quality of a summer that's committed to itself. Evening brought no relief, only the heat's full arrival.",
-      "A slow-building day in high summer: the dawn heat a promise, the midday heat a statement, the afternoon heat an insistence. Each hour confirmed the direction of the last. By late afternoon the original morning temperature felt almost temperate in memory. The day held its course.",
-      "Hot from the first hour and methodical about getting hotter. The Slow Burn in summer is less a warming than an accumulation — heat piling onto heat through the long clear day. By afternoon the air was thick with it, the earlier hours a foundation for what the day eventually became."
+      "Hot at dawn — and the day took that as instruction. Through every hour the heat built on itself, patient and inevitable as argument, until by afternoon it was total: a weight in the air, a thickness of light, summer refusing to leave anything incomplete, refusing to be anything other than what it is.",
+      "The morning promised heat and the afternoon delivered more than was promised, as summer will. Each hour added to the account until by midday the warmth of dawn was something modest in memory, the afternoon a full commitment to what the morning had only proposed, the heat its own reward.",
+      "A hot morning, and then a hotter one. The day built its heat the way a great poem builds its argument — one image at a time, each confirming the last, until by afternoon the case was made entirely and the heat became the only weather there had ever been, the only weather there needed to be.",
+      "First light and already the heat was telling its story. By noon the story had a momentum. By afternoon it had a logic. By evening nothing could have been otherwise — the early warmth had been a prelude to this, and this was summer, complete and without apology."
     ]
   },
   'Chaotic Neutral': {
     cold: [
-      "The day refused to be categorized. Cloud and clearing traded the sky without negotiation, and the cold moved through in waves — sometimes piercing, sometimes merely present. Nothing resolved. Nothing sustained. The weather seemed indifferent to its own choices.",
-      "Unpredictable from the start: sun through morning frost, then cloud, then a clearing that didn't hold. The cold was consistent where nothing else was — a fixed point in a day that couldn't settle. By evening it was unclear what kind of day it had been, only that it had been cold.",
-      "A cold day without coherence: the sky cycling through grey and blue and grey again on its own schedule. Wind arrived and left. The cold held. Everything else was variable — a day that seemed to be improvising, with the temperature as its only theme.",
-      "Whatever the morning suggested, the afternoon contradicted. The cold stayed constant while the light changed, the clouds shifted, brief sun gave way to flat grey and back again. A day in motion, without direction, arriving nowhere in particular by evening."
+      "The cold stayed fixed while the sky did whatever it wanted. Cloud and clearing traded the day in pieces, the wind changed directions twice and committed to neither. By evening it was unclear what had been decided, only that the cold had been indifferent to all of it — a fixed point at the center of a day without a center.",
+      "A day without a narrative: the sky trying positions it didn't hold, the cold the only constant in a scene of continuous revision. Brief light, brief grey, a gust that meant nothing. The cold witnessed all of it and offered no interpretation, no comfort, only its own indifferent constancy.",
+      "Nothing the morning suggested survived into the afternoon. The sky moved through its whole range without conclusion, the cold threading through each change like a fact that doesn't require belief to remain true. By evening the day had covered a great deal of ground and arrived precisely nowhere.",
+      "Cloud and light and wind in a conversation that had no point, the cold standing outside it, unchanging, watching the sky's indecisions with the patience of something that has already made up its mind and sees no reason to announce it."
     ],
     cool: [
-      "The day seemed to be making decisions and then immediately reversing them. Cloud moved in, then parted; a light drizzle arrived and stopped; the cool air carried each change in with a kind of editorial disregard for continuity. Nothing was coherent, but it was all the same temperature.",
-      "Cool and inconsistent: the morning and afternoon bore little relationship to each other, and neither prepared you for the evening. The weather moved through its options without committing — an overcast that became sun that became overcast that became something else. The cool air was the only constant thread.",
-      "A day that kept changing what it was about. Bright spells interrupted by grey spells, a brief shower, then clarity, then cloud again — all of it cool, none of it the same. The kind of day you describe as 'changeable' and then shrug.",
-      "The sky had its own agenda today, and didn't share it. Conditions shifted through the hours without clear cause, the cool air arriving with each change like punctuation in a sentence that had no point. Still, nothing severe. Just endlessly, mildly unpredictable."
+      "The cool air arrived with each change, announcing nothing, departing the same way. The sky moved through its inventory — cloud, drizzle, clearance, cloud again — with the thoroughness of someone looking for something they cannot name. The day ended without having found it, the cool air its only consistent character.",
+      "Cool and unresolvable: a morning that didn't lead to an afternoon that didn't lead to an evening, each hour independent of the last. The cool temperature was the only continuity, the one thread running through a day that kept dropping its own story mid-sentence.",
+      "A day of weather changing its mind. The cool air was the mediator no one listened to — present through each revision, connecting what couldn't otherwise be connected, the sky cycling through its conditions with the restlessness of a mind that can't commit to any of its own conclusions.",
+      "The sky had intentions it kept revising, each revision arriving without warning. Cool throughout — the one committed fact in a day of hesitations, the one stable thing in a day that moved through its possibilities without landing on any of them, without concluding, without rest."
     ],
     warm: [
-      "Warm and shapeless: the clouds moved through without pattern, the sun came and went on its own schedule, and the day accumulated hours without a clear shape. The warmth was consistent but the weather wasn't. A day to stop trying to predict and just experience.",
-      "The warm air was real, but what happened in it wasn't stable. Cloud and sun alternated without logic, and a brief shower in the afternoon was followed immediately by bright light, as if neither had been planned. A warm day that couldn't settle on a personality.",
-      "Something warm but unresolved in the air today — the weather cycling through its moods at irregular intervals, the sun present and absent in no particular order. Each hour felt like a different afternoon from a different day. Warm throughout, which was something. Coherent, never.",
-      "A warm, confused day: the kind where you look up and find something different each time but the temperature stays the same. Cloud and clearing traded places, a brief rain came through, the wind shifted. The warmth held. The day around it made no promises and kept fewer."
+      "Warm and without shape: the clouds moved through all day in patterns that meant nothing, the sun came and went on its own inscrutable logic, and a brief shower arrived and left without altering anything. The warmth was the day's only statement. Everything else was just weather doing what weather does when no one is in charge.",
+      "The warmth held while the world above it changed its mind repeatedly, as minds do when they have too many options. Cloud and clearing, a sudden shower, an hour of brilliant light, then cloud again — all of it warm, none of it planned. The day felt like improvisation over a steady chord.",
+      "Warm all day — and that was the only reliable thing about it, the one fact you could carry forward. Above that warmth the sky went on revising itself, hour by hour, cloud and sun in a negotiation without terms. By evening the day had been warm. What else it had been was harder to say.",
+      "The warm air was a fact, a given, the ground beneath the day's restlessness. What happened in it was less certain: clouds built and scattered, brief rain came and left, the light changed without reason or apology. The warmth was the day's ground note — everything else just moved across it without settling, without arriving."
     ],
     hot: [
-      "Hot and incoherent: storm clouds building in the afternoon heat and then dispersing, brief showers that did nothing to cool the air, the sun returning between cloud banks like it had forgotten something. The temperature never wavered while the weather forgot what it was supposed to be doing.",
-      "The heat was constant; the weather was not. Cloud and sun, a short sharp shower, then sun again — all of it warm, none of it predictable. The day had no arc, only weather and more weather, the heat the only narrative thread running through an otherwise improvised afternoon.",
-      "Volatile and hot: the kind of day where you can't make plans around the weather because the weather doesn't have plans. Building cumulus that arrived and retreated, brief downpours, long gaps of hard sun. The heat stayed. Everything else moved around it without purpose.",
-      "A hot day behaving badly: no clear pattern, no reliable conditions, just warmth and whatever else the atmosphere felt like trying. By evening it was unclear what had happened other than that it had been hot and, at various points, many other things too."
+      "Hot and directionless: the afternoon built its clouds to grand rhetorical heights and then released them for nothing, the brief downpours adding humidity without cooling, the sun returning each time as if surprised to find it had been absent. The heat was the only continuity in a day that couldn't find its form.",
+      "The heat was the day's only argument, and it made it without variation. Above it, the weather made counterarguments that went nowhere — clouds that built and dispersed, rain that came in ten-minute installments, sun that blazed between them with unearned confidence. By evening only the heat remained, unchanged, unmoved, having won by default.",
+      "Volatile and hot, a day conducting experiments on itself with the urgency of something that has run out of time. Brief storms, long sun, the air thick between them with the heat's accumulating residue. Nothing was resolved. The heat was the only thing that didn't change its position, and by evening it had won.",
+      "The day was hot and the weather was unpredictable and neither of those facts touched the other. Showers that evaporated on contact with the pavement, clouds that arrived with ceremony and left without purpose, sun that returned each time to a scene rearranged but not cooled. The heat waited out every revision and outlasted them all."
     ]
   },
   'Steady Companion': {
     cold: [
-      "The cold settled in before dawn and had no intention of leaving. Bare branches stood still in air that barely moved, each breath making itself visible. It was the kind of day that asked nothing of you, offered nothing dramatic — only the steady, honest presence of winter.",
-      "Grey and cold through the whole of the day: not the dramatic cold of a storm, just the ordinary cold of a winter that knows itself. The world went about its business in the familiar palette of the season. Nothing asked for attention. Everything was exactly as expected.",
-      "Bare trees, frozen ground, a low white sky that didn't change all day. The cold was matter-of-fact — present and consistent and uninterested in being interesting. A winter day keeping its promise of nothing but winter.",
-      "The day maintained its cold composure from first light to last, neither softening nor sharpening. Stillness and pale grey. The kind of day you recognize more by what it doesn't do than by what it does. The cold, at least, was reliable company."
+      "The cold settled in before dawn and occupied the day entirely, the way winter does when it is certain of itself — bare branches, visible breath, the world reduced to its skeleton and honest about it. It asked nothing of us. It offered nothing dramatic. Only the steady, undeceiving presence of winter, which is its own kind of gift.",
+      "Grey and cold, and then more grey, and then evening — still grey, still cold, winter keeping its one relentless promise. The world went about its business in the familiar vocabulary of the season, nothing asked to be noticed, nothing demanded to be felt. A day of pure being-there.",
+      "The cold was not cruel. It was simply present, the way winter is present when it has stopped trying to impress you — constant, without apology, requiring nothing but acknowledgment. The bare trees. The white sky. The slow hours, muffled as old songs. All of it cold, and all of it true.",
+      "A winter day without incident: the cold settled and stayed, the sky a low and even white, the branches still as held breath. Nothing was offered and nothing was withheld. The day kept its cold composure from first light to last and asked us only to keep ours."
     ],
     cool: [
-      "The day arrived quiet and cool, with that particular clarity of early autumn — the light a little muted, the air carrying a faint melancholy that felt earned. Nothing dramatic. A day in the middle of a transition, neither here nor there, but honest about it.",
-      "A cool, unremarkable day: the sky muted, the temperature steady, the world neither inviting nor inhospitable. The kind of afternoon that passes without leaving an impression — which is its own kind of grace. Not every day needs a story.",
-      "Overcast and cool from morning to evening, the light the same at three as it was at ten. The air carried a certain grey clarity — the kind that's good for thinking, not for anything that requires sun. A day content to be merely itself.",
-      "The cool held steady through the hours, unhurried and uncommitted to drama. The sky stayed the same shade of white-grey all day, and the light never quite arrived in any direction. A muted day, with a muted palette — the year's slow exhale."
+      "A cool day, neither here nor there — the light muted, the temperature an in-between that means the year is still deciding. A certain melancholy in it, and also a grace: the grace of things that don't insist, of weather that asks only to be noticed, not felt, not interpreted, not overcome.",
+      "The day arrived in the middle register — cool, unhurried, the sky the color of a thought not yet finished. Nothing demanded attention. The afternoon passed without event, the cool air neither giving nor withholding, the world moving at the speed of an ordinary thing, which is the speed most things actually move.",
+      "Cool and uncommitted, the sky a patient grey all day, the light at three indistinguishable from the light at ten. A day content to be background — which is itself a kind of offering, the quiet rest that arrives between more insistent things, the pause in the long sentence of the year.",
+      "The year's slow exhale: a cool, even day, the light diffuse, the air carrying something like the memory of warmth rather than warmth itself. Not every day is an argument. Some are simply the space between arguments — cool and clear and sufficient, asking nothing, taking nothing back."
     ],
     warm: [
-      "An easy day — warm light through morning to evening, no urgency anywhere. The kind of day where time moves at the pace it claims to. The world felt neither demanding nor distant, just present and pleasantly warm. There was nothing to resist and no need to.",
-      "The day asked nothing of you and gave everything it had: warm, steady light; an unhurried temperature; the particular ease of weather that has decided to be kind. Whatever needed doing could wait. The afternoon was that good.",
-      "Warm and still, the light even and unhurried. Nothing in the day made demands. The temperature didn't shift enough to be noticed, the sky stayed open and easy, and the afternoon was the kind you reference months later when you're trying to remember what good days feel like.",
-      "A generous, uncomplicated day — the warmth even and consistent from morning into evening. The light had that amber quality of a day fully in itself, unhurried and without agenda. Steady company from first to last."
+      "Warm and undemanding, a day that had decided to be kind and kept its decision all the way through without revision. The light was even and unhurried. The temperature was a given. Nothing interrupted the long easy hours, and the afternoon arrived like the rest of them — only warmer, and entirely sufficient.",
+      "The warmth was simply there, from morning through to evening, asking nothing and requiring nothing, the way a good friend doesn't require you to perform yourself. A day you can't adequately describe because it had no character other than generosity — warm, steady, the light offering itself without condition.",
+      "Days like this don't make the story — they are the rest between the story's louder moments, the warm and wordless intervals that make the rest bearable. Warm light. A still afternoon. The temperature doing exactly what it said it would. The gift of a day without an agenda.",
+      "The warmth arrived before you were awake and stayed after you stopped noticing it, the day living up to everything it implied at first light and asking nothing in return. Warm, still, generous — the kind of day that makes the difficult ones bearable in retrospect, the kind that holds the year together."
     ],
     hot: [
-      "The heat arrived with the light and didn't leave. By midday the air had gone heavy with it — insects at the edges of everything, shadows avoided, movement slowed to the minimum necessary. The day made no pretense of being anything other than hot.",
-      "Thick, still heat: the kind that makes the air visible, that makes August feel very much like August. Time moved differently — slowly, through the middle of the day, each hour longer than the last. By evening, nothing had changed except that it had gotten later.",
-      "A full summer day, in full summer form: the heat that presses down from above and rises from below, the stillness that comes when everything sensible has stopped moving. Long and slow and unambiguously hot. The day kept its one promise without variation.",
-      "The heat was continuous and total — not dramatic, just present in the complete way that deep summer achieves. The afternoon was the morning, only more so. The air barely moved. The day held its temperature like something it intended to keep."
+      "The heat arrived with the light and made its only claim: this is summer, and it is continuous. By midday the air was thick with it, heavy as a hand. By afternoon it was ancient — a heat that had always been, that would always be, the day sealed inside it like a word inside a long and drowsy sentence that has forgotten it needs to end.",
+      "Still, hot, insistent: the day moved at the pace heat dictates — slowly, through heavy air, each hour a version of the one before it. By evening nothing had changed except the angle of the light. The heat had no revision, no second thought. It was, and it stayed, and it asked you to stay too.",
+      "The heat pressed down from the beginning and the day arranged itself accordingly — nothing moving that didn't have to, the afternoon at its longest and hottest, the insects at the edges of everything keeping their own slow counsel. Summer without qualification, without asterisk, without apology.",
+      "A hot day in the mode of all hot days: absolute, continuous, the heat the only grammar the afternoon needed. The air barely moved. The light bent at the edges of everything. Time slowed to the pace the heat set, and the day was itself from first light to last — without interruption, without doubt, without variation."
     ]
   }
 };
 
+let _storyHourlyCache = null;
+
 function renderStory(hourly) {
   const el = document.getElementById('story-content');
   if (!el) return;
+  _storyHourlyCache = hourly;
   const beats = getTodayHourlyBeats(hourly);
   if (!beats) { el.innerHTML = ''; return; }
   const arcName  = classifyNarrativeArc(hourly, beats);
@@ -3496,8 +3510,18 @@ function renderStory(hourly) {
   const variants = (STORY_LIBRARY[arcName] ?? STORY_LIBRARY['Steady Companion'])[band];
   const today    = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
   const seed     = today.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-  const idx      = seed % variants.length;
-  el.innerHTML   = `<div class="story-arc">${arcName}</div><div class="story-text">${variants[idx]}</div><div class="story-ai-note">✦ AI generated</div>`;
+  const offset   = parseInt(localStorage.getItem('wx_story_offset') || '0', 10);
+  const idx      = (seed + offset) % variants.length;
+  el.innerHTML   = `
+    <div class="story-arc">${arcName}</div>
+    <div class="story-text">${variants[idx]}</div>
+    <span class="story-ai-note">✦ AI generated</span>`;
+}
+
+function cycleStory() {
+  const offset = parseInt(localStorage.getItem('wx_story_offset') || '0', 10);
+  localStorage.setItem('wx_story_offset', offset + 1);
+  if (_storyHourlyCache) renderStory(_storyHourlyCache);
 }
 
 // ── Daily Weather Game ────────────────────────────────────────────
