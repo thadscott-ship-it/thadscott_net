@@ -3910,7 +3910,7 @@ function renderGameFinal() {
 }
 
 // ── Today's Story ────────────────────────────────────────────────
-const STORY_MODEL = 'mistralai/Mistral-7B-Instruct-v0.3';
+const STORY_MODEL = 'HuggingFaceH4/zephyr-7b-beta';
 
 function saveHFToken() {
   const input = document.getElementById('token-input');
@@ -4001,7 +4001,7 @@ async function callHuggingFace(token, prompt) {
     method: 'POST',
     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      inputs: `<s>[INST] ${prompt} [/INST]`,
+      inputs: `<|system|>\nYou are a poetic weather narrator.</s>\n<|user|>\n${prompt}</s>\n<|assistant|>`,
       parameters: { max_new_tokens: 180, temperature: 0.75, top_p: 0.9, return_full_text: false },
     }),
   });
