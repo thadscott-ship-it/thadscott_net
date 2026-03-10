@@ -251,80 +251,6 @@
       min-height: 0;
     }
 
-    /* ── Token Dialog ─────────────────────────────────────────────── */
-    .token-dialog-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    .token-dialog-overlay.open { display: flex; }
-    .token-dialog {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      width: min(90%, 380px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .token-dialog h3 {
-      margin-bottom: 0.75rem;
-      font-size: 1.1rem;
-      color: var(--text-primary);
-    }
-    .token-dialog input {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      border: 1px solid var(--text-dimmer);
-      border-radius: 6px;
-      background: var(--bg-primary);
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      outline: none;
-    }
-    .token-dialog input:focus { border-color: var(--accent-blue); }
-    .token-dialog-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.4rem; }
-    .token-dialog .dialog-buttons {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    .token-dialog .btn-cancel {
-      background: var(--border);
-      color: var(--text-secondary);
-      padding: 0.4rem 1rem;
-      border-radius: 6px;
-      border: none;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-    .token-dialog .btn-cancel:hover { background: var(--text-dimmer); }
-    .token-dialog .btn-save {
-      background: #1e40af;
-      color: #fff;
-      padding: 0.4rem 1rem;
-      border-radius: 6px;
-      border: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .token-dialog .btn-save:hover { background: #2563eb; }
-    .token-clear-btn {
-      background: none;
-      border: none;
-      color: #f87171;
-      font-size: 0.8rem;
-      cursor: pointer;
-      padding: 0;
-      margin-top: 0.5rem;
-    }
-    .token-clear-btn:hover { color: #fca5a5; }
 
     .header .subtitle {
       font-size: 0.85rem;
@@ -1023,72 +949,6 @@
       .refresh-info { font-size: 0.65rem; }
     }
 
-    /* ── Today's Story ──────────────────────────────────────────── */
-    .story-arc {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--accent-blue);
-      margin-bottom: 0.6rem;
-    }
-    .story-text {
-      font-size: 1rem;
-      color: var(--text-secondary);
-      line-height: 1.8;
-      font-style: italic;
-    }
-    .story-powered {
-      margin-top: 0.9rem;
-      font-size: 0.72rem;
-      color: var(--text-muted);
-    }
-    .story-token-label {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      margin-bottom: 0.5rem;
-    }
-    .story-token-input {
-      flex: 1;
-      padding: 0.45rem 0.65rem;
-      background: var(--bg-primary);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      outline: none;
-    }
-    .story-token-input:focus { border-color: var(--accent-blue); }
-    .story-token-save {
-      padding: 0.45rem 0.9rem;
-      background: #1e40af;
-      border: none;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .story-token-save:hover { background: #2563eb; }
-    .story-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
-    .story-header h2 { margin-bottom: 0; }
-    .story-settings-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-dim);
-      transition: background 0.2s, color 0.2s;
-    }
-    .story-settings-btn:hover { background: #1e3a5f; color: var(--accent-blue); }
-    [data-theme="light"] .story-settings-btn:hover { background: #dbeafe; color: var(--accent-blue); }
-
     /* ── Theme Toggle ───────────────────────────────────────────── */
     .footer-theme { color: var(--text-muted); }
     .theme-sep    { margin: 0 0.3rem; color: var(--text-muted); }
@@ -1211,11 +1071,6 @@
         <div id="game-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
       </div>
 
-      <!-- Today's Story -->
-      <div class="card fade-in full-width" style="grid-column: 1 / -1;">
-        <h2>Today's Story</h2>
-        <div id="story-content"><div class="loading"><div class="spinner"></div><div>Loading…</div></div></div>
-      </div>
     </div>
 
     <!-- Footer -->
@@ -1246,22 +1101,6 @@
     <div class="day-modal">
       <button class="day-modal-close" onclick="closeDayModal()"><i data-lucide="x" style="width:1.2rem;height:1.2rem;stroke:currentColor;stroke-width:2.5;"></i></button>
       <div class="day-modal-inner" id="day-modal-content"></div>
-    </div>
-  </div>
-
-  <!-- Token Settings Dialog -->
-  <div class="token-dialog-overlay" id="token-dialog-overlay" onclick="if(event.target===this)closeTokenDialog()">
-    <div class="token-dialog">
-      <h3>AI Story Settings</h3>
-      <input type="password" id="token-input" placeholder="AIza…" autocomplete="off" />
-      <div class="token-dialog-hint">
-        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get a free Gemini API key</a> at aistudio.google.com.
-      </div>
-      <button id="token-clear-btn" class="token-clear-btn" onclick="clearHFToken()" style="display:none;">Clear saved token</button>
-      <div class="dialog-buttons">
-        <button class="btn-cancel" onclick="closeTokenDialog()">Cancel</button>
-        <button class="btn-save" onclick="saveHFToken()">Save</button>
-      </div>
     </div>
   </div>
 
@@ -1350,22 +1189,6 @@ function closeCityDialog() {
   closeDropdown();
   unlockScroll();
   document.getElementById('city-dialog-overlay').classList.remove('open');
-}
-
-// ── Token Dialog ──────────────────────────────────────────────────
-function openTokenDialog() {
-  const existing = localStorage.getItem('wx_ai_token') || '';
-  const input = document.getElementById('token-input');
-  const clearBtn = document.getElementById('token-clear-btn');
-  if (input) { input.value = existing; input.style.borderColor = ''; }
-  if (clearBtn) clearBtn.style.display = existing ? 'block' : 'none';
-  lockScroll();
-  document.getElementById('token-dialog-overlay').classList.add('open');
-  setTimeout(() => input?.focus(), 50);
-}
-function closeTokenDialog() {
-  unlockScroll();
-  document.getElementById('token-dialog-overlay').classList.remove('open');
 }
 
 function closeDropdown() {
@@ -1486,7 +1309,7 @@ document.getElementById('city-input').addEventListener('keydown', e => {
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   const cityOpen = document.getElementById('city-dialog-overlay').classList.contains('open');
-  if (e.key === 'Escape') { closeCityDialog(); closeDayModal(); closeTokenDialog(); }
+  if (e.key === 'Escape') { closeCityDialog(); closeDayModal(); }
   if ((e.key === 'r' || e.key === 'R') && !cityOpen) loadDashboard();
   if ((e.key === '/' || e.key === 'l' || e.key === 'L') && !cityOpen) { e.preventDefault(); openCityDialog(); }
 });
@@ -3031,7 +2854,7 @@ async function renderTwin(userCurrent, hourly) {
 function resetCardsToLoading() {
   ['current-content','today-content','daily-content','sun-moon-content',
    'aqi-content','scooter-content','twin-content','extremes-content',
-   'stargazing-content','game-content','story-content'].forEach(id => {
+   'stargazing-content','game-content'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML =
       '<div class="skeleton" style="height:2rem;margin-bottom:0.6rem;"></div>' +
@@ -3114,10 +2937,6 @@ async function loadDashboard() {
   // Daily Weather Game (location-independent, always render)
   renderGame();
 
-  // Today's Story (AI narrative, fire and forget)
-  if (weatherResult.status === 'fulfilled') {
-    renderStory(weatherResult.value.hourly);
-  }
 }
 
 // ── Day Detail Modal ──────────────────────────────────────────────
@@ -3909,166 +3728,6 @@ function renderGameFinal() {
     </div>`;
 }
 
-// ── Today's Story ────────────────────────────────────────────────
-const STORY_MODEL = 'gemini-1.5-flash';
-
-function saveHFToken() {
-  const input = document.getElementById('token-input');
-  if (!input) return;
-  const val = input.value.trim();
-  if (!val) { input.style.borderColor = '#ef4444'; return; }
-  input.style.borderColor = '';
-  localStorage.setItem('wx_ai_token', val);
-  closeTokenDialog();
-  loadDashboard();
-}
-function clearHFToken() {
-  localStorage.removeItem('wx_ai_token');
-  closeTokenDialog();
-  loadDashboard();
-}
-
-function getTodayHourlyBeats(hourly) {
-  const todayStr = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
-  const todayIndices = hourly.time.reduce((acc, t, i) => {
-    if (new Date(t).toLocaleDateString('en-CA', { timeZone: TIMEZONE }) === todayStr) acc.push(i);
-    return acc;
-  }, []);
-  if (!todayIndices.length) return null;
-  function getLocalHour(t) {
-    return parseInt(new Date(t).toLocaleTimeString('en-US', { hour: '2-digit', hour12: false, timeZone: TIMEZONE }));
-  }
-  function findBeat(target) {
-    let best = null, bestDiff = Infinity;
-    for (const i of todayIndices) {
-      const diff = Math.abs(getLocalHour(hourly.time[i]) - target);
-      if (diff < bestDiff) { bestDiff = diff; best = i; }
-    }
-    return best;
-  }
-  return { morning: findBeat(8), midday: findBeat(12), afternoon: findBeat(15), evening: findBeat(19) };
-}
-
-function classifyNarrativeArc(hourly, beats) {
-  function d(idx) {
-    if (idx == null) return null;
-    return {
-      temp:   hourly.temperature_2m[idx] ?? 60,
-      cloud:  hourly.cloud_cover[idx] ?? 50,
-      precip: hourly.precipitation_probability[idx] ?? 0,
-    };
-  }
-  const m = d(beats.morning), a = d(beats.afternoon), e = d(beats.evening);
-  const all = [m, d(beats.midday), a, e].filter(Boolean);
-  if (!all.length) return 'Steady Companion';
-  const end = e || a;
-  const morningWet   = m && (m.cloud > 65 || m.precip > 50);
-  const morningClear = m && (m.cloud < 40 && m.precip < 25);
-  const endWet       = end && (end.cloud > 65 || end.precip > 50);
-  const endClear     = end && (end.cloud < 40 && end.precip < 25);
-  if (morningWet && endClear) return 'Redemption Arc';
-  if (morningClear && endWet) return 'Fall From Grace';
-  let maxSwing = 0;
-  for (let i = 1; i < all.length; i++) maxSwing = Math.max(maxSwing, Math.abs(all[i].cloud - all[i-1].cloud));
-  if (maxSwing > 45) return 'Plot Twist';
-  if (all.length >= 2 && (all[all.length-1].temp - all[0].temp) > 10 && all.every(x => x.precip < 30)) return 'Slow Burn';
-  const cloudMean = all.reduce((s, x) => s + x.cloud, 0) / all.length;
-  const cloudStd  = Math.sqrt(all.reduce((s, x) => s + (x.cloud - cloudMean) ** 2, 0) / all.length);
-  if (cloudStd > 28) return 'Chaotic Neutral';
-  return 'Steady Companion';
-}
-
-function buildStoryPrompt(arcName, hourly, beats) {
-  function beat(idx, label) {
-    if (idx == null) return '';
-    const temp   = Math.round(hourly.temperature_2m[idx] ?? 60);
-    const cloud  = Math.round(hourly.cloud_cover[idx] ?? 50);
-    const precip = Math.round(hourly.precipitation_probability[idx] ?? 0);
-    const desc   = weatherInfo(hourly.weather_code[idx] ?? 0).desc;
-    return `- ${label}: ${desc}, ${temp}°F, ${cloud}% clouds, ${precip}% rain chance`;
-  }
-  const lines = [
-    beat(beats.morning,   'Morning'),
-    beat(beats.midday,    'Midday'),
-    beat(beats.afternoon, 'Afternoon'),
-    beat(beats.evening,   'Evening'),
-  ].filter(Boolean).join('\n');
-  return `You are a poetic weather narrator. Write exactly 2–4 sentences describing today's weather in ${CITY_NAME} as a short literary story. The narrative arc is "${arcName}".\n\nWeather:\n${lines}\n\nRules: Write in atmospheric literary prose. Do not mention exact temperatures or percentages. No bullet points or lists. No preamble — start directly with the story.`;
-}
-
-async function callHuggingFace(token, prompt) {
-  const resp = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${STORY_MODEL}:generateContent?key=${token}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 200, temperature: 0.75 },
-      }),
-    }
-  );
-  if (!resp.ok) throw new Error(`Gemini ${resp.status}: ${await resp.text()}`);
-  const data = await resp.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
-  if (!text) throw new Error('Empty response');
-  return text;
-}
-
-function escHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-async function renderStory(hourly) {
-  const el = document.getElementById('story-content');
-  if (!el) return;
-
-  const token = localStorage.getItem('wx_ai_token');
-  if (!token) {
-    el.innerHTML = `
-      <div class="story-token-label">AI story generation requires a Hugging Face token.</div>
-      <button class="story-token-save" style="margin-top:0.6rem;" onclick="openTokenDialog()">Configure</button>`;
-    return;
-  }
-
-  const today      = new Date().toLocaleDateString('en-CA', { timeZone: TIMEZONE });
-  const cacheKey   = `wx_story_${LAT.toFixed(2)}_${LON.toFixed(2)}_${today}`;
-  const forceNew   = new URLSearchParams(location.search).get('story') !== null;
-  if (forceNew) localStorage.removeItem(cacheKey);
-  try {
-    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-    if (cached?.arcName && cached?.text) {
-      el.innerHTML = `
-        <div class="story-arc">${escHtml(cached.arcName)}</div>
-        <div class="story-text">${escHtml(cached.text)}</div>
-        <div class="story-powered">AI Generated</div>`;
-      return;
-    }
-  } catch {}
-
-  el.innerHTML = '<div class="loading"><div class="spinner"></div><div style="font-size:0.85rem;">Crafting today\'s story…</div></div>';
-
-  let arcName = 'Steady Companion';
-  try {
-    const beats = getTodayHourlyBeats(hourly);
-    if (!beats) throw new Error('No hourly data for today');
-    arcName = classifyNarrativeArc(hourly, beats);
-    const prompt = buildStoryPrompt(arcName, hourly, beats);
-    const text   = await callHuggingFace(token, prompt);
-    localStorage.setItem(cacheKey, JSON.stringify({ arcName, text }));
-    el.innerHTML = `
-      <div class="story-arc">${escHtml(arcName)}</div>
-      <div class="story-text">${escHtml(text)}</div>
-      <div class="story-powered">AI Generated</div>`;
-  } catch (err) {
-    console.error('Today\'s Story error:', err);
-    el.innerHTML = `
-      <div class="story-arc">${escHtml(arcName)}</div>
-      <div class="story-text" style="color:var(--text-muted);">Today's weather tells a simple story — steady, familiar, and calm.</div>
-      <div class="story-powered" style="color:#f87171;">${escHtml(err?.message ?? String(err))}</div>`;
-  }
-}
-
 // ── Theme ──────────────────────────────────────────────────────────
 function applyTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
@@ -4086,7 +3745,6 @@ lucide.createIcons({ nodes: [document.querySelector('.radar-toggle')] });
 applyTheme(localStorage.getItem('wx_theme') || 'dark');
 document.getElementById('city-name').textContent = CITY_NAME;
 document.title = `ThadCast — ${CITY_NAME}`;
-if (new URLSearchParams(location.search).get('ai') !== null) openTokenDialog();
 loadDashboard();
 setInterval(loadDashboard, REFRESH_MS);
 </script>
