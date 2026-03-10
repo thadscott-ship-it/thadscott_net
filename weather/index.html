@@ -1253,9 +1253,9 @@
   <div class="token-dialog-overlay" id="token-dialog-overlay" onclick="if(event.target===this)closeTokenDialog()">
     <div class="token-dialog">
       <h3>AI Story Settings</h3>
-      <input type="password" id="token-input" placeholder="hf_…" autocomplete="off" />
+      <input type="password" id="token-input" placeholder="AIza…" autocomplete="off" />
       <div class="token-dialog-hint">
-        <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener">Get a free token</a> — Read access is all you need.
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get a free Gemini API key</a> at aistudio.google.com.
       </div>
       <button id="token-clear-btn" class="token-clear-btn" onclick="clearHFToken()" style="display:none;">Clear saved token</button>
       <div class="dialog-buttons">
@@ -1354,7 +1354,7 @@ function closeCityDialog() {
 
 // ── Token Dialog ──────────────────────────────────────────────────
 function openTokenDialog() {
-  const existing = localStorage.getItem('wx_hf_token') || '';
+  const existing = localStorage.getItem('wx_ai_token') || '';
   const input = document.getElementById('token-input');
   const clearBtn = document.getElementById('token-clear-btn');
   if (input) { input.value = existing; input.style.borderColor = ''; }
@@ -3910,20 +3910,20 @@ function renderGameFinal() {
 }
 
 // ── Today's Story ────────────────────────────────────────────────
-const STORY_MODEL = 'HuggingFaceH4/zephyr-7b-beta';
+const STORY_MODEL = 'gemini-1.5-flash-latest';
 
 function saveHFToken() {
   const input = document.getElementById('token-input');
   if (!input) return;
   const val = input.value.trim();
-  if (!val.startsWith('hf_')) { input.style.borderColor = '#ef4444'; return; }
+  if (!val) { input.style.borderColor = '#ef4444'; return; }
   input.style.borderColor = '';
-  localStorage.setItem('wx_hf_token', val);
+  localStorage.setItem('wx_ai_token', val);
   closeTokenDialog();
   loadDashboard();
 }
 function clearHFToken() {
-  localStorage.removeItem('wx_hf_token');
+  localStorage.removeItem('wx_ai_token');
   closeTokenDialog();
   loadDashboard();
 }
@@ -3997,17 +3997,20 @@ function buildStoryPrompt(arcName, hourly, beats) {
 }
 
 async function callHuggingFace(token, prompt) {
-  const resp = await fetch(`https://api-inference.huggingface.co/models/${STORY_MODEL}`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      inputs: `<|system|>\nYou are a poetic weather narrator.</s>\n<|user|>\n${prompt}</s>\n<|assistant|>`,
-      parameters: { max_new_tokens: 180, temperature: 0.75, top_p: 0.9, return_full_text: false },
-    }),
-  });
-  if (!resp.ok) throw new Error(`HF ${resp.status}: ${await resp.text()}`);
+  const resp = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${STORY_MODEL}:generateContent?key=${token}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 200, temperature: 0.75 },
+      }),
+    }
+  );
+  if (!resp.ok) throw new Error(`Gemini ${resp.status}: ${await resp.text()}`);
   const data = await resp.json();
-  const text = data[0]?.generated_text?.trim() ?? '';
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? '';
   if (!text) throw new Error('Empty response');
   return text;
 }
@@ -4020,7 +4023,7 @@ async function renderStory(hourly) {
   const el = document.getElementById('story-content');
   if (!el) return;
 
-  const token = localStorage.getItem('wx_hf_token');
+  const token = localStorage.getItem('wx_ai_token');
   if (!token) {
     el.innerHTML = `
       <div class="story-token-label">AI story generation requires a Hugging Face token.</div>
