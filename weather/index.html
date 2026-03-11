@@ -1684,6 +1684,8 @@ function renderCurrent(current, units, daily) {
 
 // ── Render: Hourly Chart ──────────────────────────────────────────
 function renderHourly(hourly) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const tempColor = isLight ? '#ea580c' : '#f59e0b';
   const labels = hourly.time.map(t => fmtHour(t));
   const temps = hourly.temperature_2m;
   const precip = hourly.precipitation_probability;
@@ -1734,11 +1736,12 @@ function renderHourly(hourly) {
         {
           label: 'Temperature (°F)',
           data: temps,
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245,158,11,0.1)',
+          borderColor: tempColor,
+          backgroundColor: isLight ? 'rgba(234,88,12,0.1)' : 'rgba(245,158,11,0.1)',
           fill: true,
           tension: 0.4,
           pointRadius: 0,
+          pointHoverRadius: window.innerWidth >= 700 ? 4 : 0,
           pointHitRadius: 8,
           yAxisID: 'y',
         },
@@ -1750,6 +1753,7 @@ function renderHourly(hourly) {
           fill: true,
           tension: 0.4,
           pointRadius: 0,
+          pointHoverRadius: window.innerWidth >= 700 ? 4 : 0,
           pointHitRadius: 8,
           yAxisID: 'y1',
           borderDash: [4, 4],
@@ -1780,7 +1784,7 @@ function renderHourly(hourly) {
         },
         y: {
           position: 'left',
-          ticks: { color: '#f59e0b', font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
+          ticks: { color: tempColor, font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
           grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y1: {
@@ -2737,6 +2741,8 @@ function openDayModal(i) {
 }
 
 async function fetchDayHourly(date) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const tempColor = isLight ? '#ea580c' : '#f59e0b';
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}`
     + `&hourly=temperature_2m,precipitation_probability`
     + `&start_date=${date}&end_date=${date}`
@@ -2795,9 +2801,9 @@ function renderDayChart(hourly, date) {
         {
           label: 'Temperature (°F)',
           data: hourly.temperature_2m,
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245,158,11,0.1)',
-          fill: true, tension: 0.4, pointRadius: 0, pointHitRadius: 8,
+          borderColor: tempColor,
+          backgroundColor: isLight ? 'rgba(234,88,12,0.1)' : 'rgba(245,158,11,0.1)',
+          fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: window.innerWidth >= 700 ? 4 : 0, pointHitRadius: 8,
           yAxisID: 'y',
         },
         {
@@ -2805,7 +2811,7 @@ function renderDayChart(hourly, date) {
           data: hourly.precipitation_probability,
           borderColor: '#3b82f6',
           backgroundColor: 'rgba(59,130,246,0.08)',
-          fill: true, tension: 0.4, pointRadius: 0, pointHitRadius: 8,
+          fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: window.innerWidth >= 700 ? 4 : 0, pointHitRadius: 8,
           yAxisID: 'y1', borderDash: [4, 4],
         }
       ]
@@ -2829,7 +2835,7 @@ function renderDayChart(hourly, date) {
         },
         y: {
           position: 'left',
-          ticks: { color: '#f59e0b', font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
+          ticks: { color: tempColor, font: { size: 10 }, maxTicksLimit: 4, callback: v => v + '°' },
           grid: { color: 'rgba(51,65,85,0.2)' }
         },
         y1: {
