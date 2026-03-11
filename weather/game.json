@@ -1,0 +1,356 @@
+{
+  "WEATHER_WORDS": [
+    {
+      "term": "Virga",
+      "correct": "Precipitation that evaporates before reaching the ground",
+      "decoys": [
+        "Rapidly rotating funnel of air over water",
+        "Ice pellets mixed with freezing rain"
+      ]
+    },
+    {
+      "term": "Petrichor",
+      "correct": "The earthy scent produced when rain falls on dry soil",
+      "decoys": [
+        "A measurement of atmospheric humidity at saturation",
+        "A cold katabatic wind that descends mountain slopes"
+      ]
+    },
+    {
+      "term": "Graupel",
+      "correct": "Soft snow pellets formed when supercooled water droplets coat a snowflake",
+      "decoys": [
+        "A layer of warm air sandwiched between two cold layers",
+        "A weather phenomenon where fog freezes instantly on contact"
+      ]
+    },
+    {
+      "term": "Derecho",
+      "correct": "A long-lived, widespread straight-line windstorm associated with a band of thunderstorms",
+      "decoys": [
+        "A localized funnel cloud that dissipates before touching ground",
+        "A rapid temperature drop caused by evaporating precipitation"
+      ]
+    },
+    {
+      "term": "Haboob",
+      "correct": "A massive wall of dust swept up by a collapsing thunderstorm outflow",
+      "decoys": [
+        "A fog that forms over warm ocean currents meeting cold air",
+        "A measurement of wind speed using the Beaufort scale"
+      ]
+    },
+    {
+      "term": "Foehn",
+      "correct": "A warm, dry wind that descends the leeward side of a mountain range",
+      "decoys": [
+        "A ring of light around the sun or moon caused by ice crystals",
+        "A tornado that forms over a desert landscape"
+      ]
+    },
+    {
+      "term": "Orographic lift",
+      "correct": "The forced ascent of air as it encounters a mountain range, causing cooling and precipitation",
+      "decoys": [
+        "The bending of light through layers of air at different temperatures",
+        "A sharp boundary where two different air masses collide"
+      ]
+    },
+    {
+      "term": "Bombogenesis",
+      "correct": "Rapid intensification of a storm system in which central pressure drops 24 mb in 24 hours",
+      "decoys": [
+        "The violent updraft at the center of a supercell thunderstorm",
+        "A chain of waterspouts connected by a shared cloud base"
+      ]
+    },
+    {
+      "term": "Mammatus",
+      "correct": "Pouch-like cloud formations that hang beneath the base of a cumulonimbus",
+      "decoys": [
+        "Thin, wispy clouds at high altitude composed entirely of ice",
+        "Horizontal bands of cloud caused by wave motion in stable air"
+      ]
+    },
+    {
+      "term": "Vog",
+      "correct": "Air pollution and haze caused by volcanic emissions mixing with atmospheric moisture",
+      "decoys": [
+        "Dense ground fog that persists after rain in tropical rainforests",
+        "A mirage effect created by intense surface heating in deserts"
+      ]
+    },
+    {
+      "term": "Sun dog",
+      "correct": "A bright halo spot appearing on either side of the sun, caused by ice crystal refraction",
+      "decoys": [
+        "An unusually intense solar flare that disrupts radio communication",
+        "A heat shimmer visible on paved roads on hot days"
+      ]
+    },
+    {
+      "term": "Crepuscular rays",
+      "correct": "Shafts of sunlight appearing to radiate from the sun through gaps in clouds or terrain",
+      "decoys": [
+        "The faint illumination of the sky 30 minutes after full sunset",
+        "Light reflected off snow onto the undersides of clouds"
+      ]
+    },
+    {
+      "term": "Lenticular cloud",
+      "correct": "A smooth, lens-shaped cloud that forms in stable air over or downwind of a mountain",
+      "decoys": [
+        "A cloud type exclusive to polar regions, formed from ice crystals at -85°C",
+        "A rapidly-spinning cloud vortex that precedes a cold front"
+      ]
+    },
+    {
+      "term": "Inversion",
+      "correct": "A layer of the atmosphere where temperature increases with altitude, trapping cooler air below",
+      "decoys": [
+        "A reversal of wind direction caused by a passing cold front",
+        "A phenomenon where ocean temperatures drop rapidly below 100m depth"
+      ]
+    },
+    {
+      "term": "Squall line",
+      "correct": "A line of severe thunderstorms that forms ahead of a cold front",
+      "decoys": [
+        "A sustained high-wind event along a coastal cliff face",
+        "A temperature gradient measured across a horizontal weather front"
+      ]
+    },
+    {
+      "term": "Thunder snow",
+      "correct": "A rare weather event where lightning and thunder occur during a snowstorm",
+      "decoys": [
+        "Ice pellets that produce a crackling sound when they hit the ground",
+        "A snow shower caused by convective activity over a warm lake"
+      ]
+    },
+    {
+      "term": "Pineapple Express",
+      "correct": "A corridor of tropical moisture from Hawaii that brings heavy rain to the US West Coast",
+      "decoys": [
+        "A katabatic wind pattern in the Hawaiian islands caused by trade winds",
+        "A warm El Niño current that raises Pacific sea surface temperatures"
+      ]
+    },
+    {
+      "term": "Green flash",
+      "correct": "A brief optical phenomenon where the upper rim of the sun turns green just before it sets",
+      "decoys": [
+        "A type of lightning that travels horizontally from cloud to cloud",
+        "Bioluminescent plankton visible in ocean spray during storms"
+      ]
+    },
+    {
+      "term": "Polar vortex",
+      "correct": "A large-scale cyclone near the poles that can weaken and send Arctic air southward",
+      "decoys": [
+        "A funnel cloud that forms over Arctic tundra during summer",
+        "A seasonal reversal of wind direction in the lower stratosphere"
+      ]
+    },
+    {
+      "term": "Waterspout",
+      "correct": "A rotating column of air and water mist that forms over a body of water",
+      "decoys": [
+        "Heavy precipitation that falls in a concentrated burst over open ocean",
+        "A visible jet of water vapor released from a warm ocean current"
+      ]
+    },
+    {
+      "term": "Mackerel sky",
+      "correct": "A sky covered in rows of altocumulus or cirrocumulus clouds resembling fish scales",
+      "decoys": [
+        "A low-lying coastal fog bank that rolls inland at dusk",
+        "A deep orange sunset sky associated with dust particles in the atmosphere"
+      ]
+    },
+    {
+      "term": "Katabatic wind",
+      "correct": "Cold, dense air that drains downhill under gravity, often gaining speed in valleys",
+      "decoys": [
+        "A sea breeze that reverses direction from night to day",
+        "A wind pattern that curves due to the Coriolis effect at the equator"
+      ]
+    },
+    {
+      "term": "Ball lightning",
+      "correct": "A rare phenomenon where a luminous sphere of plasma appears during thunderstorms",
+      "decoys": [
+        "An intense downdraft that spreads out on the ground beneath a storm",
+        "A highly localized whirlwind that carries debris in a spherical pattern"
+      ]
+    },
+    {
+      "term": "Heat dome",
+      "correct": "A ridge of high pressure that traps and amplifies hot air over a region for days",
+      "decoys": [
+        "A circular area of calm weather at the center of a hurricane",
+        "A thunderstorm that loses its moisture but retains its electrical energy"
+      ]
+    },
+    {
+      "term": "Supercell",
+      "correct": "A long-lived, rotating thunderstorm with a deep, persistent updraft called a mesocyclone",
+      "decoys": [
+        "A cluster of tropical storms that merge into a single large system",
+        "A record-breaking hailstone event that covers an area larger than 10 square miles"
+      ]
+    },
+    {
+      "term": "Outflow boundary",
+      "correct": "The boundary of cool air spreading out from a thunderstorm's downdraft, which can trigger new storms",
+      "decoys": [
+        "The edge of a hurricane's eye wall where the strongest winds occur",
+        "A zone where two opposing ocean currents create upwelling"
+      ]
+    },
+    {
+      "term": "Lake effect snow",
+      "correct": "Heavy snow produced when cold air passes over a large warm lake and picks up moisture",
+      "decoys": [
+        "A type of fog that forms on the surface of a frozen lake in winter",
+        "Snow that melts and refreezes in layers as it falls through warmer air"
+      ]
+    },
+    {
+      "term": "Panhandle hook",
+      "correct": "A winter storm that forms in the Texas or Oklahoma panhandle and curves northeast",
+      "decoys": [
+        "A tornado that changes direction sharply due to shifting wind shear",
+        "A warm air intrusion that wraps around the back of a high-pressure system"
+      ]
+    },
+    {
+      "term": "Slantwise convection",
+      "correct": "Atmospheric instability that releases energy along a tilted path rather than purely vertically",
+      "decoys": [
+        "Rain that falls at a sharp angle due to sustained horizontal wind",
+        "A measurement of the rate of temperature change across a weather front"
+      ]
+    },
+    {
+      "term": "Bergeron process",
+      "correct": "The dominant mechanism for precipitation in cold clouds, where ice crystals grow at the expense of water droplets",
+      "decoys": [
+        "A model for predicting the track of Atlantic hurricanes",
+        "The process by which sea ice forms concentric rings of varying salinity"
+      ]
+    }
+  ],
+  "SCENARIO_LIBRARY": [
+    {
+      "clues": "Temperature: 68°F · Humidity: 85% · Pressure: Falling rapidly · Wind: Increasing · Dark clouds building",
+      "question": "What happens next?",
+      "choices": [
+        "Skies clear up",
+        "Thunderstorm develops",
+        "Temperature drops but stays dry"
+      ],
+      "answer_index": 1,
+      "explanation": "Rapid pressure drops combined with high humidity and building clouds strongly signal an approaching storm."
+    },
+    {
+      "clues": "Temperature: 36°F · Wind: Calm · Sky: Clear · Night approaching",
+      "question": "What happens by morning?",
+      "choices": [
+        "Frost forms",
+        "Thunderstorms develop",
+        "Temperature rises overnight"
+      ],
+      "answer_index": 0,
+      "explanation": "Clear skies and calm winds allow rapid nighttime cooling, leading to radiational frost by morning."
+    },
+    {
+      "clues": "Temperature: 28°F · Wind: Off a large lake · Sky: Overcast · Wind speed: 30 mph",
+      "question": "What type of precipitation is most likely?",
+      "choices": [
+        "Freezing rain",
+        "Heavy lake-effect snow",
+        "Hail"
+      ],
+      "answer_index": 1,
+      "explanation": "Cold air passing over a warm lake picks up moisture, producing intense lake-effect snowbands on the downwind shore."
+    },
+    {
+      "clues": "Temperature: 45°F → 72°F in 3 hours · Wind: From the mountains · Humidity: Dropping fast",
+      "question": "What is causing this rapid warming?",
+      "choices": [
+        "A cold front passed through",
+        "Chinook downslope winds",
+        "Afternoon solar heating"
+      ],
+      "answer_index": 1,
+      "explanation": "Chinook winds descend the leeward side of mountains, compressing and warming dramatically — sometimes 40°F in an hour."
+    },
+    {
+      "clues": "Pressure: High and steady · Sky: Clear · Winds: Light · Temperatures: Seasonal",
+      "question": "What is most likely over the next 24 hours?",
+      "choices": [
+        "Severe thunderstorms",
+        "Stable, fair weather",
+        "Heavy snowfall"
+      ],
+      "answer_index": 1,
+      "explanation": "High pressure suppresses rising air, keeping the atmosphere stable and skies clear."
+    },
+    {
+      "clues": "Clouds progressing: cirrus → cirrostratus → altostratus · Pressure: Falling slowly · Wind shifting south",
+      "question": "What is approaching?",
+      "choices": [
+        "A warm front bringing steady rain",
+        "A cold front bringing gusty storms",
+        "High pressure clearing skies"
+      ],
+      "answer_index": 0,
+      "explanation": "The classic warm front cloud sequence — high thin cirrus giving way to lower, thicker layers — signals steady rain within hours."
+    },
+    {
+      "clues": "Temperature: 52°F · Sky: Hazy · Wind: Calm · Near industrial valley · Light winds aloft",
+      "question": "What is causing the poor air quality?",
+      "choices": [
+        "A dust storm approaching",
+        "Temperature inversion trapping pollutants",
+        "High ozone from thunderstorm activity"
+      ],
+      "answer_index": 1,
+      "explanation": "Temperature inversions trap cool, polluted air near the surface while a warm layer above acts like a lid, concentrating smog."
+    },
+    {
+      "clues": "Atmospheric river detected · Moisture plume: From Pacific · Pressure: Falling · Mountains ahead",
+      "question": "What will the mountains likely receive?",
+      "choices": [
+        "Drought conditions",
+        "Extreme precipitation and flooding",
+        "Mild, dry winds"
+      ],
+      "answer_index": 1,
+      "explanation": "Atmospheric rivers carry enormous moisture. When forced up a mountain range, the air cools rapidly, releasing heavy rain or snow."
+    },
+    {
+      "clues": "Temperature: 85°F · Dewpoint: 75°F · Pressure: Slightly falling · Cumulus building rapidly · Afternoon hours",
+      "question": "What is developing?",
+      "choices": [
+        "Radiation fog by evening",
+        "Convective thunderstorms",
+        "Strong offshore winds"
+      ],
+      "answer_index": 1,
+      "explanation": "High heat and dewpoints fuel explosive convective development in the afternoon, the classic recipe for pop-up thunderstorms."
+    },
+    {
+      "clues": "Temperature: 20°F · Wind: NW at 25 mph · Pressure: Rising rapidly · Sky: Clearing behind cold front",
+      "question": "What is happening?",
+      "choices": [
+        "A cold front is passing — cold and clearing behind it",
+        "A warm front is arriving",
+        "A tropical system is approaching"
+      ],
+      "answer_index": 0,
+      "explanation": "Rapid pressure rises, falling temperatures, and northwesterly winds clearing after a front are the textbook cold front passage signature."
+    }
+  ]
+}
