@@ -2759,6 +2759,8 @@ async function fetchDayHourly(date) {
 }
 
 function renderDayChart(hourly, date) {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const tempColor = isLight ? '#ea580c' : '#f59e0b';
   const labels = hourly.time.map(t => fmtHour(t));
   const ctx = document.getElementById('day-hourly-chart').getContext('2d');
 
