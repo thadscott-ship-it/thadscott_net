@@ -3507,9 +3507,22 @@ lucide.createIcons({ nodes: [document.querySelector('.radar-toggle')] });
 applyTheme(localStorage.getItem('wx_theme') || 'dark');
 document.getElementById('city-name').textContent = CITY_NAME;
 document.title = `ThadCast — ${CITY_NAME}`;
+let lastLoadTime = 0;
+const _origLoadDashboard = loadDashboard;
+async function loadDashboard(...args) {
+  lastLoadTime = Date.now();
+  return _origLoadDashboard(...args);
+}
+
 fetchAppData().then(() => {
   loadDashboard();
   setInterval(loadDashboard, REFRESH_MS);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && Date.now() - lastLoadTime > REFRESH_MS) {
+    loadDashboard();
+  }
 });
 </script>
 </body>
